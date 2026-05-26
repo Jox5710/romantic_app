@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    restart: unless-stopped
+    ports:
+      - "8025:8025"    # Web UI — view emails at http://localhost:8025
+      - "1025:1025"    # SMTP — GoTrue auth service connects here
+    networks:
+      - supabase-net
+
+networks:
+  supabase-net:
+    driver: bridge

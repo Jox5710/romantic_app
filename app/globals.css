@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================
+   THEME TOKENS
+   ===================== */
+
+:root,
+[data-theme='dusk'] {
+  --bg: #0a0a0f;
+  --surface: #14131a;
+  --surface-2: #1c1a22;
+  --gold: #c9a961;
+  --gold-bright: #e8c87a;
+  --gold-deep: #8a6f3a;
+  --ivory: #f5f1e8;
+  --ivory-dim: #c9c2b5;
+  --muted: #6b6660;
+  --line: rgba(201, 169, 97, 0.18);
+}
+
+[data-theme='day'] {
+  --bg: #f5f0e3;
+  --surface: #fffaef;
+  --surface-2: #ffffff;
+  --gold: #a8843f;
+  --gold-bright: #c9a961;
+  --gold-deep: #6b552a;
+  --ivory: #2a2520;
+  --ivory-dim: #5a5048;
+  --muted: #8a8278;
+  --line: rgba(168, 132, 63, 0.22);
+}
+
+[data-theme='night'] {
+  --bg: #0a0506;
+  --surface: #150a08;
+  --surface-2: #1c100c;
+  --gold: #b08040;
+  --gold-bright: #d4a060;
+  --gold-deep: #7a5a2a;
+  --ivory: #d4a574;
+  --ivory-dim: #9a7858;
+  --muted: #5a4538;
+  --line: rgba(176, 128, 64, 0.15);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ivory);
+  transition:
+    background-color 0.6s ease,
+    color 0.6s ease;
+}
+
+/* =====================
+   BASE STYLES
+   ===================== */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Gold focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold-deep);
+  border-radius: 3px;
+}
+
+/* =====================
+   SHIMMER SKELETON
+   ===================== */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 25%,
+    var(--gold-deep) 50%,
+    var(--surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* =====================
+   GOLD DIVIDER
+   ===================== */
+.gold-line {
+  border: none;
+  height: 1px;
+  background: var(--line);
+}
+
+/* =====================
+   RTL ICON FLIP
+   ===================== */
+[dir='rtl'] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* =====================
+   REDUCED MOTION
+   ===================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

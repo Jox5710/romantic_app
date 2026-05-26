@@ -1,0 +1,635 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "waitingPartner": "Waiting for your partner…",
+    "error": "Something went wrong. Please try again.",
+    "saved": "Saved",
+    "deleted": "Deleted",
+    "noData": "Nothing here yet.",
+    "days": "days",
+    "hours": "hours",
+    "minutes": "minutes",
+    "seconds": "seconds"
+  },
+  "nav": {
+    "home": "Home",
+    "timeline": "Timeline",
+    "bucket": "Bucket List",
+    "prompt": "Daily Prompt",
+    "capsule": "Time Capsule",
+    "vibe": "Vibe Sync",
+    "map": "Our Map",
+    "constellation": "Constellation",
+    "whisper": "Whisper",
+    "mirror": "Mirror",
+    "promises": "Promises",
+    "echo": "Echo",
+    "heartbeat": "Heartbeat",
+    "gratitude": "Gratitude",
+    "admin": "Admin",
+    "blueprint": "Blueprint",
+    "missions": "Missions",
+    "truce": "Safe Harbor",
+    "dinner": "Swipe to Eat",
+    "canvas": "Canvas",
+    "queue": "The Queue",
+    "voices": "Voice Notes"
+  },
+  "theme": {
+    "dusk": "Dusk",
+    "day": "Day",
+    "night": "Night"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Enter your email to receive a magic link",
+      "emailPlaceholder": "your@email.com",
+      "sendLink": "Send magic link",
+      "sent": "Check your inbox — a link is waiting.",
+      "checkEmail": "We've sent you a link. Click it to sign in.",
+      "error": "Could not send the link. Please try again.",
+      "tabMagic": "Magic Link",
+      "tabPassword": "Password",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "passwordPlaceholder": "••••••••",
+      "signIn": "Sign in",
+      "signUp": "Create account",
+      "switchToSignUp": "Don't have an account? Sign up",
+      "switchToSignIn": "Already have an account? Sign in",
+      "orContinueWith": "or continue with",
+      "passwordError": "Invalid email or password.",
+      "signUpError": "Could not create account. Please try again.",
+      "signUpSuccess": "Account created! Check your email to confirm.",
+      "passwordShort": "At least 8 characters",
+      "passwordMismatch": "Passwords don't match"
+    },
+    "invite": {
+      "title": "Create your sanctuary",
+      "subtitle": "Tell us about yourselves",
+      "myName": "Your name",
+      "partnerEmail": "Partner's email",
+      "weddingDate": "Wedding date (optional)",
+      "sendInvite": "Send invitation",
+      "inviteSent": "Invitation sent! Waiting for your partner…",
+      "passphrase": "Capsule passphrase",
+      "passphraseHint": "Choose a shared passphrase for your time capsule letters. You cannot change this later."
+    },
+    "accept": {
+      "title": "You've been invited",
+      "subtitle": "Your partner created a sanctuary for you both",
+      "inviteCode": "Invitation code",
+      "enterCode": "Enter code",
+      "accept": "Accept invitation",
+      "alreadyMember": "You're already part of a couple."
+    },
+    "awaiting": {
+      "title": "Awaiting our blessing",
+      "subtitle": "Your sanctuary is being reviewed. We'll notify you when it's approved.",
+      "submitForReview": "Submit for review",
+      "pending": "Under review — thank you for your patience.",
+      "rejected": "Your request was not approved."
+    },
+    "signOut": "Sign out"
+  },
+  "hero": {
+    "tagline": "A private sanctuary for the two of you",
+    "countdown": {
+      "title": "Until your wedding day",
+      "past": "You've been married for"
+    },
+    "anniversary": {
+      "30days": "30 days together",
+      "100days": "100 days together",
+      "6months": "6 months together",
+      "1year": "One year together",
+      "yearly": "{n} years together"
+    }
+  },
+  "timeline": {
+    "title": "Our Story",
+    "subtitle": "Every chapter, preserved forever",
+    "add": "Add memory",
+    "empty": {
+      "title": "Your story begins here",
+      "body": "Add your first memory and watch your timeline grow."
+    },
+    "form": {
+      "caption": "Caption",
+      "date": "When did this happen?",
+      "body": "Tell the story",
+      "image": "Add a photo",
+      "place": "Link a place"
+    }
+  },
+  "bucket": {
+    "title": "Bucket List",
+    "subtitle": "Dreams waiting to be lived",
+    "add": "Add a dream",
+    "empty": {
+      "title": "Your adventures await",
+      "body": "Add things you want to do together."
+    },
+    "form": {
+      "title": "What do you want to do?",
+      "category": "Category",
+      "notes": "Notes",
+      "categories": {
+        "travel": "Travel",
+        "experience": "Experience",
+        "home": "Home",
+        "other": "Other"
+      }
+    },
+    "completed": "Completed",
+    "markDone": "Mark as done"
+  },
+  "prompt": {
+    "title": "Daily Prompt",
+    "subtitle": "A question to deepen your understanding",
+    "answer": "Your answer",
+    "answerPlaceholder": "Share your thoughts…",
+    "submit": "Share your answer",
+    "waitingReveal": "Both answers will be revealed once your partner replies.",
+    "empty": {
+      "title": "No prompts yet",
+      "body": "Check back tomorrow."
+    }
+  },
+  "capsule": {
+    "title": "Time Capsule",
+    "subtitle": "Letters sealed until the right moment",
+    "compose": "Write a letter",
+    "empty": {
+      "title": "No letters yet",
+      "body": "Write your first time capsule letter — it will wait patiently."
+    },
+    "form": {
+      "body": "Write your letter",
+      "recipient": "For whom?",
+      "unlockAt": "Unlock on",
+      "recipients": {
+        "partner": "My partner",
+        "both": "Both of us",
+        "future_us": "Our future selves"
+      },
+      "passphrase": "Capsule passphrase",
+      "passphraseHint": "Enter your shared passphrase to seal this letter."
+    },
+    "sealed": "Sealed until {date}",
+    "open": "Open letter",
+    "locked": "This letter is locked until {date}."
+  },
+  "vibe": {
+    "title": "Vibe Sync",
+    "subtitle": "How are you feeling right now?",
+    "myVibe": "My vibe",
+    "partnerVibe": "Their vibe",
+    "moods": {
+      "tender": "Tender",
+      "playful": "Playful",
+      "tired": "Tired",
+      "stressed": "Stressed",
+      "grateful": "Grateful",
+      "craving_you": "Craving you"
+    },
+    "energy": "Energy",
+    "craving": "I'm craving…",
+    "cravingPlaceholder": "A hug, a coffee, silence…",
+    "empty": {
+      "title": "No vibe yet",
+      "body": "Set your vibe and let your partner feel you."
+    }
+  },
+  "map": {
+    "title": "Our Map",
+    "subtitle": "Every place that means something",
+    "add": "Add a place",
+    "empty": {
+      "title": "No places yet",
+      "body": "Long-press anywhere on the map to add your first pin."
+    },
+    "kinds": {
+      "visited": "Visited",
+      "dream": "Dream destination",
+      "first_date": "First date",
+      "anniversary": "Anniversary spot",
+      "home": "Home"
+    },
+    "form": {
+      "name": "Place name",
+      "kind": "Type",
+      "visitedAt": "When did you go?",
+      "note": "A note about this place"
+    }
+  },
+  "constellation": {
+    "title": "Our Constellation",
+    "subtitle": "Your memories, written in stars",
+    "empty": {
+      "title": "The sky is quiet",
+      "body": "Add memories to see your constellation grow."
+    }
+  },
+  "whisper": {
+    "title": "Whisper",
+    "subtitle": "Say what's on your heart",
+    "compose": {
+      "title": "Send a whisper",
+      "what": "What happened?",
+      "feeling": "How does it make you feel?",
+      "wish": "What do you need?",
+      "soften": "Soften this",
+      "send": "Send whisper",
+      "cooldown": "You've already sent a whisper today. Come back tomorrow.",
+      "delivering": "Your whisper will arrive in 30 minutes."
+    },
+    "read": {
+      "from": "A whisper from your partner",
+      "response": {
+        "heard": "I hear you",
+        "tell_more": "Tell me more",
+        "lets_talk": "Let's talk"
+      }
+    },
+    "feelings": {
+      "unseen": "Unseen",
+      "distant": "Distant",
+      "tender": "Tender",
+      "weary": "Weary",
+      "anxious": "Anxious",
+      "small": "Small",
+      "alone": "Alone",
+      "frustrated": "Frustrated",
+      "hurt": "Hurt",
+      "longing": "Longing"
+    },
+    "empty": {
+      "title": "No whispers yet",
+      "body": "When something is hard to say, whisper it."
+    }
+  },
+  "mirror": {
+    "title": "Mirror Mode",
+    "subtitle": "See yourselves through each other's eyes",
+    "answer": "Your answer",
+    "answerPlaceholder": "Reflect honestly…",
+    "submit": "Submit answer",
+    "waiting": "Your answer is sealed. Waiting for your partner…",
+    "reveal": "Reveal answers",
+    "week": "Week of {date}",
+    "empty": {
+      "title": "No mirror sessions yet",
+      "body": "A new question arrives every Monday."
+    }
+  },
+  "promises": {
+    "title": "Promise Ledger",
+    "subtitle": "Commitments made with love",
+    "add": "Make a promise",
+    "empty": {
+      "title": "No promises yet",
+      "body": "A promise is a gift to your future selves."
+    },
+    "form": {
+      "text": "The promise",
+      "cadence": "How often?",
+      "cadences": {
+        "once": "Once",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      }
+    },
+    "checkin": "Did you keep this promise today?",
+    "kept": "I kept it",
+    "broken": "Not today",
+    "keptMessage": "Beautiful. One more kept promise.",
+    "brokenMessage": "Tomorrow is a new day. You've got this."
+  },
+  "echo": {
+    "title": "Echo",
+    "subtitle": "On this day, in years past",
+    "today": "Today in history",
+    "empty": {
+      "title": "No echoes yet",
+      "body": "As your story grows, the past will speak to you here."
+    }
+  },
+  "heartbeat": {
+    "title": "Heartbeat",
+    "subtitle": "One tap to say I'm thinking of you",
+    "send": "Send a heartbeat",
+    "sentTo": "Heartbeat sent to {name}",
+    "today": "heartbeats today",
+    "empty": {
+      "title": "Silence, for now",
+      "body": "Send your first heartbeat."
+    }
+  },
+  "gratitude": {
+    "title": "Gratitude Trail",
+    "subtitle": "A river of small thankfulness",
+    "add": "I'm grateful for…",
+    "placeholder": "Something I'm grateful for today…",
+    "submit": "Add gratitude",
+    "empty": {
+      "title": "The trail is waiting",
+      "body": "What are you grateful for today?"
+    }
+  },
+  "blueprint": {
+    "title": "Blueprint",
+    "subtitle": "A cheat sheet for knowing each other completely",
+    "add": "Add a detail",
+    "categories": {
+      "sizes": "Sizes",
+      "tastes": "Tastes",
+      "vitals": "Vitals",
+      "family": "Family"
+    },
+    "form": {
+      "label": "What is it?",
+      "value": "The answer",
+      "category": "Category"
+    },
+    "empty": {
+      "title": "Your blueprint is blank",
+      "body": "Add the small details that make loving each other easier."
+    }
+  },
+  "missions": {
+    "title": "Secret Missions",
+    "subtitle": "Tiny acts of love, assigned by the universe",
+    "empty": {
+      "title": "No active missions",
+      "body": "A new mission will arrive soon."
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "verified": "Verified ✦"
+    },
+    "accomplish": "Mission accomplished",
+    "verify": "Did your partner complete the mission?",
+    "confirmVerify": "Yes, they did it!",
+    "deadline": "Complete by {date}"
+  },
+  "truce": {
+    "title": "Safe Harbor",
+    "subtitle": "A pause. A breath. A return.",
+    "trigger": "Open Safe Harbor",
+    "active": {
+      "title": "Safe Harbor is open",
+      "subtitle": "Take a breath. The storm will pass.",
+      "timer": "Harbor closes in {minutes}m {seconds}s",
+      "iFeelPrompt": "When you're ready, share how you feel:",
+      "iFeelPlaceholder": "I feel… (use I-statements)",
+      "submit": "Share my feelings"
+    },
+    "resolved": {
+      "title": "You found your way back",
+      "subtitle": "That took courage."
+    },
+    "empty": {
+      "title": "All is calm",
+      "body": "Safe Harbor is here whenever you need it."
+    }
+  },
+  "dinner": {
+    "title": "Swipe to Eat",
+    "subtitle": "Finally — a decision you'll both love",
+    "addOption": "Add an option",
+    "swipeYes": "Yes",
+    "swipeNo": "Pass",
+    "match": "It's a match! You both want {name}",
+    "categories": {
+      "restaurant": "Restaurant",
+      "home_cook": "Home cooking"
+    },
+    "form": {
+      "name": "What's the option?",
+      "category": "Category",
+      "note": "Any details?"
+    },
+    "empty": {
+      "title": "The menu is empty",
+      "body": "Add some options and start swiping."
+    }
+  },
+  "canvas": {
+    "title": "Shared Canvas",
+    "subtitle": "Draw something for them to find",
+    "clear": "Clear canvas",
+    "save": "Leave this drawing",
+    "empty": {
+      "title": "A blank canvas",
+      "body": "Draw something for your partner to discover."
+    }
+  },
+  "queue": {
+    "title": "The Queue",
+    "subtitle": "What you'll watch, read, and discover together",
+    "add": "Add to queue",
+    "categories": {
+      "movie": "Movie",
+      "show": "TV Show",
+      "book": "Book",
+      "place": "Place"
+    },
+    "watched": "Mark as watched",
+    "rate": "Rate it",
+    "form": {
+      "title": "Title",
+      "category": "Category",
+      "url": "Link (optional)"
+    },
+    "empty": {
+      "title": "Your queue is empty",
+      "body": "Add movies, shows, books, and places to explore together."
+    }
+  },
+  "voices": {
+    "title": "Voice Notes",
+    "subtitle": "The sound of you, preserved",
+    "record": "Hold to record",
+    "recording": "Recording… release to send",
+    "play": "Play",
+    "empty": {
+      "title": "Only silence here",
+      "body": "Leave a voice note for your partner to discover."
+    }
+  },
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Couple sanctuary management",
+    "stats": {
+      "total": "Total couples",
+      "pending": "Awaiting review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "couples": {
+      "title": "Approval Queue",
+      "filter": {
+        "all": "All",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "bless": "Bless",
+      "decline": "Decline",
+      "note": "Note to couple (optional)",
+      "reason": "Reason for declining",
+      "confirmBless": "Bless this couple's sanctuary?",
+      "confirmDecline": "Decline this request?"
+    }
+  },
+  "tutorial": {
+    "common": {
+      "next": "Next",
+      "prev": "Back",
+      "skip": "Skip",
+      "finish": "Done",
+      "stepOf": "{current} of {total}"
+    },
+    "home": {
+      "step1": { "title": "Welcome to Forever", "desc": "Your shared digital sanctuary — everything here belongs only to the two of you." },
+      "step2": { "title": "Your Feature Modules", "desc": "Each card leads to a different way to connect and grow together. Tap any to explore." },
+      "step3": { "title": "Quick Actions", "desc": "Use Heartbeat for a quick 'thinking of you', and Whisper for deeper emotional conversations." }
+    },
+    "timeline": {
+      "step1": { "title": "Your Story", "desc": "This is your shared memory timeline — every chapter of your relationship preserved here forever." },
+      "step2": { "title": "Add a Memory", "desc": "Tap the Add button to record a new memory. Give it a date, a title, and your words." },
+      "step3": { "title": "Browse Your Past", "desc": "Scroll through your timeline. Filter by year, place, or type to relive the moments that matter." }
+    },
+    "bucket": {
+      "step1": { "title": "Shared Dreams", "desc": "Your bucket list — all the adventures and experiences you want to have together." },
+      "step2": { "title": "Add a Dream", "desc": "Tap the Add button and choose a category: Travel, Experience, Home, or Other." },
+      "step3": { "title": "Mark it Done", "desc": "Completed a dream? Check it off and earn a gold seal. You can link it to a memory too." },
+      "step4": { "title": "Drag to Reorder", "desc": "Press and hold any item to drag it into a new position on your list." }
+    },
+    "prompt": {
+      "step1": { "title": "Today's Question", "desc": "A new thought-provoking question appears every day — the same one for both of you." },
+      "step2": { "title": "Answer in Secret", "desc": "Write your answer privately. Neither of you sees the other's answer until you've both replied." },
+      "step3": { "title": "The Reveal", "desc": "Once both answers are in, they appear side by side. See how alike — or beautifully different — you are." }
+    },
+    "capsule": {
+      "step1": { "title": "Letters in Time", "desc": "Write a message that can only be opened on a future date you choose." },
+      "step2": { "title": "End-to-End Encrypted", "desc": "Your capsule is locked with your shared passphrase. The server never sees the decrypted text." },
+      "step3": { "title": "Open When Ready", "desc": "On the unlock date, enter your passphrase to reveal the letter. A gift from your past selves." }
+    },
+    "vibe": {
+      "step1": { "title": "Your Mood, Shared", "desc": "Tell your partner how you're feeling right now without needing words." },
+      "step2": { "title": "Pick a Mood", "desc": "Choose from six moods, set your energy level, and add what you need right now." },
+      "step3": { "title": "Live Updates", "desc": "Your partner's vibe updates in real time. No refresh needed — just glance and know." }
+    },
+    "map": {
+      "step1": { "title": "Your Places", "desc": "Every meaningful location in your story — pinned on an interactive map." },
+      "step2": { "title": "Add a Pin", "desc": "Long-press anywhere on the map to drop a pin. Tag it as visited, a dream, a first date, or home." },
+      "step3": { "title": "Tap a Pin", "desc": "Tap any pin to see its details and the memory you've linked to it." }
+    },
+    "constellation": {
+      "step1": { "title": "Star Map of Memories", "desc": "Every memory in your timeline becomes a star in your personal constellation." },
+      "step2": { "title": "Golden Spiral", "desc": "Stars are placed along a golden ratio spiral — the most beautiful arrangement in nature." },
+      "step3": { "title": "Tap a Star", "desc": "Tap any star to see the memory it represents. Pinch to zoom, drag to pan." }
+    },
+    "whisper": {
+      "step1": { "title": "A Safe Space to Speak", "desc": "Whisper is for the things that are hard to say. Write from your heart, without blame." },
+      "step2": { "title": "The AI Softener", "desc": "Tap 'Soften this' to let Claude AI reframe your words into 'I feel…' language — kinder and clearer." },
+      "step3": { "title": "30-Minute Pause", "desc": "Your whisper arrives 30 minutes later. A built-in cooling-off period before it's sent." },
+      "step4": { "title": "Your Partner Responds", "desc": "They can reply: 'I hear you', 'Tell me more', or 'Let's talk'. Simple, but powerful." }
+    },
+    "mirror": {
+      "step1": { "title": "See Through Their Eyes", "desc": "A new reflective question every Monday — designed to help you understand each other more deeply." },
+      "step2": { "title": "Answer Privately", "desc": "Both of you answer in secret. Neither sees the other's words until you've both submitted." },
+      "step3": { "title": "The Reveal", "desc": "Answers appear side by side with a golden reveal animation. A window into each other's inner world." }
+    },
+    "promises": {
+      "step1": { "title": "Commitments That Count", "desc": "Add promises you make to each other — daily, weekly, monthly, or yearly." },
+      "step2": { "title": "Check In", "desc": "Each cycle a gentle question appears: 'Did you keep your promise today?' No judgment, only awareness." },
+      "step3": { "title": "Gold Seal of Honor", "desc": "Tap yes and earn a gold seal. The ledger tracks your streak — a beautiful record of integrity." }
+    },
+    "echo": {
+      "step1": { "title": "On This Day", "desc": "Echo surfaces anything from your timeline that happened on today's date in past years." },
+      "step2": { "title": "Memories, Gratitudes & More", "desc": "It searches across memories, gratitudes, and other entries — a surprise from your past selves." },
+      "step3": { "title": "Relive It", "desc": "Tap any entry to see the full moment. Let the past speak to your present." }
+    },
+    "heartbeat": {
+      "step1": { "title": "One Tap, One Message", "desc": "The Heartbeat button says everything with nothing: 'I'm thinking of you right now.'" },
+      "step2": { "title": "Send a Pulse", "desc": "Tap the gold button to send a heartbeat. Your partner sees it and feels it." },
+      "step3": { "title": "Daily Rhythm", "desc": "Your heartbeat count resets every day. A gentle ritual to stay connected across any distance." }
+    },
+    "gratitude": {
+      "step1": { "title": "The Gratitude Trail", "desc": "A flowing stream of small thankful moments — the things that make your relationship beautiful." },
+      "step2": { "title": "Add Gratitude", "desc": "Tap the field and complete: 'I am grateful for…' Then save it to your shared trail." },
+      "step3": { "title": "A Growing River", "desc": "Every entry adds to a living, scrollable record. When you're having a hard day, read through it." }
+    },
+    "blueprint": {
+      "step1": { "title": "Know Each Other Deeply", "desc": "The Blueprint is your partner manual — the details that eliminate guesswork forever." },
+      "step2": { "title": "Four Categories", "desc": "Sizes & measurements, favorites & tastes, essentials & allergies, and family dates. Fill yours in." },
+      "step3": { "title": "See Both Profiles", "desc": "Your data and your partner's appear side by side — clearly labeled so you always know whose is whose." }
+    },
+    "missions": {
+      "step1": { "title": "Secret Romantic Missions", "desc": "Get assigned a small, meaningful romantic act at random. Simple gestures, big impact." },
+      "step2": { "title": "48-Hour Window", "desc": "Complete your mission within 48 hours. Tap 'Mission Complete' when you've done it." },
+      "step3": { "title": "Partner Confirms", "desc": "Your partner gets to confirm it happened. Their 'Yes!' earns you a gold seal of love." }
+    },
+    "truce": {
+      "step1": { "title": "The Safe Harbor", "desc": "When conflict arises, open the Truce. It's a structured pause before the storm escalates." },
+      "step2": { "title": "20-Minute Timer", "desc": "The interface shifts to calm blue. A 20-minute countdown gives both of you space to breathe." },
+      "step3": { "title": "Share How You Feel", "desc": "After the timer, write 'I feel…' in your own words. Then read each other's — and begin again, gently." }
+    },
+    "dinner": {
+      "step1": { "title": "No More 'Where Should We Eat?'", "desc": "Add your restaurant options and swipe independently. A match means you both want it." },
+      "step2": { "title": "Add Options", "desc": "Tap Add to put restaurants or home-cooked meals on the list. Anyone can add anytime." },
+      "step3": { "title": "Swipe & Match", "desc": "Swipe right for yes, left for no. When you both swipe yes on the same option — celebration!" }
+    },
+    "canvas": {
+      "step1": { "title": "Draw Together", "desc": "A shared canvas where you leave visual messages for each other — no words needed." },
+      "step2": { "title": "Pick a Color", "desc": "Choose from 7 colors including the signature gold. Draw anything you feel." },
+      "step3": { "title": "Find Their Art", "desc": "When your partner opens the canvas, they'll see what you drew. A silent, beautiful surprise." }
+    },
+    "queue": {
+      "step1": { "title": "Everything You'll Do Together", "desc": "Movies, shows, books, and places — all in one shared list, waiting for your next date." },
+      "step2": { "title": "Add to the Queue", "desc": "Tap Add, pick a category, and add a title with an optional link. Both of you can add anytime." },
+      "step3": { "title": "Check It Off", "desc": "Watched it? Read it? Tap the checkmark. It moves to Completed with a gold seal and the date." }
+    },
+    "voices": {
+      "step1": { "title": "Your Voice, Preserved", "desc": "Record voice messages up to 60 seconds. Your actual voice, saved in your sanctuary forever." },
+      "step2": { "title": "Press & Hold to Record", "desc": "Hold the microphone button to record. Release to send. Your partner sees a golden waveform." },
+      "step3": { "title": "Unheard Messages Glow", "desc": "New voice notes you haven't listened to yet have a gold border — so nothing gets missed." }
+    },
+    "signIn": {
+      "step1": { "title": "Magic Link Sign-In", "desc": "No password to remember. Enter your email and we'll send you a secure login link." },
+      "step2": { "title": "Check Your Inbox", "desc": "Click the link in your email and you'll be brought straight into Forever — securely." }
+    },
+    "invite": {
+      "step1": { "title": "Create Your Sanctuary", "desc": "You're the one setting up your shared space. Fill in your name and your partner's email." },
+      "step2": { "title": "Set the Wedding Date", "desc": "Optional but beautiful — we'll build a live countdown to your wedding day on the dashboard." },
+      "step3": { "title": "The Secret Passphrase", "desc": "Choose a phrase only the two of you know. It's used to encrypt your Time Capsule letters — never stored." }
+    },
+    "admin": {
+      "step1": { "title": "Admin Dashboard", "desc": "From here you can see all couples who have registered and those awaiting review." },
+      "step2": { "title": "Review Couples", "desc": "Go to the Couples page to approve or decline each couple's application to join Forever." },
+      "step3": { "title": "Bless or Decline", "desc": "Tap Bless to approve a couple — they'll be notified and their sanctuary will be activated." }
+    }
+  }
+}
