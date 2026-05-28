@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { useRespectfulMotion } from '@/lib/hooks/use-respectful-motion';
 
 interface Particle {
   id: number;
@@ -22,6 +23,9 @@ interface FloatingHeart {
   size: number;
   drift: number;
 }
+
+const PARTICLE_COUNT = 28;
+const HEART_COUNT = 6;
 
 function AnimatedTitle({ text, delay = 0 }: { text: string; delay?: number }) {
   return (
@@ -45,9 +49,10 @@ export function SplashScreen() {
   const [show, setShow] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [done, setDone] = useState(false);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [hearts, setHearts] = useState<FloatingHeart[]>([]);
+  const [seedReady, setSeedReady] = useState(false);
   const locale = useLocale();
+  const t = useTranslations('splash');
+  const { repeat } = useRespectfulMotion();
 
   useEffect(() => {
     const seen = sessionStorage.getItem('forever_intro_seen');
@@ -58,27 +63,7 @@ export function SplashScreen() {
     }
     setShow(true);
     setChecked(true);
-
-    const pts: Particle[] = Array.from({ length: 48 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 4 + 1.5,
-      duration: Math.random() * 2.5 + 1.5,
-      delay: Math.random() * 3,
-    }));
-    setParticles(pts);
-
-    const hts: FloatingHeart[] = Array.from({ length: 10 }, (_, i) => ({
-      id: i,
-      x: 5 + i * 9.5,
-      duration: 3.5 + Math.random() * 3,
-      delay: i * 0.5,
-      size: 12 + Math.random() * 16,
-      drift: (Math.random() - 0.5) * 40,
-    }));
-    setHearts(hts);
-
+    setSeedReady(true);
     const t1 = setTimeout(() => setExiting(true), 3400);
     return () => clearTimeout(t1);
   }, []);
@@ -92,11 +77,34 @@ export function SplashScreen() {
     return () => clearTimeout(t);
   }, [exiting]);
 
+  // Stable random positions generated once per mount; memoized so the parent's
+  // re-renders (visibility flips from the motion hook) don't reshuffle them.
+  const particles = useMemo<Particle[]>(() => {
+    if (!seedReady) return [];
+    return Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 4 + 1.5,
+      duration: Math.random() * 2.5 + 1.5,
+      delay: Math.random() * 3,
+    }));
+  }, [seedReady]);
+
+  const hearts = useMemo<FloatingHeart[]>(() => {
+    if (!seedReady) return [];
+    return Array.from({ length: HEART_COUNT }, (_, i) => ({
+      id: i,
+      x: 8 + i * 15,
+      duration: 3.5 + Math.random() * 3,
+      delay: i * 0.6,
+      size: 12 + Math.random() * 16,
+      drift: (Math.random() - 0.5) * 40,
+    }));
+  }, [seedReady]);
+
   if (!checked || done) return null;
   if (!show) return null;
-
-  const subtitle =
-    locale === 'ar' ? 'ملاذ خاص لكما وحدكما' : 'A private sanctuary, just for you two';
 
   return (
     <motion.div
@@ -113,63 +121,65 @@ export function SplashScreen() {
         }}
       />
 
-      {/* Gold sparkle particles */}
-      {particles.map((p) => (
-        <motion.span
-          key={p.id}
-          className="absolute rounded-full bg-gold pointer-events-none"
-          style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
-          animate={{ scale: [0, 1, 0], opacity: [0, 0.7, 0], y: [0, -18] }}
-          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      ))}
+      {/* Gold sparkle particles — gated on reduced-motion + tab visibility */}
+      <div className="absolute inset-0 pointer-events-none" style={{ willChange: 'transform' }}>
+        {particles.map((p) => (
+          <motion.span
+            key={p.id}
+            className="absolute rounded-full bg-gold"
+            style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, willChange: 'transform, opacity' }}
+            animate={{ scale: [0, 1, 0], opacity: [0, 0.7, 0], y: [0, -18] }}
+            transition={{ duration: p.duration, delay: p.delay, repeat, ease: 'easeInOut' }}
+          />
+        ))}
+      </div>
 
       {/* Floating hearts */}
-      {hearts.map((h) => (
-        <motion.div
-          key={h.id}
-          className="absolute bottom-0 text-gold/15 pointer-events-none select-none"
-          style={{ left: `${h.x}%`, fontSize: h.size }}
-          animate={{
-            y: [0, -120, -240],
-            opacity: [0, 0.5, 0],
-            x: [0, h.drift, h.drift * 1.5],
-            rotate: [0, 10, -8],
-          }}
-          transition={{ duration: h.duration, delay: h.delay, repeat: Infinity, ease: 'easeOut' }}
-        >
-          ♥
-        </motion.div>
-      ))}
+      <div className="absolute inset-0 pointer-events-none" style={{ willChange: 'transform' }}>
+        {hearts.map((h) => (
+          <motion.div
+            key={h.id}
+            className="absolute bottom-0 text-gold/15 select-none"
+            style={{ left: `${h.x}%`, fontSize: h.size, willChange: 'transform, opacity' }}
+            animate={{
+              y: [0, -120, -240],
+              opacity: [0, 0.5, 0],
+              x: [0, h.drift, h.drift * 1.5],
+              rotate: [0, 10, -8],
+            }}
+            transition={{ duration: h.duration, delay: h.delay, repeat, ease: 'easeOut' }}
+          >
+            ♥
+          </motion.div>
+        ))}
+      </div>
 
       {/* Center content */}
       <div className="flex flex-col items-center gap-6 select-none">
         {/* Logo + rings */}
         <div className="relative flex items-center justify-center">
-          {/* Outer slow expanding ring */}
           <motion.div
             className="absolute rounded-full border border-gold/15"
             animate={{ width: [150, 210, 150], height: [150, 210, 150], opacity: [0.5, 0, 0.5] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-            style={{ width: 150, height: 150 }}
+            transition={{ duration: 3, repeat, ease: 'easeInOut', delay: 0.4 }}
+            style={{ width: 150, height: 150, willChange: 'transform, opacity' }}
           />
-          {/* Middle ring */}
           <motion.div
             className="absolute rounded-full border border-gold/25"
             animate={{ width: [130, 180, 130], height: [130, 180, 130], opacity: [0.6, 0, 0.6] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
-            style={{ width: 130, height: 130 }}
+            transition={{ duration: 2.5, repeat, ease: 'easeInOut', delay: 0.1 }}
+            style={{ width: 130, height: 130, willChange: 'transform, opacity' }}
           />
-          {/* Inner glow */}
           <motion.div
             className="absolute rounded-full"
             style={{
               width: 110,
               height: 110,
               background: 'radial-gradient(circle, rgba(201,169,97,0.18) 0%, transparent 70%)',
+              willChange: 'transform, opacity',
             }}
             animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 2, repeat, ease: 'easeInOut' }}
           />
 
           <motion.div
@@ -189,18 +199,18 @@ export function SplashScreen() {
         </div>
 
         {/* Letter-by-letter title */}
-        <motion.h1 className="font-display-en text-5xl text-gold tracking-[0.18em]">
+        <motion.h1 className="font-display-en brand-latin text-5xl text-gold tracking-[0.18em]">
           <AnimatedTitle text="Forever" delay={0.65} />
         </motion.h1>
 
-        {/* Subtitle */}
+        {/* Subtitle (now sourced from i18n) */}
         <motion.p
-          className={`text-muted text-sm tracking-wide text-center max-w-[220px] ${locale === 'ar' ? 'font-body-ar' : 'font-body-en'}`}
+          className={`text-muted text-sm tracking-wide text-center max-w-[240px] ${locale === 'ar' ? 'font-body-ar' : 'font-body-en'}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.4, ease: [0.2, 0.8, 0.2, 1] }}
         >
-          {subtitle}
+          {t('subtitle')}
         </motion.p>
 
         {/* Expanding gold divider */}
@@ -222,8 +232,9 @@ export function SplashScreen() {
             <motion.span
               key={i}
               className="w-1 h-1 rounded-full bg-gold/50"
+              style={{ willChange: 'transform, opacity' }}
               animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-              transition={{ duration: 0.9, delay: i * 0.2, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: 0.9, delay: i * 0.2, repeat, ease: 'easeInOut' }}
             />
           ))}
         </motion.div>

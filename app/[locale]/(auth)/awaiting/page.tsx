@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { GoldButton } from '@/components/ui/gold-button';
@@ -13,6 +13,7 @@ export default function AwaitingPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { coupleState, coupleId } = useCoupleState();
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (coupleState === 'approved') {
@@ -46,12 +47,14 @@ export default function AwaitingPage() {
 
   async function submitForReview() {
     if (!coupleId) return;
+    setSubmitting(true);
     const supabase = createClient();
     const { error } = await supabase
       .from('couples')
       .update({ state: 'pending_admin' })
       .eq('id', coupleId);
     if (error) toast(error.message);
+    setSubmitting(false);
   }
 
   return (
@@ -64,7 +67,7 @@ export default function AwaitingPage() {
         </div>
 
         {coupleState === 'mutual' && (
-          <GoldButton onClick={submitForReview} size="lg" className="w-full">
+          <GoldButton onClick={submitForReview} loading={submitting} size="lg" className="w-full">
             {t('submitForReview')}
           </GoldButton>
         )}

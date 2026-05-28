@@ -1,0 +1,46 @@
+# Production override — applied on top of docker-compose.yml on the EC2 host.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#                  --env-file .env.production up -d
+#
+# Differences from dev:
+#   - `app` uses the pre-built static-export image from GHCR (no source mount, no Node runtime)
+#   - `app` is reachable only on the docker network — Caddy proxies it on 443
+#   - `caddy` service added for automatic SSL termination
+#   - Studio + mailhog are kept (handy for ops); remove them here if you want to drop them.
+
+services:
+  app:
+    # !reset disables the dev build/volume/port overrides from docker-compose.yml
+    build: !reset null
+    volumes: !reset []
+    ports: !reset []
+    image: ghcr.io/${GH_REPO:-your-org/your-repo}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      # Static export bakes NEXT_PUBLIC_* at build time — no runtime overrides needed.
+      # Polling vars are dev-only; clear them so they don't fight nginx.
+      WATCHPACK_POLLING: ""
+      CHOKIDAR_USEPOLLING: ""
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - kong
+    networks:
+      - supabase-net
+
+volumes:
+  caddy_data:
+  caddy_config:

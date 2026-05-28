@@ -8,8 +8,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from '@/lib/i18n/navigation';
+import { useRespectfulMotion } from '@/lib/hooks/use-respectful-motion';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
+import { LoadingOverlay } from '@/components/ui/loading-overlay';
 import { Heart, Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
 
 type Tab = 'magic' | 'password';
@@ -37,25 +39,29 @@ const signUpSchema = z
 type SignUpForm = z.infer<typeof signUpSchema>;
 
 // ─── Floating sparkle particle ───────────────────────────────────────────────
-function Particle({ x, y, size, duration, delay }: { x: number; y: number; size: number; duration: number; delay: number }) {
+function Particle({
+  x, y, size, duration, delay, repeat,
+}: { x: number; y: number; size: number; duration: number; delay: number; repeat: number }) {
   return (
     <motion.span
       className="absolute rounded-full bg-gold pointer-events-none"
-      style={{ left: `${x}%`, top: `${y}%`, width: size, height: size }}
+      style={{ left: `${x}%`, top: `${y}%`, width: size, height: size, willChange: 'transform, opacity' }}
       animate={{ scale: [0, 1, 0], opacity: [0, 0.6, 0], y: [0, -20, -40] }}
-      transition={{ duration, delay, repeat: Infinity, ease: 'easeInOut' }}
+      transition={{ duration, delay, repeat, ease: 'easeInOut' }}
     />
   );
 }
 
 // ─── Floating heart ───────────────────────────────────────────────────────────
-function FloatingHeart({ x, duration, delay, size }: { x: number; duration: number; delay: number; size: number }) {
+function FloatingHeart({
+  x, duration, delay, size, repeat,
+}: { x: number; duration: number; delay: number; size: number; repeat: number }) {
   return (
     <motion.div
       className="absolute bottom-0 text-gold/20 pointer-events-none select-none"
-      style={{ left: `${x}%`, fontSize: size }}
+      style={{ left: `${x}%`, fontSize: size, willChange: 'transform, opacity' }}
       animate={{ y: [0, -80, -160], opacity: [0, 0.4, 0], rotate: [0, 15, -10] }}
-      transition={{ duration, delay, repeat: Infinity, ease: 'easeOut' }}
+      transition={{ duration, delay, repeat, ease: 'easeOut' }}
     >
       ♥
     </motion.div>
@@ -66,7 +72,7 @@ type ParticleData = { id: number; x: number; y: number; size: number; duration: 
 type HeartData = { id: number; x: number; duration: number; delay: number; size: number };
 
 function buildParticles(): ParticleData[] {
-  return Array.from({ length: 30 }, (_, i) => ({
+  return Array.from({ length: 18 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
@@ -77,9 +83,9 @@ function buildParticles(): ParticleData[] {
 }
 
 function buildHearts(): HeartData[] {
-  return Array.from({ length: 6 }, (_, i) => ({
+  return Array.from({ length: 4 }, (_, i) => ({
     id: i,
-    x: 10 + i * 16,
+    x: 12 + i * 22,
     duration: 4 + Math.random() * 3,
     delay: i * 0.8,
     size: 14 + Math.random() * 10,
@@ -364,9 +370,11 @@ function PasswordForm({ t }: { t: ReturnType<typeof useTranslations> }) {
 export default function SignInPage() {
   const t = useTranslations('auth.signIn');
   const router = useRouter();
+  const { repeat } = useRespectfulMotion();
   const [tab, setTab] = useState<Tab>('magic');
   const [particles, setParticles] = useState<ParticleData[]>([]);
   const [hearts, setHearts] = useState<HeartData[]>([]);
+  const [redirecting, setRedirecting] = useState(false);
 
   // Generate random positions only on the client to avoid SSR/hydration mismatch
   useEffect(() => {
@@ -379,10 +387,14 @@ export default function SignInPage() {
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace('/');
+      if (data.session) {
+        setRedirecting(true);
+        router.replace('/');
+      }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
+        setRedirecting(true);
         router.replace('/');
       }
     });
@@ -391,6 +403,8 @@ export default function SignInPage() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+      <LoadingOverlay show={redirecting} label={t('redirecting')} fullscreen />
+
       {/* Adaptive background gradient */}
       <div className="fixed inset-0 -z-10 bg-bg">
         <div
@@ -404,12 +418,12 @@ export default function SignInPage() {
 
       {/* Floating particles — client-only to prevent hydration mismatch */}
       {particles.map((p) => (
-        <Particle key={p.id} {...p} />
+        <Particle key={p.id} {...p} repeat={repeat} />
       ))}
 
       {/* Floating hearts */}
       {hearts.map((h) => (
-        <FloatingHeart key={h.id} {...h} />
+        <FloatingHeart key={h.id} {...h} repeat={repeat} />
       ))}
 
       {/* Card */}
@@ -434,16 +448,18 @@ export default function SignInPage() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', damping: 14, stiffness: 120, delay: 0.15 }}
             >
-              {/* Pulsing ring */}
+              {/* Pulsing rings (gated on reduced-motion + tab visibility) */}
               <motion.div
                 className="absolute inset-0 rounded-full border-2 border-gold/40"
+                style={{ willChange: 'transform, opacity' }}
                 animate={{ scale: [1, 1.6, 1], opacity: [0.6, 0, 0.6] }}
-                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                transition={{ duration: 2.4, repeat, ease: 'easeInOut' }}
               />
               <motion.div
                 className="absolute inset-0 rounded-full border border-gold/20"
+                style={{ willChange: 'transform, opacity' }}
                 animate={{ scale: [1, 2.0, 1], opacity: [0.4, 0, 0.4] }}
-                transition={{ duration: 2.4, delay: 0.6, repeat: Infinity, ease: 'easeInOut' }}
+                transition={{ duration: 2.4, delay: 0.6, repeat, ease: 'easeInOut' }}
               />
               <div className="relative z-10 w-20 h-20 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center">
                 <Heart className="text-gold" size={40} fill="currentColor" />

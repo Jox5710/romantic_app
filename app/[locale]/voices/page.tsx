@@ -196,11 +196,11 @@ export default function VoicesPage() {
               <Mic size={32} className={recording ? 'text-white' : 'text-gold'} />
             </button>
             <p className="text-xs text-muted text-center">
-              {recording ? t('recording') : t('record')}
+              {saveNote.isPending ? t('uploading') : recording ? t('recording') : t('record')}
             </p>
           </div>
         ) : (
-          <p className="text-muted text-sm text-center">Voice recording is not supported in this browser.</p>
+          <p className="text-muted text-sm text-center">{t('unsupported')}</p>
         )}
 
         {/* Notes list */}

@@ -55,6 +55,28 @@
     "day": "Day",
     "night": "Night"
   },
+  "splash": {
+    "subtitle": "A private sanctuary, just for you two"
+  },
+  "userMenu": {
+    "account": "Couple settings",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…"
+  },
+  "account": {
+    "title": "Couple settings",
+    "subtitle": "Your names and the day you became one",
+    "nameA": "First name",
+    "nameAAr": "First name in Arabic",
+    "nameB": "Partner's name",
+    "nameBAr": "Partner's name in Arabic",
+    "weddingDate": "Wedding date",
+    "namePlaceholder": "Name",
+    "nameArPlaceholder": "بالعربية",
+    "save": "Save changes",
+    "saved": "Saved",
+    "error": "Could not save. Please try again."
+  },
   "auth": {
     "signIn": {
       "title": "Welcome back",
@@ -78,16 +100,25 @@
       "signUpError": "Could not create account. Please try again.",
       "signUpSuccess": "Account created! Check your email to confirm.",
       "passwordShort": "At least 8 characters",
-      "passwordMismatch": "Passwords don't match"
+      "passwordMismatch": "Passwords don't match",
+      "redirecting": "Opening your sanctuary…"
     },
     "invite": {
       "title": "Create your sanctuary",
       "subtitle": "Tell us about yourselves",
       "myName": "Your name",
+      "myNamePlaceholder": "Your name",
+      "myNameAr": "Your name in Arabic (optional)",
+      "myNameArPlaceholder": "اسمك بالعربية",
       "partnerEmail": "Partner's email",
+      "partnerEmailPlaceholder": "partner@email.com",
       "weddingDate": "Wedding date (optional)",
       "sendInvite": "Send invitation",
       "inviteSent": "Invitation sent! Waiting for your partner…",
+      "shareLink": "Share this link with your partner",
+      "copyLink": "Copy link",
+      "copied": "Copied!",
+      "errorCreating": "Could not create your sanctuary. Please try again.",
       "passphrase": "Capsule passphrase",
       "passphraseHint": "Choose a shared passphrase for your time capsule letters. You cannot change this later."
     },
@@ -97,7 +128,13 @@
       "inviteCode": "Invitation code",
       "enterCode": "Enter code",
       "accept": "Accept invitation",
-      "alreadyMember": "You're already part of a couple."
+      "myName": "Your name",
+      "myNamePlaceholder": "Your name",
+      "myNameAr": "Your name in Arabic (optional)",
+      "myNameArPlaceholder": "اسمك بالعربية",
+      "alreadyMember": "You're already part of a couple.",
+      "notFoundTitle": "Invitation not found",
+      "notFoundBody": "This code may be invalid or already used."
     },
     "awaiting": {
       "title": "Awaiting our blessing",
@@ -105,6 +142,11 @@
       "submitForReview": "Submit for review",
       "pending": "Under review — thank you for your patience.",
       "rejected": "Your request was not approved."
+    },
+    "rejected": {
+      "title": "Not approved",
+      "message": "Your request was not approved.",
+      "backToSignIn": "Sign in again"
     },
     "signOut": "Sign out"
   },
@@ -471,6 +513,8 @@
     "subtitle": "The sound of you, preserved",
     "record": "Hold to record",
     "recording": "Recording… release to send",
+    "uploading": "Sending your voice…",
+    "unsupported": "Voice recording is not supported in this browser.",
     "play": "Play",
     "empty": {
       "title": "Only silence here",
@@ -498,8 +542,29 @@
       "decline": "Decline",
       "note": "Note to couple (optional)",
       "reason": "Reason for declining",
+      "reasonPlaceholder": "Reason…",
       "confirmBless": "Bless this couple's sanctuary?",
-      "confirmDecline": "Decline this request?"
+      "confirmDecline": "Decline this request?",
+      "cancel": "Cancel",
+      "empty": "No couples found.",
+      "pendingPartner": "(pending)",
+      "blessed": "Couple blessed!",
+      "declined": "Request declined",
+      "row": {
+        "state": "State",
+        "email": "Email",
+        "wedding": "Wedding",
+        "created": "Created",
+        "note": "Note"
+      },
+      "state": {
+        "drafted": "Drafted",
+        "invited": "Invited",
+        "mutual": "Mutual",
+        "pending_admin": "Pending review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
     }
   },
   "tutorial": {

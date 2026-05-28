@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "PowerShell(docker compose --env-file .env.docker up -d --force-recreate app 2>&1)",
+      "PowerShell(docker restart romantic_app-app-1 2>&1)",
+      "PowerShell(docker compose --env-file .env.docker up -d app 2>&1)",
+      "PowerShell(wsl --shutdown 2>&1)",
+      "Bash(docker info *)",
+      "PowerShell(docker compose --env-file .env.docker up -d 2>&1)"
+    ]
+  }
+}

@@ -1,17 +1,24 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Countdown } from './countdown';
 import { motion } from 'framer-motion';
 
 interface Props {
   nameA: string | null;
   nameB: string | null;
+  nameAAr?: string | null;
+  nameBAr?: string | null;
   weddingDate: string | null;
 }
 
-export function Hero({ nameA, nameB, weddingDate }: Props) {
+export function Hero({ nameA, nameB, nameAAr, nameBAr, weddingDate }: Props) {
   const t = useTranslations('hero');
+  const isArabic = useLocale() === 'ar';
+
+  const displayA = (isArabic ? nameAAr ?? nameA : nameA) ?? '…';
+  const displayB = (isArabic ? nameBAr ?? nameB : nameB) ?? '…';
+  const nameFont = isArabic ? 'font-display-ar' : 'font-display-en';
 
   return (
     <section className="flex flex-col items-center text-center gap-8 py-16 px-4">
@@ -22,12 +29,12 @@ export function Hero({ nameA, nameB, weddingDate }: Props) {
         className="space-y-3"
       >
         <div className="flex items-center gap-4 justify-center">
-          <span className="font-display-en text-5xl md:text-7xl text-ivory">
-            {nameA ?? '…'}
+          <span className={`${nameFont} text-5xl md:text-7xl text-ivory`}>
+            {displayA}
           </span>
           <span className="font-display-en text-4xl md:text-6xl text-gold">&amp;</span>
-          <span className="font-display-en text-5xl md:text-7xl text-ivory">
-            {nameB ?? '…'}
+          <span className={`${nameFont} text-5xl md:text-7xl text-ivory`}>
+            {displayB}
           </span>
         </div>
         <p className="text-ivoryDim text-sm tracking-widest uppercase">

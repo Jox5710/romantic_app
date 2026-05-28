@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { RouteGuard } from '@/components/route-guard';
 import { Card } from '@/components/ui/card';
@@ -18,6 +18,8 @@ interface CoupleRow {
   state: CoupleState;
   name_a: string | null;
   name_b: string | null;
+  name_a_ar: string | null;
+  name_b_ar: string | null;
   wedding_date: string | null;
   created_at: string;
   invite_email: string | null;
@@ -26,7 +28,16 @@ interface CoupleRow {
 
 export default function CouplesQueuePage() {
   const t = useTranslations('admin.couples');
+  const isArabic = useLocale() === 'ar';
+  const nameFont = isArabic ? 'font-display-ar' : 'font-display-en';
   const { toast } = useToast();
+
+  // Locale-appropriate "A & B" pairing with Latin fallback when Arabic is blank.
+  const pairNames = (c: CoupleRow) => {
+    const a = (isArabic ? c.name_a_ar ?? c.name_a : c.name_a) ?? '?';
+    const b = (isArabic ? c.name_b_ar ?? c.name_b : c.name_b) ?? t('pendingPartner');
+    return { a, b };
+  };
   const [couples, setCouples] = useState<CoupleRow[]>([]);
   const [filter, setFilter] = useState<FilterState>('pending_admin');
   const [loading, setLoading] = useState(true);
@@ -41,7 +52,7 @@ export default function CouplesQueuePage() {
     const supabase = createClient();
     let q = supabase
       .from('couples')
-      .select('id,state,name_a,name_b,wedding_date,created_at,invite_email,admin_note')
+      .select('id,state,name_a,name_b,name_a_ar,name_b_ar,wedding_date,created_at,invite_email,admin_note')
       .order('created_at', { ascending: false });
     if (filter !== 'all') q = q.eq('state', filter);
     const { data } = await q;
@@ -61,7 +72,7 @@ export default function CouplesQueuePage() {
       .update({ state: 'approved', approved_at: new Date().toISOString(), approved_by: user?.id })
       .eq('id', selected.id);
     if (error) { toast(error.message); setBlessing(false); return; }
-    toast('Couple blessed!', 'success');
+    toast(t('blessed'), 'success');
     setSelected(null);
     load();
   }
@@ -75,7 +86,7 @@ export default function CouplesQueuePage() {
       .update({ state: 'rejected', admin_note: note })
       .eq('id', selected.id);
     if (error) { toast(error.message); setDeclining(false); return; }
-    toast('Request declined', 'success');
+    toast(t('declined'), 'success');
     setSelected(null);
     setShowDecline(false);
     load();
@@ -114,7 +125,7 @@ export default function CouplesQueuePage() {
             {loading ? (
               [1, 2, 3].map((n) => <div key={n} className="h-24 rounded-2xl shimmer" />)
             ) : couples.length === 0 ? (
-              <div className="text-center py-12 text-muted">No couples found.</div>
+              <div className="text-center py-12 text-muted">{t('empty')}</div>
             ) : couples.map((c) => (
               <Card
                 key={c.id}
@@ -126,8 +137,8 @@ export default function CouplesQueuePage() {
                 onClick={() => { setSelected(c); setShowDecline(false); setNote(''); }}
               >
                 <div className="space-y-0.5 flex-1">
-                  <p className="text-ivory font-medium">
-                    {c.name_a ?? '?'} &amp; {c.name_b ?? '(pending)'}
+                  <p className={`text-ivory font-medium ${nameFont} text-lg`}>
+                    {pairNames(c).a} &amp; {pairNames(c).b}
                   </p>
                   <p className="text-xs text-muted">
                     {format(new Date(c.created_at), 'PPP')} · {c.invite_email}
@@ -138,7 +149,7 @@ export default function CouplesQueuePage() {
                     c.state === 'rejected' ? 'bg-red-900/40 text-red-400' :
                     'bg-gold/10 text-gold',
                   ].join(' ')}>
-                    {c.state}
+                    {t(`state.${c.state}`)}
                   </span>
                 </div>
               </Card>
@@ -148,20 +159,20 @@ export default function CouplesQueuePage() {
           {selected && (
             <Card variant="elevated" className="space-y-4 self-start sticky top-20">
               <div className="flex items-start justify-between">
-                <h2 className="font-display-en text-2xl text-ivory">
-                  {selected.name_a ?? '?'} &amp; {selected.name_b ?? '(pending)'}
+                <h2 className={`${nameFont} text-2xl text-ivory`}>
+                  {pairNames(selected).a} &amp; {pairNames(selected).b}
                 </h2>
                 <button type="button" onClick={() => setSelected(null)} className="text-muted hover:text-ivory">✕</button>
               </div>
 
               <div className="space-y-2 text-sm">
-                <Row label="State" value={selected.state} />
-                <Row label="Email" value={selected.invite_email ?? '—'} />
+                <Row label={t('row.state')} value={t(`state.${selected.state}`)} />
+                <Row label={t('row.email')} value={selected.invite_email ?? '—'} />
                 {selected.wedding_date && (
-                  <Row label="Wedding" value={format(new Date(selected.wedding_date), 'PPP')} />
+                  <Row label={t('row.wedding')} value={format(new Date(selected.wedding_date), 'PPP')} />
                 )}
-                <Row label="Created" value={format(new Date(selected.created_at), 'PPPp')} />
-                {selected.admin_note && <Row label="Note" value={selected.admin_note} />}
+                <Row label={t('row.created')} value={format(new Date(selected.created_at), 'PPPp')} />
+                {selected.admin_note && <Row label={t('row.note')} value={selected.admin_note} />}
               </div>
 
               {selected.state === 'pending_admin' && (
@@ -178,7 +189,7 @@ export default function CouplesQueuePage() {
                     <div className="space-y-3">
                       <Field
                         label={t('note')}
-                        placeholder="Reason…"
+                        placeholder={t('reasonPlaceholder')}
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                       />
@@ -187,7 +198,7 @@ export default function CouplesQueuePage() {
                           {t('confirmDecline')}
                         </GoldButton>
                         <GoldButton variant="ghost" onClick={() => setShowDecline(false)} size="sm">
-                          Cancel
+                          {t('cancel')}
                         </GoldButton>
                       </div>
                     </div>

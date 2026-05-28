@@ -13,6 +13,7 @@ import { Heart } from 'lucide-react';
 
 const schema = z.object({
   myName: z.string().min(1),
+  myNameAr: z.string().optional(),
   partnerEmail: z.string().email(),
   weddingDate: z.string().optional(),
   passphrase: z.string().min(8, 'Passphrase must be at least 8 characters'),
@@ -25,6 +26,7 @@ export default function InvitePage() {
   const { toast } = useToast();
   const [done, setDone] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const {
     register,
@@ -44,6 +46,7 @@ export default function InvitePage() {
       .insert({
         state: 'invited',
         name_a: values.myName,
+        name_a_ar: values.myNameAr?.trim() || null,
         invite_code: inviteCode,
         invite_email: values.partnerEmail,
         initiator_id: user.id,
@@ -53,7 +56,7 @@ export default function InvitePage() {
       .single();
 
     if (coupleErr || !couple) {
-      toast(coupleErr?.message ?? 'Error creating couple');
+      toast(coupleErr?.message ?? t('errorCreating'));
       return;
     }
 
@@ -84,14 +87,18 @@ export default function InvitePage() {
           <p className="text-gold font-display-en text-5xl">✉</p>
           <h2 className="text-ivory font-display-en text-3xl">{t('inviteSent')}</h2>
           <div className="bg-surface2 rounded-xl p-4 space-y-2">
-            <p className="text-xs text-muted uppercase tracking-wider">Share this link with your partner</p>
+            <p className="text-xs text-muted uppercase tracking-wider">{t('shareLink')}</p>
             <p className="text-gold font-mono text-sm break-all">{inviteUrl}</p>
             <button
               type="button"
-              onClick={() => navigator.clipboard.writeText(inviteUrl)}
+              onClick={() => {
+                navigator.clipboard.writeText(inviteUrl);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
               className="text-xs text-ivoryDim hover:text-ivory transition-colors"
             >
-              Copy link
+              {copied ? t('copied') : t('copyLink')}
             </button>
           </div>
         </div>
@@ -111,14 +118,21 @@ export default function InvitePage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Field
             label={t('myName')}
-            placeholder="Your name"
+            placeholder={t('myNamePlaceholder')}
             error={errors.myName?.message}
             {...register('myName')}
           />
           <Field
+            label={t('myNameAr')}
+            placeholder={t('myNameArPlaceholder')}
+            error={errors.myNameAr?.message}
+            dir="rtl"
+            {...register('myNameAr')}
+          />
+          <Field
             label={t('partnerEmail')}
             type="email"
-            placeholder="partner@email.com"
+            placeholder={t('partnerEmailPlaceholder')}
             error={errors.partnerEmail?.message}
             {...register('partnerEmail')}
           />

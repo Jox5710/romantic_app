@@ -13,6 +13,8 @@ import { useTutorial } from '@/components/tutorial/use-tutorial';
 interface CoupleData {
   name_a: string | null;
   name_b: string | null;
+  name_a_ar: string | null;
+  name_b_ar: string | null;
   wedding_date: string | null;
   created_at: string;
 }
@@ -32,7 +34,7 @@ export default function DashboardPage() {
     const supabase = createClient();
     supabase
       .from('couples')
-      .select('name_a,name_b,wedding_date,created_at')
+      .select('name_a,name_b,name_a_ar,name_b_ar,wedding_date,created_at')
       .eq('id', coupleId)
       .single()
       .then(({ data }) => setCouple(data as CoupleData | null));
@@ -50,6 +52,8 @@ export default function DashboardPage() {
         <Hero
           nameA={couple?.name_a ?? null}
           nameB={couple?.name_b ?? null}
+          nameAAr={couple?.name_a_ar ?? null}
+          nameBAr={couple?.name_b_ar ?? null}
           weddingDate={couple?.wedding_date ?? null}
         />
       </div>

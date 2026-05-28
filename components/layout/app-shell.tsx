@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ThemeSwitcher } from '@/components/theme/theme-switcher';
 import { LangSwitcher } from './lang-switcher';
+import { UserMenu } from './user-menu';
 import { Link } from '@/lib/i18n/navigation';
 import { useTutorialContext } from '@/components/tutorial/tutorial-provider';
 
@@ -43,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="object-contain drop-shadow-[0_0_10px_rgba(201,169,97,0.55)]"
               priority
             />
-            <span className="font-display-en text-2xl">Forever</span>
+            <span className="font-display-en brand-latin text-2xl">Forever</span>
           </Link>
         </motion.div>
 
@@ -51,6 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <TutorialTriggerButton />
           <ThemeSwitcher />
           <LangSwitcher />
+          <UserMenu />
         </div>
       </header>
 

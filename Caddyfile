@@ -1,0 +1,25 @@
+# Forever — production reverse proxy with automatic Let's Encrypt SSL.
+#
+# Replace forever.example.com / api.forever.example.com with your real domains
+# before first deploy. Caddy provisions and renews certs automatically as long
+# as port 80 and 443 are open and DNS resolves both A-records to this EC2.
+
+# Frontend (Next.js static export served by nginx in the `app` container on port 80)
+forever.example.com {
+	encode zstd gzip
+	reverse_proxy app:80
+}
+
+# Supabase API gateway (Kong on port 8000) — auth, rest, realtime, storage all live behind here
+api.forever.example.com {
+	encode zstd gzip
+
+	# Realtime needs the upgrade headers; Caddy's reverse_proxy passes them by default,
+	# but we set them explicitly so the intent is documented.
+	@websockets {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	reverse_proxy @websockets kong:8000
+	reverse_proxy kong:8000
+}

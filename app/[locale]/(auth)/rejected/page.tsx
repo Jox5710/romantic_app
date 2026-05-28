@@ -1,12 +1,18 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { GoldButton } from '@/components/ui/gold-button';
+import { RedirectButton } from '@/components/ui/redirect-button';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter } from '@/lib/i18n/navigation';
 
 export default function RejectedPage() {
-  const t = useTranslations('auth.awaiting');
+  const t = useTranslations('auth.rejected');
   const router = useRouter();
+
+  async function backToSignIn() {
+    await createClient().auth.signOut();
+    router.replace('/sign-in');
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -15,12 +21,12 @@ export default function RejectedPage() {
           <span className="text-red-400 text-3xl">×</span>
         </div>
         <div className="space-y-2">
-          <h1 className="font-display-en text-3xl text-ivory">Not Approved</h1>
-          <p className="text-ivoryDim text-sm">{t('rejected')}</p>
+          <h1 className="font-display-en text-3xl text-ivory">{t('title')}</h1>
+          <p className="text-ivoryDim text-sm">{t('message')}</p>
         </div>
-        <GoldButton variant="ghost" onClick={() => router.replace('/sign-in')} className="w-full">
-          Sign In Again
-        </GoldButton>
+        <RedirectButton variant="ghost" onClick={backToSignIn} className="w-full">
+          {t('backToSignIn')}
+        </RedirectButton>
       </div>
     </div>
   );

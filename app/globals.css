@@ -113,6 +113,17 @@ body {
 }
 
 /* =====================
+   RTL DISPLAY FONT
+   In Arabic, headings that use the Latin serif display face (font-display-en)
+   fall back to the Arabic display face automatically — so the ~45 page titles
+   don't each need a locale ternary. The Latin brand wordmark opts out via
+   .brand-latin so "Forever" always stays in the Latin serif.
+   ===================== */
+[dir='rtl'] .font-display-en:not(.brand-latin) {
+  font-family: var(--font-tajawal), 'Aref Ruqaa', serif;
+}
+
+/* =====================
    REDUCED MOTION
    ===================== */
 @media (prefers-reduced-motion: reduce) {

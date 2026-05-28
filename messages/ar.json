@@ -50,6 +50,28 @@
     "queue": "قائمة الانتظار",
     "voices": "رسائل صوتية"
   },
+  "splash": {
+    "subtitle": "ملاذ خاص لكما وحدكما"
+  },
+  "userMenu": {
+    "account": "إعدادات الثنائي",
+    "signOut": "تسجيل الخروج",
+    "signingOut": "جارٍ تسجيل الخروج…"
+  },
+  "account": {
+    "title": "إعدادات الثنائي",
+    "subtitle": "أسماؤكما واليوم الذي صرتما فيه واحداً",
+    "nameA": "الاسم الأول",
+    "nameAAr": "الاسم الأول بالعربية",
+    "nameB": "اسم الشريك",
+    "nameBAr": "اسم الشريك بالعربية",
+    "weddingDate": "تاريخ الزفاف",
+    "namePlaceholder": "الاسم",
+    "nameArPlaceholder": "بالعربية",
+    "save": "حفظ التغييرات",
+    "saved": "تم الحفظ",
+    "error": "تعذّر الحفظ. يرجى المحاولة مجدداً."
+  },
   "theme": {
     "dusk": "الغسق",
     "day": "النهار",
@@ -78,16 +100,25 @@
       "signUpError": "تعذّر إنشاء الحساب. يرجى المحاولة مجدداً.",
       "signUpSuccess": "تم إنشاء الحساب! تحقق من بريدك لتأكيده.",
       "passwordShort": "٨ أحرف على الأقل",
-      "passwordMismatch": "كلمتا المرور غير متطابقتين"
+      "passwordMismatch": "كلمتا المرور غير متطابقتين",
+      "redirecting": "نفتح ملاذكما…"
     },
     "invite": {
       "title": "أنشئ ملاذكما",
       "subtitle": "أخبرنا عن أنفسكما",
       "myName": "اسمك",
+      "myNamePlaceholder": "اسمك",
+      "myNameAr": "اسمك بالعربية (اختياري)",
+      "myNameArPlaceholder": "اسمك بالعربية",
       "partnerEmail": "بريد شريكك الإلكتروني",
+      "partnerEmailPlaceholder": "شريكك@الإلكتروني.com",
       "weddingDate": "تاريخ الزفاف (اختياري)",
       "sendInvite": "أرسل الدعوة",
       "inviteSent": "تم إرسال الدعوة! بانتظار شريكك…",
+      "shareLink": "شارك هذا الرابط مع شريكك",
+      "copyLink": "نسخ الرابط",
+      "copied": "تم النسخ!",
+      "errorCreating": "تعذّر إنشاء ملاذكما. يرجى المحاولة مجدداً.",
       "passphrase": "عبارة سرية للكبسولة",
       "passphraseHint": "اختر عبارة سرية مشتركة لرسائل كبسولة الزمن. لا يمكن تغييرها لاحقاً."
     },
@@ -97,7 +128,13 @@
       "inviteCode": "رمز الدعوة",
       "enterCode": "أدخل الرمز",
       "accept": "قبول الدعوة",
-      "alreadyMember": "أنت بالفعل جزء من ثنائي."
+      "myName": "اسمك",
+      "myNamePlaceholder": "اسمك",
+      "myNameAr": "اسمك بالعربية (اختياري)",
+      "myNameArPlaceholder": "اسمك بالعربية",
+      "alreadyMember": "أنت بالفعل جزء من ثنائي.",
+      "notFoundTitle": "الدعوة غير موجودة",
+      "notFoundBody": "قد يكون هذا الرمز غير صالح أو مُستخدماً من قبل."
     },
     "awaiting": {
       "title": "بانتظار البركة",
@@ -105,6 +142,11 @@
       "submitForReview": "أرسل للمراجعة",
       "pending": "تحت المراجعة — شكراً لصبرك.",
       "rejected": "لم تتم الموافقة على طلبك."
+    },
+    "rejected": {
+      "title": "لم تتم الموافقة",
+      "message": "لم تتم الموافقة على طلبك.",
+      "backToSignIn": "سجّل الدخول من جديد"
     },
     "signOut": "تسجيل الخروج"
   },
@@ -471,6 +513,8 @@
     "subtitle": "صوتك، محفوظ للأبد",
     "record": "اضغط مطوّلاً للتسجيل",
     "recording": "يسجّل… اترك لإرسال",
+    "uploading": "نرسل صوتك…",
+    "unsupported": "تسجيل الصوت غير مدعوم في هذا المتصفح.",
     "play": "تشغيل",
     "empty": {
       "title": "الصمت يسود",
@@ -498,8 +542,29 @@
       "decline": "رفض",
       "note": "ملاحظة للزوجين (اختياري)",
       "reason": "سبب الرفض",
+      "reasonPlaceholder": "السبب…",
       "confirmBless": "تبارك ملاذ هذا الزوجين؟",
-      "confirmDecline": "رفض هذا الطلب؟"
+      "confirmDecline": "رفض هذا الطلب؟",
+      "cancel": "إلغاء",
+      "empty": "لا يوجد أزواج.",
+      "pendingPartner": "(بانتظار الشريك)",
+      "blessed": "تمت مباركة الزوجين!",
+      "declined": "تم رفض الطلب",
+      "row": {
+        "state": "الحالة",
+        "email": "البريد",
+        "wedding": "الزفاف",
+        "created": "أُنشئ",
+        "note": "ملاحظة"
+      },
+      "state": {
+        "drafted": "مسودّة",
+        "invited": "مدعوّ",
+        "mutual": "متبادل",
+        "pending_admin": "قيد المراجعة",
+        "approved": "معتمد",
+        "rejected": "مرفوض"
+      }
     }
   },
   "tutorial": {

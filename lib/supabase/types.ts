@@ -35,6 +35,8 @@ export interface Database {
           state: CoupleState;
           name_a: string | null;
           name_b: string | null;
+          name_a_ar: string | null;
+          name_b_ar: string | null;
           wedding_date: string | null;
           invite_code: string | null;
           invite_email: string | null;
@@ -50,6 +52,8 @@ export interface Database {
           state?: CoupleState;
           name_a?: string | null;
           name_b?: string | null;
+          name_a_ar?: string | null;
+          name_b_ar?: string | null;
           wedding_date?: string | null;
           invite_code?: string | null;
           invite_email?: string | null;
@@ -65,6 +69,8 @@ export interface Database {
           state?: CoupleState;
           name_a?: string | null;
           name_b?: string | null;
+          name_a_ar?: string | null;
+          name_b_ar?: string | null;
           wedding_date?: string | null;
           invite_code?: string | null;
           invite_email?: string | null;

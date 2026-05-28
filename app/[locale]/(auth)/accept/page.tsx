@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { GoldButton } from '@/components/ui/gold-button';
+import { Field } from '@/components/ui/field';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from '@/lib/i18n/navigation';
 import { Heart } from 'lucide-react';
@@ -19,6 +20,8 @@ function AcceptInner() {
   const [couple, setCouple] = useState<{ id: string; name_a: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
+  const [myName, setMyName] = useState('');
+  const [myNameAr, setMyNameAr] = useState('');
 
   useEffect(() => {
     if (!code) { setLoading(false); return; }
@@ -46,6 +49,7 @@ function AcceptInner() {
       user_id: user.id,
       couple_id: couple.id,
       role: 'partner',
+      display_name: myName.trim() || null,
       confirmed_at: new Date().toISOString(),
     });
 
@@ -57,7 +61,12 @@ function AcceptInner() {
 
     const { error: coupleErr } = await supabase
       .from('couples')
-      .update({ partner_id: user.id, state: 'mutual' })
+      .update({
+        partner_id: user.id,
+        state: 'mutual',
+        name_b: myName.trim() || null,
+        name_b_ar: myNameAr.trim() || null,
+      })
       .eq('id', couple.id);
 
     if (coupleErr) {
@@ -92,16 +101,29 @@ function AcceptInner() {
                 </p>
               )}
             </div>
+            <div className="space-y-4 text-start">
+              <Field
+                label={t('myName')}
+                placeholder={t('myNamePlaceholder')}
+                value={myName}
+                onChange={(e) => setMyName(e.target.value)}
+              />
+              <Field
+                label={t('myNameAr')}
+                placeholder={t('myNameArPlaceholder')}
+                dir="rtl"
+                value={myNameAr}
+                onChange={(e) => setMyNameAr(e.target.value)}
+              />
+            </div>
             <GoldButton onClick={accept} loading={accepting} size="lg" className="w-full">
               {t('accept')}
             </GoldButton>
           </>
         ) : (
           <div className="space-y-2">
-            <h2 className="font-display-en text-2xl text-ivory">Invitation not found</h2>
-            <p className="text-ivoryDim text-sm">
-              This code may be invalid or already used.
-            </p>
+            <h2 className="font-display-en text-2xl text-ivory">{t('notFoundTitle')}</h2>
+            <p className="text-ivoryDim text-sm">{t('notFoundBody')}</p>
           </div>
         )}
       </div>

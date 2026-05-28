@@ -69,10 +69,10 @@ BEGIN
   IF v_couple_id IS NULL THEN
     v_couple_id := gen_random_uuid();
     INSERT INTO public.couples (
-      id, state, name_a, name_b,
+      id, state, name_a, name_b, name_a_ar, name_b_ar,
       initiator_id, partner_id, approved_at, approved_by, created_at
     ) VALUES (
-      v_couple_id, 'approved', 'Youssef', 'Nourhan',
+      v_couple_id, 'approved', 'Youssef', 'Nourhan', 'يوسف', 'نورهان',
       v_admin_id, v_partner_id, now(), v_admin_id, now()
     );
   ELSE
@@ -82,6 +82,8 @@ BEGIN
            partner_id = v_partner_id,
            name_a = COALESCE(name_a, 'Youssef'),
            name_b = COALESCE(name_b, 'Nourhan'),
+           name_a_ar = COALESCE(name_a_ar, 'يوسف'),
+           name_b_ar = COALESCE(name_b_ar, 'نورهان'),
            approved_at = COALESCE(approved_at, now()),
            approved_by = COALESCE(approved_by, v_admin_id)
      WHERE id = v_couple_id;
