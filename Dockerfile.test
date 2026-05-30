@@ -1,0 +1,20 @@
+# Playwright E2E runner. Uses the official Playwright image which already
+# bundles Chromium + Firefox + WebKit and all the Linux system deps — so we
+# don't reinstall ~2 GB of browsers on every cold build.
+FROM mcr.microsoft.com/playwright:v1.49.0-jammy
+
+WORKDIR /work
+
+# Install just the test deps (Playwright + TS). package-lock is optional;
+# we use `npm install` to handle the first-run case where the lockfile
+# doesn't exist yet.
+COPY tests/e2e/package.json ./
+RUN npm install --no-audit --no-fund
+
+# Copy the suite into the image. In docker-compose.test.yml we bind-mount
+# tests/e2e on top so that editing specs doesn't require a rebuild — the
+# anonymous /work/node_modules volume preserves the installed deps.
+COPY tests/e2e/ ./
+
+ENV CI=1
+CMD ["npx", "playwright", "test"]

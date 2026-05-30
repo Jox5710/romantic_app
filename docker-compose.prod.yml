@@ -5,7 +5,7 @@
 #                  --env-file .env.production up -d
 #
 # Differences from dev:
-#   - `app` uses the pre-built static-export image from GHCR (no source mount, no Node runtime)
+#   - `app` uses the pre-built Node-server image from GHCR (runs `node server.js` on :3000)
 #   - `app` is reachable only on the docker network — Caddy proxies it on 443
 #   - `caddy` service added for automatic SSL termination
 #   - Studio + mailhog are kept (handy for ops); remove them here if you want to drop them.
@@ -19,8 +19,8 @@ services:
     image: ghcr.io/${GH_REPO:-your-org/your-repo}:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
-      # Static export bakes NEXT_PUBLIC_* at build time — no runtime overrides needed.
-      # Polling vars are dev-only; clear them so they don't fight nginx.
+      # NEXT_PUBLIC_* are baked into the client bundle at build time.
+      # Clear the dev-only file-watch polling vars.
       WATCHPACK_POLLING: ""
       CHOKIDAR_USEPOLLING: ""
 

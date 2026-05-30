@@ -80,9 +80,30 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     setHighlightRect(el ? el.getBoundingClientRect() : null);
   }, [activeTutorial, currentStep]);
 
+  // On step/tutorial change, POLL for the target element (it may not be mounted
+  // the instant the tutorial starts). Only set a rect once found. If it never
+  // appears, highlightRect stays null and the overlay renders a soft (not black)
+  // backdrop instead of dimming the whole page.
   useEffect(() => {
-    computeRect();
-  }, [computeRect]);
+    if (!activeTutorial) { setHighlightRect(null); return; }
+    const steps = registeredRef.current[activeTutorial];
+    const step = steps?.[currentStep];
+    if (!step) return;
+
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = () => {
+      const el = document.querySelector(`[data-tutorial-id="${step.id}"]`);
+      if (el) {
+        setHighlightRect(el.getBoundingClientRect());
+        return;
+      }
+      setHighlightRect(null);
+      if (tries++ < 15) timer = setTimeout(poll, 120);
+    };
+    poll();
+    return () => clearTimeout(timer);
+  }, [activeTutorial, currentStep]);
 
   // Re-measure on resize / scroll
   useEffect(() => {

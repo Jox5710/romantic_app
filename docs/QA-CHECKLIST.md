@@ -89,6 +89,35 @@ MailHog (magic links) at http://localhost:8025.
 
 ---
 
+## Automated coverage (Playwright)
+
+Most of the above is also enforced by a Playwright suite living in
+[`tests/e2e/`](../tests/e2e/) and run inside a dedicated container.
+
+Run before each deploy:
+
+```sh
+pwsh ./test-e2e.ps1                            # full suite
+pwsh ./test-e2e.ps1 auth.spec.ts               # one spec
+pwsh ./test-e2e.ps1 --project=chromium-mobile  # mobile only
+```
+
+The container builds once (`docker compose -f docker-compose.test.yml build`);
+subsequent runs reuse the bind-mounted specs without rebuild.
+
+Outputs in `playwright-report/`:
+- `index.html` — full report (traces, videos, screenshots).
+- `SUMMARY.md` — failures bucketed by **P0/P1/P2/P3** with suggested fix locations.
+- `junit.xml` — machine-readable.
+
+The suite covers the same flows as this checklist plus API contract checks (Kong CORS,
+realtime WS handshake, sign-in token shape) and 6 viewport projects across 3 browsers.
+
+**Deployment gate:** treat a green run as the precondition for shipping.
+A red P0/P1 failure means do not deploy until fixed.
+
+---
+
 ## Known non-blocking notes
 
 - The `next build` ESLint step has pre-existing warnings/errors in

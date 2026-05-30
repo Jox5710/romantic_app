@@ -9,6 +9,7 @@ import { useWhispers, useSentTodayWhisper, useSendWhisper, useRespondToWhisper }
 import { FeelingChips } from '@/components/whisper/feeling-chips';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/components/ui/toast';
 import { Wind, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import type { WhisperFeeling, WhisperResponse } from '@/lib/supabase/types';
@@ -25,6 +26,7 @@ export default function WhisperPage() {
   ]);
   const tCompose = useTranslations('whisper.compose');
   const locale = useLocale();
+  const { toast } = useToast();
   const { session, coupleId } = useCoupleState();
   const { data: whispers } = useWhispers(coupleId);
   const { data: sentToday } = useSentTodayWhisper(session?.user.id ?? null);
@@ -59,6 +61,9 @@ export default function WhisperPage() {
         body: { text: what, locale },
       });
       if (data?.softened) setWhat(data.softened);
+      else toast(tCompose('softenUnavailable')); // edge function not deployed / errored
+    } catch {
+      toast(tCompose('softenUnavailable'));
     } finally {
       setSoftening(false);
     }

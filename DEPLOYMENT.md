@@ -14,8 +14,8 @@ the rollout runs via AWS Systems Manager (no SSH key to expose).
    git push main          │                  EC2 (t3.medium)              │
         │                 │                                                │
         ▼                 │   ┌─────────┐    :443   ┌────────────────────┐ │
- ┌───────────────┐  OIDC  │   │  Caddy  │◀──────────│  app (nginx :80)   │ │  static
- │ GitHub Actions│───────▶│   │  (TLS)  │           │  Next.js export    │ │  export
+ ┌───────────────┐  OIDC  │   │  Caddy  │◀──────────│  app (node :3000)  │ │  Next.js
+ │ GitHub Actions│───────▶│   │  (TLS)  │           │  standalone server │ │  server
  │  build → GHCR │  SSM   │   └────┬────┘           └────────────────────┘ │
  └───────┬───────┘ RunCmd │        │ /api → :8000                          │
          │ docker pull    │        ▼                                       │
@@ -32,8 +32,8 @@ the rollout runs via AWS Systems Manager (no SSH key to expose).
               ──── https://api.forever.example.com (Kong) ─────┘
 ```
 
-The browser loads the static export from `app:80` and talks to Supabase through
-`api.forever.example.com` → Kong. Realtime, auth, rest, and storage all sit behind Kong.
+The browser loads the app from the Next.js server (`app:3000`) and talks to Supabase
+through `api.forever.example.com` → Kong. Realtime, auth, rest, and storage all sit behind Kong.
 
 ---
 
@@ -185,7 +185,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.
 Edit [Caddyfile](Caddyfile) and replace the example domains:
 
 ```
-forever.example.com      { encode zstd gzip   reverse_proxy app:80 }
+forever.example.com      { encode zstd gzip   reverse_proxy app:3000 }
 api.forever.example.com  { encode zstd gzip   reverse_proxy kong:8000 }
 ```
 
@@ -268,7 +268,7 @@ git push origin main
 ```
 
 Watch **Actions → Build & Deploy to EC2**:
-1. `build` — builds the static export image, pushes `:latest` + `:<sha>` to GHCR (~1 min cached)
+1. `build` — builds the Next.js standalone server image, pushes `:latest` + `:<sha>` to GHCR (~1 min cached)
 2. `deploy` — assumes the AWS role via OIDC, sends an SSM command to EC2 that runs
    `git pull`, `docker compose pull app`, `docker compose up -d`, `docker image prune -f`
 
@@ -315,7 +315,7 @@ aws ssm get-command-invocation --command-id <id> --instance-id <INSTANCE_ID> --r
 | Realtime WS fails `TenantNotFound` | Tenant not seeded — rerun §6 step 2. |
 | Realtime WS fails `signature_error` / admin API `bad_jwt` | `JWT_SECRET` doesn't match `ANON_KEY`/`SERVICE_ROLE_KEY`. Regenerate all three with `keygen.ps1` and recreate `auth rest realtime kong storage`. |
 | Sign-in works but browser can't reach API | `NEXT_PUBLIC_SUPABASE_URL` baked at build time is wrong. It must be the public HTTPS host and set as a GitHub **variable** before the build. |
-| App container restarts / blank page | It's a static export served by nginx on **:80** — make sure Caddy proxies `app:80`, not `app:3000`. |
+| App container restarts / blank page | The app runs the Next.js server on **:3000** — make sure Caddy proxies `app:3000`. Check `docker compose logs app` for a boot error (missing `.next/standalone` ⇒ rebuild with `output: 'standalone'`). |
 
 ---
 
@@ -343,3 +343,18 @@ GHCR storage and GitHub Actions minutes are free for a personal/small-org repo.
 - [ ] EBS snapshots scheduled (AWS Backup) for the postgres volume
 - [ ] Rotate `JWT_SECRET` + keys + DB password periodically; recreate dependent
       containers and re-seed the realtime tenant after any JWT rotation
+
+---
+
+## 13. Pre-deploy gate — run the E2E suite
+
+Before pushing to `main` (or merging a release PR):
+
+```sh
+pwsh ./test-e2e.ps1
+```
+
+A **green** run is the gate. Failures bucketed by priority are written to
+`playwright-report/SUMMARY.md`; any **P0** or **P1** failure blocks the deploy.
+See [`docs/QA-CHECKLIST.md`](docs/QA-CHECKLIST.md#automated-coverage-playwright)
+for the full suite description and runner options.

@@ -15,11 +15,11 @@ export const GoldButton = forwardRef<HTMLButtonElement, Props>(function GoldButt
 
   const variants = {
     primary:
-      'bg-gold text-bg shadow-gold hover:bg-goldBright active:scale-95',
+      'bg-gold text-bg shadow-gold hover:bg-goldBright active:bg-goldBright active:scale-95',
     ghost:
-      'border border-line text-gold hover:border-gold hover:bg-surface2 active:scale-95',
+      'border border-line text-gold hover:border-gold hover:bg-surface2 active:border-gold active:bg-surface2 active:scale-95',
     danger:
-      'bg-red-900/60 text-red-200 border border-red-800 hover:bg-red-900 active:scale-95',
+      'bg-red-900/60 text-red-200 border border-red-800 hover:bg-red-900 active:bg-red-900 active:scale-95',
   };
 
   const sizes = {

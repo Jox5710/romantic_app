@@ -23,11 +23,17 @@ export default function DashboardPage() {
   const { coupleId } = useCoupleState();
   const [couple, setCouple] = useState<CoupleData | null>(null);
 
-  useTutorial('home', [
-    { id: 'home-hero', titleKey: 'home.step1.title', descKey: 'home.step1.desc' },
-    { id: 'home-module-grid', titleKey: 'home.step2.title', descKey: 'home.step2.desc' },
-    { id: 'home-heartbeat-card', titleKey: 'home.step3.title', descKey: 'home.step3.desc' },
-  ]);
+  // Gate the tutorial on couple data being loaded, so it starts only once the
+  // Hero + module grid (and their data-tutorial-id targets) are actually on screen.
+  useTutorial(
+    'home',
+    [
+      { id: 'home-hero', titleKey: 'home.step1.title', descKey: 'home.step1.desc' },
+      { id: 'home-module-grid', titleKey: 'home.step2.title', descKey: 'home.step2.desc' },
+      { id: 'home-heartbeat-card', titleKey: 'home.step3.title', descKey: 'home.step3.desc' },
+    ],
+    !!couple,
+  );
 
   useEffect(() => {
     if (!coupleId) return;

@@ -7,7 +7,15 @@
       "PowerShell(docker compose --env-file .env.docker up -d app 2>&1)",
       "PowerShell(wsl --shutdown 2>&1)",
       "Bash(docker info *)",
-      "PowerShell(docker compose --env-file .env.docker up -d 2>&1)"
+      "PowerShell(docker compose --env-file .env.docker up -d 2>&1)",
+      "PowerShell(docker compose --env-file .env.docker restart kong 2>&1)",
+      "Bash(echo \"=== exit: $? ===\")",
+      "Bash(find \"d:\\\\romantic_app\\\\romantic_app\\\\components\" -name \"module-grid*\" -o -name \"hero.tsx\" 2>nul)",
+      "Bash(grep -r \"w-\\\\[\" \"d:\\\\romantic_app\\\\romantic_app\\\\components\" 2>nul | head -20)",
+      "Bash(ls \"d:\\\\romantic_app\\\\romantic_app\\\\app\\\\*\" 2>nul | grep -E \"layout|global|css\")"
+    ],
+    "additionalDirectories": [
+      "d:\\romantic_app\\romantic_app"
     ]
   }
 }

@@ -1,0 +1,21 @@
+{
+  "name": "forever-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium-desktop",
+    "test:firefox": "playwright test --project=firefox-desktop",
+    "test:webkit": "playwright test --project=webkit-desktop",
+    "test:mobile": "playwright test --project=chromium-mobile --project=chromium-small-mobile --project=chromium-320",
+    "test:visual": "playwright test visual.spec.ts",
+    "test:visual:update": "playwright test visual.spec.ts --update-snapshots",
+    "test:smoke": "playwright test features/smoke.spec.ts",
+    "report": "playwright show-report playwright-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.0",
+    "@types/node": "20.11.30",
+    "typescript": "5.4.3"
+  }
+}

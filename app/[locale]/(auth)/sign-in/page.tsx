@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from '@/lib/i18n/navigation';
 import { useRespectfulMotion } from '@/lib/hooks/use-respectful-motion';
+import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
 import { LoadingOverlay } from '@/components/ui/loading-overlay';
@@ -212,8 +213,10 @@ function PasswordForm({ t }: { t: ReturnType<typeof useTranslations> }) {
   const [success, setSuccess] = useState<string | null>(null);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const signInForm = useForm<SignInForm>({ resolver: zodResolver(signInSchema) });
-  const signUpForm = useForm<SignUpForm>({ resolver: zodResolver(signUpSchema) });
+  const signInResolver = useMemo(() => zodResolver(signInSchema), []);
+  const signUpResolver = useMemo(() => zodResolver(signUpSchema), []);
+  const signInForm = useForm<SignInForm>({ resolver: signInResolver });
+  const signUpForm = useForm<SignUpForm>({ resolver: signUpResolver });
 
   const handleSignIn = useCallback(async ({ email, password }: SignInForm) => {
     setGlobalError(null);
@@ -291,7 +294,7 @@ function PasswordForm({ t }: { t: ReturnType<typeof useTranslations> }) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.12 }}
             onSubmit={signInForm.handleSubmit(handleSignIn)}
             className="space-y-3"
           >
@@ -322,7 +325,7 @@ function PasswordForm({ t }: { t: ReturnType<typeof useTranslations> }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.12 }}
             onSubmit={signUpForm.handleSubmit(handleSignUp)}
             className="space-y-3"
           >
@@ -371,10 +374,10 @@ export default function SignInPage() {
   const t = useTranslations('auth.signIn');
   const router = useRouter();
   const { repeat } = useRespectfulMotion();
+  const { session, loading } = useCoupleState();
   const [tab, setTab] = useState<Tab>('magic');
   const [particles, setParticles] = useState<ParticleData[]>([]);
   const [hearts, setHearts] = useState<HeartData[]>([]);
-  const [redirecting, setRedirecting] = useState(false);
 
   // Generate random positions only on the client to avoid SSR/hydration mismatch
   useEffect(() => {
@@ -382,24 +385,12 @@ export default function SignInPage() {
     setHearts(buildHearts());
   }, []);
 
-  // Once a session exists (just signed in, or already signed in), get off /sign-in.
-  // The home page's RouteGuard then routes onwards (invite / awaiting / dashboard).
+  // Single source of truth: once the shared auth state reports a session, leave
+  // /sign-in. The home page's RouteGuard then routes onwards (invite / awaiting / dashboard).
+  const redirecting = !loading && !!session;
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        setRedirecting(true);
-        router.replace('/');
-      }
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
-        setRedirecting(true);
-        router.replace('/');
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [router]);
+    if (redirecting) router.replace('/');
+  }, [redirecting, router]);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
@@ -505,7 +496,7 @@ export default function SignInPage() {
                   initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 16 }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0.12 }}
                 >
                   <MagicLinkForm t={t} />
                 </motion.div>
@@ -515,7 +506,7 @@ export default function SignInPage() {
                   initial={{ opacity: 0, x: 16 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0.12 }}
                 >
                   <PasswordForm t={t} />
                 </motion.div>

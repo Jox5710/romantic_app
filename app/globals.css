@@ -18,6 +18,9 @@
   --ivory-dim: #c9c2b5;
   --muted: #6b6660;
   --line: rgba(201, 169, 97, 0.18);
+  /* Animated background glow palette (dusk = warm gold) */
+  --glow-1: rgba(201, 169, 97, 0.18);
+  --glow-2: rgba(232, 200, 122, 0.12);
 }
 
 [data-theme='day'] {
@@ -31,6 +34,9 @@
   --ivory-dim: #5a5048;
   --muted: #8a8278;
   --line: rgba(168, 132, 63, 0.22);
+  /* Day = soft warm rose */
+  --glow-1: rgba(214, 142, 122, 0.16);
+  --glow-2: rgba(201, 169, 97, 0.12);
 }
 
 [data-theme='night'] {
@@ -44,6 +50,9 @@
   --ivory-dim: #9a7858;
   --muted: #5a4538;
   --line: rgba(176, 128, 64, 0.15);
+  /* Night = deep amber */
+  --glow-1: rgba(176, 128, 64, 0.20);
+  --glow-2: rgba(212, 160, 96, 0.12);
 }
 
 html,
@@ -120,7 +129,7 @@ body {
    .brand-latin so "Forever" always stays in the Latin serif.
    ===================== */
 [dir='rtl'] .font-display-en:not(.brand-latin) {
-  font-family: var(--font-tajawal), 'Aref Ruqaa', serif;
+  font-family: var(--font-aref-ruqaa), serif;
 }
 
 /* =====================

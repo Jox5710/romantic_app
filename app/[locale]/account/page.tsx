@@ -102,11 +102,11 @@ export default function AccountPage() {
             [1, 2, 3, 4].map((n) => <div key={n} className="h-12 rounded-xl shimmer" />)
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label={t('nameA')} placeholder={t('namePlaceholder')} value={form.name_a} onChange={set('name_a')} />
                 <Field label={t('nameAAr')} placeholder={t('nameArPlaceholder')} dir="rtl" value={form.name_a_ar} onChange={set('name_a_ar')} />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label={t('nameB')} placeholder={t('namePlaceholder')} value={form.name_b} onChange={set('name_b')} />
                 <Field label={t('nameBAr')} placeholder={t('nameArPlaceholder')} dir="rtl" value={form.name_b_ar} onChange={set('name_b_ar')} />
               </div>

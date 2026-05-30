@@ -279,7 +279,12 @@
       "kind": "Type",
       "visitedAt": "When did you go?",
       "note": "A note about this place"
-    }
+    },
+    "noToken": "Map unavailable. Add a Mapbox token (NEXT_PUBLIC_MAPBOX_TOKEN) to enable the map.",
+    "hint": "Right-click or long-press to add a pin",
+    "newPin": "New pin",
+    "savePin": "Save pin",
+    "noteOptional": "Note (optional)"
   },
   "constellation": {
     "title": "Our Constellation",
@@ -298,6 +303,7 @@
       "feeling": "How does it make you feel?",
       "wish": "What do you need?",
       "soften": "Soften this",
+      "softenUnavailable": "Gentle rewording isn't available right now.",
       "send": "Send whisper",
       "cooldown": "You've already sent a whisper today. Come back tomorrow.",
       "delivering": "Your whisper will arrive in 30 minutes."

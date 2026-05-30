@@ -15,8 +15,8 @@ env:
 
 jobs:
   # ──────────────────────────────────────────────────────────────────────────
-  # 1) Build the Next.js static-export image and push to GHCR.
-  #    NEXT_PUBLIC_* are baked at build time (output: 'export' = no Node runtime).
+  # 1) Build the Next.js standalone server image and push to GHCR.
+  #    NEXT_PUBLIC_* are baked into the client bundle at build time (output: 'standalone').
   # ──────────────────────────────────────────────────────────────────────────
   build:
     runs-on: ubuntu-latest

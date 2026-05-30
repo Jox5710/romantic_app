@@ -29,7 +29,8 @@ const HEART_COUNT = 6;
 
 function AnimatedTitle({ text, delay = 0 }: { text: string; delay?: number }) {
   return (
-    <span className="inline-flex">
+    // dir=ltr so the Latin brand letters keep their order even on RTL (Arabic) pages
+    <span className="inline-flex" dir="ltr">
       {text.split('').map((char, i) => (
         <motion.span
           key={i}
@@ -54,13 +55,10 @@ export function SplashScreen() {
   const t = useTranslations('splash');
   const { repeat } = useRespectfulMotion();
 
+  // Play the intro on every full page load (hard refresh). The splash mounts in
+  // Providers, which only remounts on a real page load — not on client-side
+  // navigation — so this shows once per hard refresh, never between in-app routes.
   useEffect(() => {
-    const seen = sessionStorage.getItem('forever_intro_seen');
-    if (seen) {
-      setChecked(true);
-      setDone(true);
-      return;
-    }
     setShow(true);
     setChecked(true);
     setSeedReady(true);
@@ -70,10 +68,7 @@ export function SplashScreen() {
 
   useEffect(() => {
     if (!exiting) return;
-    const t = setTimeout(() => {
-      setDone(true);
-      sessionStorage.setItem('forever_intro_seen', '1');
-    }, 600);
+    const t = setTimeout(() => setDone(true), 600);
     return () => clearTimeout(t);
   }, [exiting]);
 

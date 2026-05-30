@@ -41,21 +41,23 @@ export function ModuleGrid() {
         {modules.map(({ href, icon: Icon, key }, i) => (
           <motion.div
             key={href}
+            data-tutorial-id={key === 'heartbeat' ? 'home-heartbeat-card' : undefined}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: i * 0.05, ease: [0.2, 0.8, 0.2, 1] }}
-            whileHover={{ scale: 1.04, boxShadow: '0 0 20px rgba(201,169,97,0.25)' }}
-            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.4, delay: i * 0.02, ease: [0.2, 0.8, 0.2, 1] }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 1.04 }}
+            style={{ willChange: 'transform' }}
           >
             <Link
               href={href}
-              className="flex flex-col items-center gap-3 rounded-2xl border border-line bg-surface p-5 text-center hover:border-gold/40 hover:bg-surface2 transition-all duration-200 group shadow-pop"
+              className="flex flex-col items-center gap-3 rounded-2xl border border-line bg-surface p-5 text-center transition-all duration-200 group shadow-pop hover:border-gold/40 hover:bg-surface2 hover:shadow-gold active:border-gold/40 active:bg-surface2 active:shadow-gold"
             >
               <Icon
                 size={22}
-                className="text-gold group-hover:text-goldBright transition-colors"
+                className="text-gold transition-colors group-hover:text-goldBright group-active:text-goldBright"
               />
-              <span className="text-xs text-ivoryDim group-hover:text-ivory transition-colors">
+              <span className="text-xs text-ivoryDim transition-colors group-hover:text-ivory group-active:text-ivory">
                 {t(key)}
               </span>
             </Link>

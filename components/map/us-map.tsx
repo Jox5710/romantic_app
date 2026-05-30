@@ -1,13 +1,17 @@
 'use client';
 
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { usePlaces, useAddPlace } from '@/lib/queries/places';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
 import { Card } from '@/components/ui/card';
-import { X } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
 import type { PlaceKind } from '@/lib/supabase/types';
+
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
 
 const PIN_COLORS: Record<PlaceKind, string> = {
   visited: '#c9a961',
@@ -23,6 +27,7 @@ interface PendingPin {
 }
 
 export function UsMap() {
+  const t = useTranslations('map');
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<unknown>(null);
   const { coupleId } = useCoupleState();
@@ -35,6 +40,7 @@ export function UsMap() {
   const [note, setNote] = useState('');
 
   useEffect(() => {
+    if (!MAPBOX_TOKEN) return; // No token → don't init Mapbox (avoids a hard crash)
     let map: import('mapbox-gl').Map;
 
     import('mapbox-gl').then((mapboxgl) => {
@@ -92,34 +98,44 @@ export function UsMap() {
 
   const kinds: PlaceKind[] = ['visited', 'dream', 'first_date', 'anniversary', 'home'];
 
+  // No Mapbox token configured → show a graceful placeholder instead of crashing.
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div className="w-full h-[calc(100vh-7rem)] rounded-2xl border border-line bg-surface/60 flex flex-col items-center justify-center gap-3 px-6 text-center">
+        <MapPin size={40} className="text-gold/50" />
+        <p className="text-ivoryDim text-sm max-w-xs">{t('noToken')}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative w-full h-[calc(100vh-5rem)]">
+    <div className="relative w-full h-[calc(100vh-7rem)]">
       <div ref={mapRef} className="w-full h-full rounded-2xl overflow-hidden" />
 
       {pending && (
         <div className="absolute bottom-6 start-6 z-10 w-80">
           <Card variant="elevated" className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gold uppercase tracking-wider">New pin</p>
-              <button type="button" onClick={() => setPending(null)} className="text-muted hover:text-ivory"><X size={14} /></button>
+              <p className="text-xs text-gold uppercase tracking-wider">{t('newPin')}</p>
+              <button type="button" onClick={() => setPending(null)} className="text-muted hover:text-ivory active:text-ivory"><X size={14} /></button>
             </div>
-            <Field label="Place name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+            <Field label={t('form.name')} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
             <div className="flex flex-wrap gap-1.5">
               {kinds.map((k) => (
                 <button key={k} type="button" onClick={() => setKind(k)}
                   className={['px-2 py-1 rounded-full border text-xs transition-all', kind === k ? 'border-gold text-gold bg-gold/10' : 'border-line text-muted'].join(' ')}>
-                  {k.replace('_', ' ')}
+                  {t(`kinds.${k}`)}
                 </button>
               ))}
             </div>
-            <Field label="Note (optional)" value={note} onChange={(e) => setNote(e.target.value)} />
-            <GoldButton onClick={savePin} loading={add.isPending} disabled={!name.trim()} className="w-full">Save pin</GoldButton>
+            <Field label={t('noteOptional')} value={note} onChange={(e) => setNote(e.target.value)} />
+            <GoldButton onClick={savePin} loading={add.isPending} disabled={!name.trim()} className="w-full">{t('savePin')}</GoldButton>
           </Card>
         </div>
       )}
 
       <p className="absolute top-4 start-4 z-10 text-xs text-ivoryDim bg-bg/70 backdrop-blur-sm rounded-full px-3 py-1.5">
-        Right-click to add a pin
+        {t('hint')}
       </p>
     </div>
   );

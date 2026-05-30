@@ -138,7 +138,7 @@ export default function CouplesQueuePage() {
               >
                 <div className="space-y-0.5 flex-1">
                   <p className={`text-ivory font-medium ${nameFont} text-lg`}>
-                    {pairNames(c).a} &amp; {pairNames(c).b}
+                    {pairNames(c).a} {isArabic ? 'و' : '&'} {pairNames(c).b}
                   </p>
                   <p className="text-xs text-muted">
                     {format(new Date(c.created_at), 'PPP')} · {c.invite_email}
@@ -160,7 +160,7 @@ export default function CouplesQueuePage() {
             <Card variant="elevated" className="space-y-4 self-start sticky top-20">
               <div className="flex items-start justify-between">
                 <h2 className={`${nameFont} text-2xl text-ivory`}>
-                  {pairNames(selected).a} &amp; {pairNames(selected).b}
+                  {pairNames(selected).a} {isArabic ? 'و' : '&'} {pairNames(selected).b}
                 </h2>
                 <button type="button" onClick={() => setSelected(null)} className="text-muted hover:text-ivory">✕</button>
               </div>

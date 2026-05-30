@@ -1,0 +1,42 @@
+# Playwright E2E test service. Run with:
+#   docker compose -f docker-compose.test.yml run --rm playwright
+#
+# Joins the existing supabase-net so `app:3000` and `kong:8000` resolve via
+# Docker DNS. Test specs are bind-mounted, so editing them does NOT require a
+# rebuild — only changes to Dockerfile.test or package.json do.
+
+services:
+  playwright:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    # Share Kong's network namespace so the test container's browser sees
+    # `localhost:8000` as Kong — matches NEXT_PUBLIC_SUPABASE_URL baked into the
+    # app's client bundle. Through Kong's resolv.conf we still get docker DNS
+    # for `app` (both kong + app are on supabase-net).
+    network_mode: "container:romantic_app-kong-1"
+    volumes:
+      # Live specs / fixtures / utils
+      - ./tests/e2e:/work
+      # Anonymous volume keeps the image's node_modules visible despite the bind mount
+      - /work/node_modules
+      # Report + traces land here on the host
+      - ./playwright-report:/work/playwright-report
+      - ./tests/e2e/test-results:/work/test-results
+    environment:
+      # `app:3000` resolves via docker DNS (kong shares supabase-net). For Kong
+      # we use localhost:8000 because we share kong's network namespace —
+      # which is exactly what the app's client bundle expects too.
+      BASE_URL: http://app:3000
+      KONG_URL: http://localhost:8000
+      SUPABASE_ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlYWx0aW1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NDU0NTAsImV4cCI6MjA5NTIwNTQ1MH0.vQfnuMlaDDvRkozVTaFaQn7UNgNIcYH9moXxK-KpNAM}
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlYWx0aW1lIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTg0NTQ1MCwiZXhwIjoyMDk1MjA1NDUwfQ.UIE5g0W_igCZ2lhs7JoyeK2SLG4EUHZTmdTyEcNRTvM}
+      TEST_ADMIN_EMAIL: admin@fromantic.com
+      TEST_ADMIN_PASSWORD: jox@12345
+      TEST_PARTNER_EMAIL: nourhansamy@fromantic.com
+      TEST_PARTNER_PASSWORD: nourhan@youssef
+      # Disable Mapbox in tests so the no-token placeholder branch is exercised
+      NEXT_PUBLIC_MAPBOX_TOKEN: ""
+    # Give the user's terminal a sensible default if they just `run` without args
+    init: true
+    ipc: host

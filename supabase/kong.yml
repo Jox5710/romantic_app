@@ -30,6 +30,15 @@ services:
           - /auth/v1/verify
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
 
   - name: auth-v1-open-callback
     url: http://auth:9999/callback
@@ -40,6 +49,15 @@ services:
           - /auth/v1/callback
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
 
   - name: auth-v1-open-authorize
     url: http://auth:9999/authorize
@@ -50,6 +68,15 @@ services:
           - /auth/v1/authorize
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
 
   - name: auth-v1
     url: http://auth:9999
@@ -60,6 +87,15 @@ services:
           - /auth/v1/
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
       - name: key-auth
         config:
           hide_credentials: false
@@ -80,6 +116,15 @@ services:
           - /rest/v1/
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
       - name: key-auth
         config:
           hide_credentials: true
@@ -100,6 +145,15 @@ services:
           - /graphql/v1
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
       - name: key-auth
         config:
           hide_credentials: true
@@ -125,6 +179,15 @@ services:
           - /realtime/v1/
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
       - name: key-auth
         config:
           hide_credentials: false
@@ -145,6 +208,15 @@ services:
           - /storage/v1/
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
       - name: key-auth
         config:
           hide_credentials: true
@@ -165,6 +237,15 @@ services:
           - /functions/v1/
     plugins:
       - name: cors
+        config:
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
       - name: key-auth
         config:
           hide_credentials: true

@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        // Extra-small breakpoint for very narrow phones (<400px hides the wordmark)
+        xs: '400px',
+      },
       colors: {
         bg: 'var(--bg)',
         surface: 'var(--surface)',
@@ -21,7 +25,7 @@ const config: Config = {
         line: 'var(--line)',
       },
       fontFamily: {
-        'display-en': ['var(--font-cormorant)', 'serif'],
+        'display-en': ['var(--font-playfair)', 'serif'],
         'display-ar': ['var(--font-aref-ruqaa)', 'serif'],
         'body-en': ['var(--font-manrope)', 'sans-serif'],
         'body-ar': ['var(--font-tajawal)', 'sans-serif'],

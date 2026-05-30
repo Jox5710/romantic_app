@@ -4,10 +4,10 @@
 # before first deploy. Caddy provisions and renews certs automatically as long
 # as port 80 and 443 are open and DNS resolves both A-records to this EC2.
 
-# Frontend (Next.js static export served by nginx in the `app` container on port 80)
+# Frontend (Next.js Node server in the `app` container on port 3000)
 forever.example.com {
 	encode zstd gzip
-	reverse_proxy app:80
+	reverse_proxy app:3000
 }
 
 # Supabase API gateway (Kong on port 8000) — auth, rest, realtime, storage all live behind here

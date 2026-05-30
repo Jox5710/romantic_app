@@ -28,12 +28,14 @@ export function Hero({ nameA, nameB, nameAAr, nameBAr, weddingDate }: Props) {
         transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
         className="space-y-3"
       >
-        <div className="flex items-center gap-4 justify-center">
-          <span className={`${nameFont} text-5xl md:text-7xl text-ivory`}>
+        <div className="flex items-center gap-3 sm:gap-4 justify-center flex-wrap">
+          <span className={`${nameFont} text-4xl sm:text-5xl md:text-7xl text-ivory`}>
             {displayA}
           </span>
-          <span className="font-display-en text-4xl md:text-6xl text-gold">&amp;</span>
-          <span className={`${nameFont} text-5xl md:text-7xl text-ivory`}>
+          <span className={`${nameFont} text-3xl sm:text-4xl md:text-6xl text-gold`}>
+            {isArabic ? 'و' : '&'}
+          </span>
+          <span className={`${nameFont} text-4xl sm:text-5xl md:text-7xl text-ivory`}>
             {displayB}
           </span>
         </div>
