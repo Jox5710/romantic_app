@@ -12,12 +12,14 @@ test.describe('Account', () => {
     testInfo.annotations.push({ type: 'priority', description: 'P1' });
     await loginAs(page, 'admin');
     await page.goto(localePath('en', 'account'));
-    await expect(page.locator('h1')).toHaveText(/couple settings/i, { timeout: 10_000 });
+    await expect(page.locator('main h1')).toHaveText(/couple settings/i, { timeout: 10_000 });
 
-    // Name fields are inputs with localized labels; pick by label "First name"
-    const nameA = page.getByLabel(/first name$/i).first();
-    await expect(nameA).toBeVisible();
-    await expect(nameA).not.toHaveValue('', { timeout: 5_000 });
+    // The Field component renders its label as a span, not <label for>, so
+    // getByLabel doesn't work. Pick the first text input under main form
+    // — that's name_a — and assert it hydrated from the DB.
+    const firstInput = page.locator('main form input[type="text"], main form input:not([type])').first();
+    await expect(firstInput).toBeVisible({ timeout: 10_000 });
+    await expect(firstInput).not.toHaveValue('', { timeout: 8_000 });
   });
 
   test('changing the wedding date persists across reload', async ({ page }, testInfo) => {

@@ -8,6 +8,6 @@ test('Time Capsule — page loads without crash', async ({ page }, testInfo) => 
   await loginAs(page, 'admin');
   const log = failOnConsoleError(page);
   await page.goto(localePath('en', 'capsule'));
-  await expect(page.locator('h1')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('main h1')).toBeVisible({ timeout: 10_000 });
   log.assertNone('capsule');
 });

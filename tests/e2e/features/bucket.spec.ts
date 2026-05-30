@@ -13,7 +13,7 @@ test('Bucket list — page loads + add row submits without error', async ({ page
   await loginAs(page, 'admin');
   const log = failOnConsoleError(page);
   await page.goto(localePath('en', 'bucket'));
-  await expect(page.locator('h1')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('main h1')).toBeVisible({ timeout: 10_000 });
 
   // Find the input + add button (selectors are intentionally generic)
   const input = page.locator('input[type="text"], textarea').first();

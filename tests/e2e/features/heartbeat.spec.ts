@@ -20,7 +20,7 @@ test.describe('Heartbeat', () => {
 
     const log = failOnConsoleError(page);
     await page.goto(localePath('en', 'heartbeat'));
-    await expect(page.locator('h1')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('main h1')).toBeVisible({ timeout: 10_000 });
     await page.waitForTimeout(4_000);
     expect(wsOpened, 'realtime WS did not open within 4s on /heartbeat').toBe(true);
     log.assertNone('heartbeat');

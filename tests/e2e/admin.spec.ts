@@ -12,7 +12,7 @@ test.describe('Admin — dashboard + couples', () => {
     await loginAs(page, 'admin');
     const log = failOnConsoleError(page);
     await page.goto(localePath('en', 'admin'));
-    await expect(page.locator('h1')).toHaveText(/admin/i, { timeout: 10_000 });
+    await expect(page.locator('main h1')).toHaveText(/admin/i, { timeout: 10_000 });
     // Four stat cards
     await expect(page.locator('section, div').filter({ hasText: /total couples/i })).toHaveCount(1, { timeout: 5_000 });
     log.assertNone('admin dashboard');
@@ -22,7 +22,7 @@ test.describe('Admin — dashboard + couples', () => {
     testInfo.annotations.push({ type: 'priority', description: 'P1' });
     await loginAs(page, 'admin');
     await page.goto(localePath('en', 'admin/couples'));
-    await expect(page.locator('h1')).toHaveText(/approval queue/i, { timeout: 10_000 });
+    await expect(page.locator('main h1')).toHaveText(/approval queue/i, { timeout: 10_000 });
 
     // Click "All" filter and confirm cards (the demo couple is approved)
     await page.getByRole('button', { name: /^all$/i }).click();

@@ -33,7 +33,7 @@ for (const { slug, titleRe, priority } of ROUTES) {
     await loginAs(page, 'admin');
     const log = failOnConsoleError(page);
     await page.goto(localePath('en', slug));
-    await expect(page.locator('h1')).toHaveText(titleRe, { timeout: 10_000 });
+    await expect(page.locator('main h1')).toHaveText(titleRe, { timeout: 10_000 });
 
     // Special case: map should show the localized "no token" placeholder when
     // NEXT_PUBLIC_MAPBOX_TOKEN is empty (our test container sets it to "").

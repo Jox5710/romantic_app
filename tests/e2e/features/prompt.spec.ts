@@ -8,7 +8,7 @@ test('Daily Prompt — page loads, can type an answer', async ({ page }, testInf
   await loginAs(page, 'admin');
   const log = failOnConsoleError(page);
   await page.goto(localePath('en', 'prompt'));
-  await expect(page.locator('h1')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('main h1')).toBeVisible({ timeout: 10_000 });
   // Typing into the answer area should not crash; submitting is best-effort
   // because daily-prompt may already be answered for today.
   const input = page.locator('textarea, input[type="text"]').first();

@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 import { localePath } from './utils/i18n';
 import { loginAs } from './fixtures/auth';
-import { readGlowVar, setTheme } from './utils/theme';
+import { readGlowVar } from './utils/theme';
 
 test.describe('Theme', () => {
   test('all three themes produce distinct --glow-1 values', async ({ page }, testInfo) => {
@@ -16,23 +16,18 @@ test.describe('Theme', () => {
     });
 
     await loginAs(page, 'admin');
-
-    // dusk
-    await setTheme(page, 'dusk');
     await page.goto(localePath('en'));
-    const dusk = await readGlowVar(page, 1);
 
-    // day
-    await setTheme(page, 'day');
-    await page.goto(localePath('en'));
-    const day = await readGlowVar(page, 1);
+    // Toggle the theme attribute directly on the live page (no addInitScript
+    // stacking) and read the resolved CSS var each time.
+    const readAfter = async (theme: 'dusk' | 'day' | 'night') => {
+      await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+      return readGlowVar(page, 1);
+    };
+    const dusk = await readAfter('dusk');
+    const day = await readAfter('day');
+    const night = await readAfter('night');
 
-    // night
-    await setTheme(page, 'night');
-    await page.goto(localePath('en'));
-    const night = await readGlowVar(page, 1);
-
-    // Each theme defines a non-empty glow color, and the three differ from each other
     expect(dusk).not.toEqual('');
     expect(day).not.toEqual('');
     expect(night).not.toEqual('');

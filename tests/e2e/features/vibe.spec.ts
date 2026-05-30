@@ -8,6 +8,6 @@ test('Vibe — page loads, no console errors', async ({ page }, testInfo) => {
   await loginAs(page, 'admin');
   const log = failOnConsoleError(page);
   await page.goto(localePath('en', 'vibe'));
-  await expect(page.locator('h1')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('main h1')).toBeVisible({ timeout: 10_000 });
   log.assertNone('vibe load');
 });

@@ -8,6 +8,6 @@ test('Memory Timeline — page loads + heading visible', async ({ page }, testIn
   await loginAs(page, 'admin');
   const log = failOnConsoleError(page);
   await page.goto(localePath('en', 'timeline'));
-  await expect(page.locator('h1')).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('main h1')).toBeVisible({ timeout: 10_000 });
   log.assertNone('timeline');
 });

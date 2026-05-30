@@ -12,8 +12,10 @@ export function localePath(locale: Locale, path = '/'): string {
 }
 
 export async function expectRtl(page: Page, expected: boolean) {
-  const dir = await page.evaluate(() => document.documentElement.dir);
-  expect(dir).toBe(expected ? 'rtl' : 'ltr');
+  // HtmlLocaleAttrs sets `dir` in a useEffect after React mounts, so we poll.
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 8_000 })
+    .toBe(expected ? 'rtl' : 'ltr');
 }
 
 /**
@@ -21,7 +23,7 @@ export async function expectRtl(page: Page, expected: boolean) {
  * Reads the computed font-family on the first <h1>.
  */
 export async function expectArabicDisplayFont(page: Page) {
-  const family = await page.locator('h1').first().evaluate((el) => getComputedStyle(el).fontFamily);
+  const family = await page.locator('main h1').first().evaluate((el) => getComputedStyle(el).fontFamily);
   // The font name in computed style appears with quotes or via the CSS var fallback.
   expect(family.toLowerCase()).toMatch(/aref|tajawal/);
 }

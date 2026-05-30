@@ -14,7 +14,7 @@ test.describe('Whisper', () => {
     await loginAs(page, 'admin');
     const log = failOnConsoleError(page);
     await page.goto(localePath('en', 'whisper'));
-    await expect(page.locator('h1')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('main h1')).toBeVisible({ timeout: 10_000 });
 
     // Look for the "What happened?" textarea/input
     const what = page.getByPlaceholder(/what happened/i).or(page.getByLabel(/what happened/i)).first();

@@ -29,7 +29,7 @@ test.describe('i18n / RTL', () => {
 
     await loginAs(page, 'admin');
     await page.goto(localePath('ar', 'account'));
-    const family = await page.locator('h1').first().evaluate((el) => getComputedStyle(el).fontFamily);
+    const family = await page.locator('main h1').first().evaluate((el) => getComputedStyle(el).fontFamily);
     expect(family.toLowerCase()).toMatch(/aref/);
   });
 
