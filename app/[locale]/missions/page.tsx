@@ -11,6 +11,7 @@ import { GoldSeal } from '@/components/ui/gold-seal';
 import { format, addDays } from 'date-fns';
 import { Swords } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
+import { useToast } from '@/components/ui/toast';
 
 const MISSION_POOL = [
   "Bring home their favourite snack without being asked.",
@@ -57,6 +58,8 @@ function useMissions(coupleId: string | null) {
 
 export default function MissionsPage() {
   const t = useTranslations('missions');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
 
   useTutorial('missions', [
     { id: 'missions-title', titleKey: 'missions.step1.title', descKey: 'missions.step1.desc' },
@@ -83,6 +86,7 @@ export default function MissionsPage() {
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['missions', coupleId] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   const complete = useMutation({
@@ -90,6 +94,7 @@ export default function MissionsPage() {
       await supabase.from('missions').update({ completed_at: new Date().toISOString() }).eq('id', id);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['missions', coupleId] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   const verify = useMutation({
@@ -97,6 +102,7 @@ export default function MissionsPage() {
       await supabase.from('missions').update({ verified_at: new Date().toISOString() }).eq('id', id);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['missions', coupleId] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   return (
@@ -112,7 +118,7 @@ export default function MissionsPage() {
 
         {/* My mission */}
         <div className="space-y-3">
-          <h2 className="text-gold text-xs uppercase tracking-widest">Your mission</h2>
+          <h2 className="text-gold text-xs uppercase tracking-widest">{t('header')}</h2>
           {myMission ? (
             <Card variant="elevated" className="space-y-4">
               <p className="text-ivory leading-relaxed">{myMission.text}</p>
@@ -132,7 +138,7 @@ export default function MissionsPage() {
             <Card variant="elevated" className="text-center py-8 space-y-3">
               <p className="text-muted text-sm">{t('empty.body')}</p>
               <GoldButton onClick={() => assign.mutate()} loading={assign.isPending} size="sm">
-                Get a mission
+                {t('getMission')}
               </GoldButton>
             </Card>
           )}

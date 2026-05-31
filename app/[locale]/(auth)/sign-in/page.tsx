@@ -14,6 +14,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
 import { LoadingOverlay } from '@/components/ui/loading-overlay';
 import { Heart, Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 type Tab = 'magic' | 'password';
 type AuthMode = 'signin' | 'signup';
@@ -376,6 +377,11 @@ export default function SignInPage() {
   const { repeat } = useRespectfulMotion();
   const { session, loading } = useCoupleState();
   const [tab, setTab] = useState<Tab>('magic');
+
+  useTutorial('signIn', [
+    { id: 'signin-title', titleKey: 'signIn.step1.title', descKey: 'signIn.step1.desc' },
+    { id: 'signin-form', titleKey: 'signIn.step2.title', descKey: 'signIn.step2.desc' },
+  ]);
   const [particles, setParticles] = useState<ParticleData[]>([]);
   const [hearts, setHearts] = useState<HeartData[]>([]);
 
@@ -463,13 +469,14 @@ export default function SignInPage() {
               transition={{ duration: 0.6, delay: 0.35 }}
               className="space-y-1"
             >
-              <h1 className="font-display-en text-3xl text-ivory">{t('title')}</h1>
+              <h1 className="font-display-en text-3xl text-ivory" data-tutorial-id="signin-title">{t('title')}</h1>
               <p className="text-ivoryDim text-sm">{t('subtitle')}</p>
             </motion.div>
           </div>
 
           {/* Tabs */}
           <motion.div
+            data-tutorial-id="signin-form"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.45 }}

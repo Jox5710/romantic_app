@@ -88,8 +88,8 @@ export default function MirrorPage() {
                       className="grid grid-cols-2 gap-4"
                     >
                       {[
-                        { label: 'You', ans: myAnswer },
-                        { label: 'Partner', ans: partnerAnswer },
+                        { label: t('you'), ans: myAnswer },
+                        { label: t('partner'), ans: partnerAnswer },
                       ].map(({ label, ans }) => (
                         <Card key={label} className="space-y-2">
                           <p className="text-xs text-gold uppercase">{label}</p>
@@ -112,7 +112,7 @@ export default function MirrorPage() {
 
         {past && past.length > 0 && (
           <div className="space-y-4">
-            <p className="text-xs text-muted uppercase tracking-wider">Past sessions</p>
+            <p className="text-xs text-muted uppercase tracking-wider">{t('pastTitle')}</p>
             {past.map((s: { id: string; week_of: string; mirror_questions: { question_en: string; question_ar: string }; mirror_answers: Array<{ answer: string; user_id: string }> }) => {
               const q = locale === 'ar' ? s.mirror_questions?.question_ar : s.mirror_questions?.question_en;
               return (

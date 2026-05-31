@@ -10,6 +10,7 @@ import { Field } from '@/components/ui/field';
 import { useToast } from '@/components/ui/toast';
 import { format } from 'date-fns';
 import type { CoupleState } from '@/lib/supabase/types';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 type FilterState = 'all' | CoupleState;
 
@@ -31,6 +32,12 @@ export default function CouplesQueuePage() {
   const isArabic = useLocale() === 'ar';
   const nameFont = isArabic ? 'font-display-ar' : 'font-display-en';
   const { toast } = useToast();
+
+  useTutorial('adminCouples', [
+    { id: 'admin-couples-filter', titleKey: 'adminCouples.step1.title', descKey: 'adminCouples.step1.desc' },
+    { id: 'admin-couples-list', titleKey: 'adminCouples.step2.title', descKey: 'adminCouples.step2.desc' },
+    { id: 'admin-couples-actions', titleKey: 'adminCouples.step3.title', descKey: 'adminCouples.step3.desc' },
+  ]);
 
   // Locale-appropriate "A & B" pairing with Latin fallback when Arabic is blank.
   const pairNames = (c: CoupleRow) => {
@@ -104,7 +111,7 @@ export default function CouplesQueuePage() {
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
         <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap" data-tutorial-id="admin-couples-filter">
           {filters.map(({ key, label }) => (
             <button
               key={key}
@@ -121,7 +128,7 @@ export default function CouplesQueuePage() {
         </div>
 
         <div className={selected ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' : ''}>
-          <div className="space-y-3">
+          <div className="space-y-3" data-tutorial-id="admin-couples-list">
             {loading ? (
               [1, 2, 3].map((n) => <div key={n} className="h-24 rounded-2xl shimmer" />)
             ) : couples.length === 0 ? (
@@ -176,7 +183,7 @@ export default function CouplesQueuePage() {
               </div>
 
               {selected.state === 'pending_admin' && (
-                <div className="space-y-3">
+                <div className="space-y-3" data-tutorial-id="admin-couples-actions">
                   <div className="flex gap-3">
                     <GoldButton onClick={bless} loading={blessing} size="sm">
                       {t('bless')} ✦

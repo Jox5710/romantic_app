@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { RouteGuard } from '@/components/route-guard';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/components/ui/toast';
 import { CalendarDays } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
@@ -20,6 +21,8 @@ interface EchoItem {
 
 export default function EchoPage() {
   const t = useTranslations('echo');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
 
   useTutorial('echo', [
     { id: 'echo-title', titleKey: 'echo.step1.title', descKey: 'echo.step1.desc' },
@@ -37,33 +40,44 @@ export default function EchoPage() {
     const m = getMonth(now) + 1;
     const d = getDate(now);
 
-    Promise.all([
-      supabase.from('memories').select('caption,occurred_at').eq('couple_id', coupleId),
-      supabase.from('gratitudes').select('for_text,created_at').eq('couple_id', coupleId),
-    ]).then(([mem, grat]) => {
-      const all: EchoItem[] = [];
+    (async () => {
+      try {
+        const [mem, grat] = await Promise.all([
+          supabase.from('memories').select('caption,occurred_at').eq('couple_id', coupleId),
+          supabase.from('gratitudes').select('for_text,created_at').eq('couple_id', coupleId),
+        ]);
+        if (mem.error || grat.error) throw mem.error ?? grat.error;
+        const all: EchoItem[] = [];
 
-      (mem.data ?? []).forEach((r: { caption: string; occurred_at: string }) => {
-        const d2 = new Date(r.occurred_at);
-        if (getMonth(d2) + 1 === m && getDate(d2) === d && d2.getFullYear() < now.getFullYear()) {
-          all.push({ type: 'memory', date: r.occurred_at, text: r.caption, year: d2.getFullYear() });
-        }
-      });
+        (mem.data ?? []).forEach((r: { caption: string; occurred_at: string }) => {
+          const d2 = new Date(r.occurred_at);
+          if (getMonth(d2) + 1 === m && getDate(d2) === d && d2.getFullYear() < now.getFullYear()) {
+            all.push({ type: 'memory', date: r.occurred_at, text: r.caption, year: d2.getFullYear() });
+          }
+        });
 
-      (grat.data ?? []).forEach((r: { for_text: string; created_at: string }) => {
-        const d2 = new Date(r.created_at);
-        if (getMonth(d2) + 1 === m && getDate(d2) === d && d2.getFullYear() < now.getFullYear()) {
-          all.push({ type: 'gratitude', date: r.created_at, text: r.for_text, year: d2.getFullYear() });
-        }
-      });
+        (grat.data ?? []).forEach((r: { for_text: string; created_at: string }) => {
+          const d2 = new Date(r.created_at);
+          if (getMonth(d2) + 1 === m && getDate(d2) === d && d2.getFullYear() < now.getFullYear()) {
+            all.push({ type: 'gratitude', date: r.created_at, text: r.for_text, year: d2.getFullYear() });
+          }
+        });
 
-      all.sort((a, b) => b.year - a.year);
-      setItems(all);
-      setLoading(false);
-    });
-  }, [coupleId]);
+        all.sort((a, b) => b.year - a.year);
+        setItems(all);
+      } catch {
+        toast(tc('error'), 'error');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [coupleId, toast, tc]);
 
-  const typeLabel = { memory: '✦ Memory', gratitude: '🌿 Gratitude', prompt_answer: '💬 Prompt' };
+  const typeLabel: Record<EchoItem['type'], string> = {
+    memory: `✦ ${t('labels.memory')}`,
+    gratitude: `🌿 ${t('labels.gratitude')}`,
+    prompt_answer: `💬 ${t('labels.prompt')}`,
+  };
 
   return (
     <RouteGuard>

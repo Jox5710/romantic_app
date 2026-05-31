@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import dynamic from 'next/dynamic';
 import { RouteGuard } from '@/components/route-guard';
 import { useTranslations } from 'next-intl';

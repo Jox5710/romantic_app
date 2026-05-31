@@ -304,6 +304,7 @@
       "wish": "What do you need?",
       "soften": "Soften this",
       "softenUnavailable": "Gentle rewording isn't available right now.",
+      "softenComingSoon": "AI rewording is coming soon — set NEXT_PUBLIC_SOFTEN_URL to enable.",
       "send": "Send whisper",
       "cooldown": "You've already sent a whisper today. Come back tomorrow.",
       "delivering": "Your whisper will arrive in 30 minutes."
@@ -342,6 +343,9 @@
     "waiting": "Your answer is sealed. Waiting for your partner…",
     "reveal": "Reveal answers",
     "week": "Week of {date}",
+    "you": "You",
+    "partner": "Partner",
+    "pastTitle": "Past sessions",
     "empty": {
       "title": "No mirror sessions yet",
       "body": "A new question arrives every Monday."
@@ -376,6 +380,11 @@
     "title": "Echo",
     "subtitle": "On this day, in years past",
     "today": "Today in history",
+    "labels": {
+      "memory": "Memory",
+      "gratitude": "Gratitude",
+      "prompt": "Prompt"
+    },
     "empty": {
       "title": "No echoes yet",
       "body": "As your story grows, the past will speak to you here."
@@ -418,6 +427,7 @@
       "value": "The answer",
       "category": "Category"
     },
+    "you": "You",
     "empty": {
       "title": "Your blueprint is blank",
       "body": "Add the small details that make loving each other easier."
@@ -438,7 +448,9 @@
     "accomplish": "Mission accomplished",
     "verify": "Did your partner complete the mission?",
     "confirmVerify": "Yes, they did it!",
-    "deadline": "Complete by {date}"
+    "deadline": "Complete by {date}",
+    "header": "Your mission",
+    "getMission": "Get a mission"
   },
   "truce": {
     "title": "Safe Harbor",
@@ -450,12 +462,14 @@
       "timer": "Harbor closes in {minutes}m {seconds}s",
       "iFeelPrompt": "When you're ready, share how you feel:",
       "iFeelPlaceholder": "I feel… (use I-statements)",
-      "submit": "Share my feelings"
+      "submit": "Share my feelings",
+      "mySharedHeader": "Your feelings, shared"
     },
     "resolved": {
       "title": "You found your way back",
       "subtitle": "That took courage."
     },
+    "closed": "Harbor closed",
     "empty": {
       "title": "All is calm",
       "body": "Safe Harbor is here whenever you need it."
@@ -468,6 +482,7 @@
     "swipeYes": "Yes",
     "swipeNo": "Pass",
     "match": "It's a match! You both want {name}",
+    "matchesHeader": "Matches!",
     "categories": {
       "restaurant": "Restaurant",
       "home_cook": "Home cooking"
@@ -504,6 +519,7 @@
     },
     "watched": "Mark as watched",
     "rate": "Rate it",
+    "completedHeader": "Completed",
     "form": {
       "title": "Title",
       "category": "Category",
@@ -522,6 +538,9 @@
     "uploading": "Sending your voice…",
     "unsupported": "Voice recording is not supported in this browser.",
     "play": "Play",
+    "pause": "Pause",
+    "you": "You",
+    "newBadge": "New",
     "empty": {
       "title": "Only silence here",
       "body": "Leave a voice note for your partner to discover."
@@ -701,6 +720,30 @@
       "step1": { "title": "Admin Dashboard", "desc": "From here you can see all couples who have registered and those awaiting review." },
       "step2": { "title": "Review Couples", "desc": "Go to the Couples page to approve or decline each couple's application to join Forever." },
       "step3": { "title": "Bless or Decline", "desc": "Tap Bless to approve a couple — they'll be notified and their sanctuary will be activated." }
+    },
+    "adminCouples": {
+      "step1": { "title": "Every Couple, One Place", "desc": "Each card is a couple awaiting review. Filter by state to focus on the queue that matters right now." },
+      "step2": { "title": "Open a Profile", "desc": "Tap any couple to see their names, contact email, and wedding date in the side panel." },
+      "step3": { "title": "Bless or Decline", "desc": "Bless activates their sanctuary; Decline lets you leave a private note explaining why." }
+    },
+    "account": {
+      "step1": { "title": "Your Account", "desc": "This is your shared profile — names, wedding date, and the details that personalize Forever." },
+      "step2": { "title": "Edit Names", "desc": "Add both of you in Latin and Arabic script. We'll use the right one based on the active language." },
+      "step3": { "title": "Save Your Changes", "desc": "Tap Save when you're done. The dashboard countdown and greeting will update right away." }
+    },
+    "accept": {
+      "step1": { "title": "Welcome to Forever", "desc": "Your partner invited you to a private space. Just add your name to claim your half of the sanctuary." },
+      "step2": { "title": "Both Scripts Welcome", "desc": "Fill in Latin and Arabic — your name appears in whichever language you're using at the moment." },
+      "step3": { "title": "Accept the Invitation", "desc": "Tap Accept and we'll send your sanctuary off for a quick blessing from the Forever team." }
+    },
+    "awaiting": {
+      "step1": { "title": "Almost There", "desc": "You're paired with your partner. We just need a moment to approve your sanctuary." },
+      "step2": { "title": "Submit for Review", "desc": "If both of you have joined, tap Submit for Review to let the Forever team take a look." },
+      "step3": { "title": "We'll Notify You", "desc": "Once you're blessed, the sanctuary unlocks instantly — no refresh needed." }
+    },
+    "rejected": {
+      "step1": { "title": "Application Declined", "desc": "Your couple application wasn't accepted this time. Reach out if you'd like to know more." },
+      "step2": { "title": "Back to Sign-In", "desc": "You can return to the sign-in screen and try again or reach out to the Forever team." }
     }
   }
 }

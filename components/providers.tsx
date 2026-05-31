@@ -15,8 +15,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000,
+            // 5 min — read-heavy feature pages (timeline, gratitude, queue…)
+            // stop refetching on every focus/mount. Mutations still invalidate
+            // immediately via queryClient.invalidateQueries, so freshness is
+            // preserved where it matters.
+            staleTime: 5 * 60 * 1000,
             retry: 2,
+            refetchOnWindowFocus: false,
           },
         },
       }),

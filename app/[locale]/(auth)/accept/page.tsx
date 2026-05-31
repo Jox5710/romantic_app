@@ -9,10 +9,17 @@ import { Field } from '@/components/ui/field';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from '@/lib/i18n/navigation';
 import { Heart } from 'lucide-react';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 function AcceptInner() {
   const t = useTranslations('auth.accept');
   const { toast } = useToast();
+
+  useTutorial('accept', [
+    { id: 'accept-title', titleKey: 'accept.step1.title', descKey: 'accept.step1.desc' },
+    { id: 'accept-names', titleKey: 'accept.step2.title', descKey: 'accept.step2.desc' },
+    { id: 'accept-button', titleKey: 'accept.step3.title', descKey: 'accept.step3.desc' },
+  ]);
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get('code') ?? '';
@@ -93,7 +100,7 @@ function AcceptInner() {
 
         {couple ? (
           <>
-            <div className="space-y-2">
+            <div className="space-y-2" data-tutorial-id="accept-title">
               <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
               {couple.name_a && (
                 <p className="text-ivoryDim">
@@ -101,7 +108,7 @@ function AcceptInner() {
                 </p>
               )}
             </div>
-            <div className="space-y-4 text-start">
+            <div className="space-y-4 text-start" data-tutorial-id="accept-names">
               <Field
                 label={t('myName')}
                 placeholder={t('myNamePlaceholder')}
@@ -116,7 +123,7 @@ function AcceptInner() {
                 onChange={(e) => setMyNameAr(e.target.value)}
               />
             </div>
-            <GoldButton onClick={accept} loading={accepting} size="lg" className="w-full">
+            <GoldButton onClick={accept} loading={accepting} size="lg" className="w-full" data-tutorial-id="accept-button">
               {t('accept')}
             </GoldButton>
           </>

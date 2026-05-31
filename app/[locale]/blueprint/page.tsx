@@ -11,6 +11,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
 import { ClipboardList, Plus, Trash2 } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
+import { useToast } from '@/components/ui/toast';
 
 type Category = 'sizes' | 'tastes' | 'vitals' | 'family';
 const CATEGORIES: Category[] = ['sizes', 'tastes', 'vitals', 'family'];
@@ -61,6 +62,8 @@ function useDeleteBlueprint(coupleId: string | null) {
 
 export default function BlueprintPage() {
   const t = useTranslations('blueprint');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
 
   useTutorial('blueprint', [
     { id: 'blueprint-title', titleKey: 'blueprint.step1.title', descKey: 'blueprint.step1.desc' },
@@ -81,8 +84,12 @@ export default function BlueprintPage() {
 
   async function submit() {
     if (!label.trim() || !value.trim()) return;
-    await add.mutateAsync({ category: activeTab, label, value });
-    setLabel(''); setValue(''); setShowForm(false);
+    try {
+      await add.mutateAsync({ category: activeTab, label, value });
+      setLabel(''); setValue(''); setShowForm(false);
+    } catch {
+      toast(tc('error'), 'error');
+    }
   }
 
   return (
@@ -127,15 +134,15 @@ export default function BlueprintPage() {
                   <p className="text-xs text-muted uppercase tracking-wider">{item.label}</p>
                   <p className="text-ivory font-medium">{item.value}</p>
                   {item.user_id === session?.user.id && (
-                    <p className="text-xs text-gold/60 mt-0.5">You</p>
+                    <p className="text-xs text-gold/60 mt-0.5">{t('you')}</p>
                   )}
                 </div>
                 {item.user_id === session?.user.id && (
                   <button
                     type="button"
-                    onClick={() => del.mutate(item.id)}
+                    onClick={() => del.mutate(item.id, { onError: () => toast(tc('error'), 'error') })}
                     className="text-muted hover:text-red-400 transition-colors"
-                    aria-label="Delete"
+                    aria-label={tc('delete')}
                   >
                     <Trash2 size={15} />
                   </button>
@@ -152,7 +159,7 @@ export default function BlueprintPage() {
             <Field label={t('form.value')} value={value} onChange={(e) => setValue(e.target.value)} placeholder="e.g. 7" />
             <div className="flex gap-2">
               <GoldButton onClick={submit} loading={add.isPending} size="sm">{t('add')}</GoldButton>
-              <GoldButton variant="ghost" size="sm" onClick={() => setShowForm(false)}>Cancel</GoldButton>
+              <GoldButton variant="ghost" size="sm" onClick={() => setShowForm(false)}>{tc('cancel')}</GoldButton>
             </div>
           </Card>
         ) : (

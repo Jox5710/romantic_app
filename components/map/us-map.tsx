@@ -1,6 +1,10 @@
 'use client';
 
-import 'mapbox-gl/dist/mapbox-gl.css';
+// Leaflet stylesheet MUST be a static top-level import — Next.js App Router
+// only extracts CSS that's imported statically (dynamic CSS imports evaluate
+// to an empty module). Since us-map.tsx is only mounted on /map, this CSS
+// already ships only with that route.
+import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePlaces, useAddPlace } from '@/lib/queries/places';
@@ -8,10 +12,9 @@ import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
 import { Card } from '@/components/ui/card';
-import { MapPin, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import type { PlaceKind } from '@/lib/supabase/types';
-
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
+import type { Map as LeafletMap, Marker } from 'leaflet';
 
 const PIN_COLORS: Record<PlaceKind, string> = {
   visited: '#c9a961',
@@ -21,15 +24,29 @@ const PIN_COLORS: Record<PlaceKind, string> = {
   home: '#b08040',
 };
 
+// CartoDB Dark Matter — free, no key, dark theme that fits the Forever palette.
+const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const TILE_ATTR =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
 interface PendingPin {
   lat: number;
   lng: number;
 }
 
+interface PlaceRow {
+  id: string;
+  lat: number;
+  lng: number;
+  kind: PlaceKind;
+  name: string;
+}
+
 export function UsMap() {
   const t = useTranslations('map');
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<unknown>(null);
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
+  const markersRef = useRef<Marker[]>([]);
   const { coupleId } = useCoupleState();
   const { data: places } = usePlaces(coupleId);
   const add = useAddPlace();
@@ -39,53 +56,59 @@ export function UsMap() {
   const [kind, setKind] = useState<PlaceKind>('visited');
   const [note, setNote] = useState('');
 
+  // Init the map once. Leaflet ships from npm so it works offline / on intranets.
   useEffect(() => {
-    if (!MAPBOX_TOKEN) return; // No token → don't init Mapbox (avoids a hard crash)
-    let map: import('mapbox-gl').Map;
-
-    import('mapbox-gl').then((mapboxgl) => {
-      mapboxgl.default.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '';
+    let cleanup = () => {};
+    import('leaflet').then((L) => {
       if (!mapRef.current || mapInstanceRef.current) return;
 
-      map = new mapboxgl.default.Map({
-        container: mapRef.current,
-        style: 'mapbox://styles/mapbox/dark-v11',
-        center: [20, 30],
+      const map = L.map(mapRef.current, {
+        center: [30, 20],
         zoom: 2,
+        worldCopyJump: true,
+      });
+
+      L.tileLayer(TILE_URL, {
+        attribution: TILE_ATTR,
+        subdomains: 'abcd',
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Right-click (desktop) and long-press (mobile, via contextmenu) drops a
+      // pending pin where the user clicked.
+      map.on('contextmenu', (e) => {
+        setPending({ lat: e.latlng.lat, lng: e.latlng.lng });
       });
 
       mapInstanceRef.current = map;
-
-      map.on('contextmenu', (e) => {
-        setPending({ lat: e.lngLat.lat, lng: e.lngLat.lng });
-      });
-
-      map.on('load', () => {
-        if (!places) return;
-        places.forEach((p: { id: string; lat: number; lng: number; kind: PlaceKind; name: string }) => {
-          const el = document.createElement('div');
-          el.style.cssText = `width:14px;height:14px;border-radius:50%;background:${PIN_COLORS[p.kind]};border:2px solid #fff;cursor:pointer;`;
-          new mapboxgl.default.Marker(el)
-            .setLngLat([p.lng, p.lat])
-            .setPopup(new mapboxgl.default.Popup().setText(p.name))
-            .addTo(map);
-        });
-      });
+      cleanup = () => {
+        map.remove();
+        mapInstanceRef.current = null;
+        markersRef.current = [];
+      };
     });
 
-    return () => { if (map) map.remove(); mapInstanceRef.current = null; };
+    return () => cleanup();
   }, []);
 
+  // Sync markers whenever the places list changes. Wipe the previous set so
+  // an edit/delete doesn't leave ghost pins on the canvas.
   useEffect(() => {
-    if (!mapInstanceRef.current || !places) return;
-    import('mapbox-gl').then((mapboxgl) => {
-      places.forEach((p: { id: string; lat: number; lng: number; kind: PlaceKind; name: string }) => {
-        const el = document.createElement('div');
-        el.style.cssText = `width:14px;height:14px;border-radius:50%;background:${PIN_COLORS[p.kind]};border:2px solid #fff;cursor:pointer;`;
-        new mapboxgl.default.Marker(el)
-          .setLngLat([p.lng, p.lat])
-          .setPopup(new mapboxgl.default.Popup().setText(p.name))
-          .addTo(mapInstanceRef.current as import('mapbox-gl').Map);
+    const map = mapInstanceRef.current;
+    if (!map || !places) return;
+    import('leaflet').then((L) => {
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+
+      (places as PlaceRow[]).forEach((p) => {
+        const icon = L.divIcon({
+          className: 'forever-pin',
+          html: `<span style="display:block;width:14px;height:14px;border-radius:50%;background:${PIN_COLORS[p.kind]};border:2px solid #fff;box-shadow:0 0 6px rgba(0,0,0,0.4);"></span>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+        });
+        const marker = L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(p.name);
+        markersRef.current.push(marker);
       });
     });
   }, [places]);
@@ -98,22 +121,12 @@ export function UsMap() {
 
   const kinds: PlaceKind[] = ['visited', 'dream', 'first_date', 'anniversary', 'home'];
 
-  // No Mapbox token configured → show a graceful placeholder instead of crashing.
-  if (!MAPBOX_TOKEN) {
-    return (
-      <div className="w-full h-[calc(100vh-7rem)] rounded-2xl border border-line bg-surface/60 flex flex-col items-center justify-center gap-3 px-6 text-center">
-        <MapPin size={40} className="text-gold/50" />
-        <p className="text-ivoryDim text-sm max-w-xs">{t('noToken')}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-full h-[calc(100vh-7rem)]">
-      <div ref={mapRef} className="w-full h-full rounded-2xl overflow-hidden" />
+      <div ref={mapRef} className="w-full h-full rounded-2xl overflow-hidden bg-surface2" />
 
       {pending && (
-        <div className="absolute bottom-6 start-6 z-10 w-80">
+        <div className="absolute bottom-6 start-6 z-[1000] w-80">
           <Card variant="elevated" className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs text-gold uppercase tracking-wider">{t('newPin')}</p>
@@ -134,7 +147,7 @@ export function UsMap() {
         </div>
       )}
 
-      <p className="absolute top-4 start-4 z-10 text-xs text-ivoryDim bg-bg/70 backdrop-blur-sm rounded-full px-3 py-1.5">
+      <p className="absolute top-4 start-4 z-[1000] text-xs text-ivoryDim bg-bg/70 backdrop-blur-sm rounded-full px-3 py-1.5">
         {t('hint')}
       </p>
     </div>

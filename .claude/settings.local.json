@@ -12,7 +12,14 @@
       "Bash(echo \"=== exit: $? ===\")",
       "Bash(find \"d:\\\\romantic_app\\\\romantic_app\\\\components\" -name \"module-grid*\" -o -name \"hero.tsx\" 2>nul)",
       "Bash(grep -r \"w-\\\\[\" \"d:\\\\romantic_app\\\\romantic_app\\\\components\" 2>nul | head -20)",
-      "Bash(ls \"d:\\\\romantic_app\\\\romantic_app\\\\app\\\\*\" 2>nul | grep -E \"layout|global|css\")"
+      "Bash(ls \"d:\\\\romantic_app\\\\romantic_app\\\\app\\\\*\" 2>nul | grep -E \"layout|global|css\")",
+      "PowerShell($dd = \"$env:ProgramFiles\\\\Docker\\\\Docker\\\\Docker Desktop.exe\"; if \\(Test-Path $dd\\) { Start-Process $dd; Write-Host \"Started Docker Desktop; waiting up to 90s for engine...\" } else { Write-Host \"Docker Desktop exe not found at default path\"; exit 1 })",
+      "Bash(docker exec *)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(npx next *)",
+      "Bash(npm uninstall *)",
+      "Bash(npm install *)"
     ],
     "additionalDirectories": [
       "d:\\romantic_app\\romantic_app"

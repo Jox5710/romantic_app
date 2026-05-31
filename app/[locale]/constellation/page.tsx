@@ -91,11 +91,18 @@ export default function ConstellationPage() {
   }, [memories]);
 
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
-    const rect = canvasRef.current!.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    const hit = starsRef.current.find((s) => Math.hypot(s.x - mx, s.y - my) < 16);
-    setTooltip(hit ? { x: mx, y: my, memory: hit.memory } : null);
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    const mxDisplay = e.clientX - rect.left;
+    const myDisplay = e.clientY - rect.top;
+    // Hit-test stars in bitmap coords; place the tooltip in display coords so
+    // it stays under the tap on responsive widths.
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const mxBitmap = mxDisplay * scaleX;
+    const myBitmap = myDisplay * scaleY;
+    const hit = starsRef.current.find((s) => Math.hypot(s.x - mxBitmap, s.y - myBitmap) < 16);
+    setTooltip(hit ? { x: mxDisplay, y: myDisplay, memory: hit.memory } : null);
   }
 
   return (

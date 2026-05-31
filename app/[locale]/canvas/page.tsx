@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { GoldButton } from '@/components/ui/gold-button';
 import { PenLine, Trash2 } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
+import { useToast } from '@/components/ui/toast';
 
 interface Stroke {
   id: string;
@@ -37,6 +38,8 @@ function useStrokes(coupleId: string | null) {
 
 export default function CanvasPage() {
   const t = useTranslations('canvas');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
 
   useTutorial('canvas', [
     { id: 'canvas-title', titleKey: 'canvas.step1.title', descKey: 'canvas.step1.desc' },
@@ -89,6 +92,7 @@ export default function CanvasPage() {
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['canvas', coupleId] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   const clearCanvas = useMutation({
@@ -97,15 +101,20 @@ export default function CanvasPage() {
       await supabase.from('canvas_strokes').delete().eq('couple_id', coupleId);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['canvas', coupleId] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   function getPos(e: React.MouseEvent | React.TouchEvent) {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
-    if ('touches' in e) {
-      return [e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top];
-    }
-    return [e.clientX - rect.left, e.clientY - rect.top];
+    // The canvas internal bitmap stays at 700×500 but CSS rescales it to fit
+    // the container. Scale pointer coords back into bitmap space so strokes
+    // line up under your finger on any viewport (mobile, tablet, desktop).
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const cx = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const cy = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    return [(cx - rect.left) * scaleX, (cy - rect.top) * scaleY];
   }
 
   function onStart(e: React.MouseEvent | React.TouchEvent) {

@@ -11,6 +11,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { Feather } from 'lucide-react';
 import { addMinutes, differenceInSeconds } from 'date-fns';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
+import { useToast } from '@/components/ui/toast';
 
 interface TruceSession {
   id: string;
@@ -41,6 +42,7 @@ function useActiveTruce(coupleId: string | null) {
 }
 
 function Countdown({ expiresAt }: { expiresAt: string }) {
+  const t = useTranslations('truce');
   const [remaining, setRemaining] = useState(differenceInSeconds(new Date(expiresAt), new Date()));
 
   useEffect(() => {
@@ -50,7 +52,7 @@ function Countdown({ expiresAt }: { expiresAt: string }) {
     return () => clearInterval(id);
   }, [expiresAt]);
 
-  if (remaining <= 0) return <span className="text-muted text-sm">Harbor closed</span>;
+  if (remaining <= 0) return <span className="text-muted text-sm">{t('closed')}</span>;
 
   const m = Math.floor(remaining / 60);
   const s = remaining % 60;
@@ -62,6 +64,8 @@ function Countdown({ expiresAt }: { expiresAt: string }) {
 
 export default function TrucePage() {
   const t = useTranslations('truce');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
 
   useTutorial('truce', [
     { id: 'truce-title', titleKey: 'truce.step1.title', descKey: 'truce.step1.desc' },
@@ -84,6 +88,7 @@ export default function TrucePage() {
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['truce', coupleId] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   const shareFeeling = useMutation({
@@ -97,6 +102,7 @@ export default function TrucePage() {
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['truce', coupleId] }); setText(''); },
+    onError: () => toast(tc('error'), 'error'),
   });
 
   const myFeeling = active?.triggered_by === session?.user.id ? active?.i_feel : active?.partner_i_feel;
@@ -141,7 +147,7 @@ export default function TrucePage() {
               </Card>
             ) : (
               <Card variant="elevated" className="space-y-2 border-blue-900/20">
-                <p className="text-xs text-muted uppercase tracking-wider">Your feelings, shared</p>
+                <p className="text-xs text-muted uppercase tracking-wider">{t('active.mySharedHeader')}</p>
                 <p className="text-ivory italic">&ldquo;{myFeeling}&rdquo;</p>
               </Card>
             )}

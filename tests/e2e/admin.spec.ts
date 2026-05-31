@@ -13,8 +13,9 @@ test.describe('Admin — dashboard + couples', () => {
     const log = failOnConsoleError(page);
     await page.goto(localePath('en', 'admin'));
     await expect(page.locator('main h1')).toHaveText(/admin/i, { timeout: 10_000 });
-    // Four stat cards
-    await expect(page.locator('section, div').filter({ hasText: /total couples/i })).toHaveCount(1, { timeout: 5_000 });
+    // The four stat cards each render a <p> with their label; anchor on the
+    // leaf "Total couples" paragraph (avoids matching every ancestor div).
+    await expect(page.locator('main p', { hasText: /total couples/i }).first()).toBeVisible({ timeout: 5_000 });
     log.assertNone('admin dashboard');
   });
 

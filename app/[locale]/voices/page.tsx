@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Mic, Play, Pause } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
 import { format } from 'date-fns';
+import { useToast } from '@/components/ui/toast';
 
 interface VoiceNote {
   id: string;
@@ -52,14 +53,20 @@ function WaveformBar({ active }: { active: boolean }) {
 
 function NoteCard({ note, isMe }: { note: VoiceNote; isMe: boolean }) {
   const supabase = createClient();
+  const t = useTranslations('voices');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
   const [playing, setPlaying] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   async function play() {
     if (!url) {
-      const { data } = await supabase.storage.from('voice-notes').createSignedUrl(note.storage_path, 300);
-      if (!data?.signedUrl) return;
+      const { data, error } = await supabase.storage.from('voice-notes').createSignedUrl(note.storage_path, 300);
+      if (error || !data?.signedUrl) {
+        toast(tc('error'), 'error');
+        return;
+      }
       setUrl(data.signedUrl);
       const audio = new Audio(data.signedUrl);
       audioRef.current = audio;
@@ -84,7 +91,7 @@ function NoteCard({ note, isMe }: { note: VoiceNote; isMe: boolean }) {
           type="button"
           onClick={play}
           className="w-10 h-10 rounded-full bg-gold/10 text-gold flex items-center justify-center hover:bg-gold/20 transition-colors"
-          aria-label={playing ? 'Pause' : 'Play'}
+          aria-label={playing ? t('pause') : t('play')}
         >
           {playing ? <Pause size={16} /> : <Play size={16} />}
         </button>
@@ -96,9 +103,9 @@ function NoteCard({ note, isMe }: { note: VoiceNote; isMe: boolean }) {
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted">{format(new Date(note.created_at), 'PPp')}</p>
         {!isMe && !note.played_at && (
-          <span className="text-xs text-gold">New</span>
+          <span className="text-xs text-gold">{t('newBadge')}</span>
         )}
-        {isMe && <span className="text-xs text-muted/60">You</span>}
+        {isMe && <span className="text-xs text-muted/60">{t('you')}</span>}
       </div>
     </Card>
   );
@@ -106,6 +113,8 @@ function NoteCard({ note, isMe }: { note: VoiceNote; isMe: boolean }) {
 
 export default function VoicesPage() {
   const t = useTranslations('voices');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
 
   useTutorial('voices', [
     { id: 'voices-title', titleKey: 'voices.step1.title', descKey: 'voices.step1.desc' },
@@ -140,17 +149,22 @@ export default function VoicesPage() {
       });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['voices', coupleId] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   async function startRecording() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mr = new MediaRecorder(stream);
-    mediaRef.current = mr;
-    chunksRef.current = [];
-    startTimeRef.current = new Date();
-    mr.ondataavailable = (e) => chunksRef.current.push(e.data);
-    mr.start();
-    setRecording(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      mediaRef.current = mr;
+      chunksRef.current = [];
+      startTimeRef.current = new Date();
+      mr.ondataavailable = (e) => chunksRef.current.push(e.data);
+      mr.start();
+      setRecording(true);
+    } catch {
+      toast(tc('error'), 'error');
+    }
   }
 
   function stopRecording() {

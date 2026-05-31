@@ -10,6 +10,7 @@ import { FeelingChips } from '@/components/whisper/feeling-chips';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/toast';
+import { softenText } from '@/lib/llm/soften';
 import { Wind, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import type { WhisperFeeling, WhisperResponse } from '@/lib/supabase/types';
@@ -55,17 +56,14 @@ export default function WhisperPage() {
   async function soften() {
     if (!what.trim()) return;
     setSoftening(true);
-    try {
-      const supabase = createClient();
-      const { data } = await supabase.functions.invoke('soften', {
-        body: { text: what, locale },
-      });
-      if (data?.softened) setWhat(data.softened);
-      else toast(tCompose('softenUnavailable')); // edge function not deployed / errored
-    } catch {
+    const result = await softenText({ text: what, locale });
+    setSoftening(false);
+    if (result.status === 'ok' && result.softened) {
+      setWhat(result.softened);
+    } else if (result.status === 'unconfigured') {
+      toast(tCompose('softenComingSoon'));
+    } else {
       toast(tCompose('softenUnavailable'));
-    } finally {
-      setSoftening(false);
     }
   }
 

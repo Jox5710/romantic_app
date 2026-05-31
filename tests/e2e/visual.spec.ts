@@ -10,9 +10,13 @@ import { localePath } from './utils/i18n';
 import { loginAs } from './fixtures/auth';
 import { setTheme } from './utils/theme';
 
-// Only run visual checks on chromium-desktop; on other projects skip entirely.
-test.skip(({ browserName }, testInfo) => testInfo.project.name !== 'chromium-desktop',
-  'Visual baselines are chromium-desktop only to avoid font-rendering flakiness');
+// Visual regression baselines are chromium-desktop only (cross-browser font
+// rendering produces too much noise). Run with `--project=chromium-desktop`;
+// the main suite already excludes this spec via `--grep-invert="visual"`.
+test.beforeEach(({}, testInfo) => {
+  testInfo.skip(testInfo.project.name !== 'chromium-desktop',
+    'Visual baselines are chromium-desktop only');
+});
 
 async function freezePage(page: import('@playwright/test').Page) {
   await page.addStyleTag({

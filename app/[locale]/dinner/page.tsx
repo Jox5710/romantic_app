@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
+import { useToast } from '@/components/ui/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Utensils, Plus, X, Check } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
@@ -41,6 +42,8 @@ function useDinnerOptions(coupleId: string | null) {
 
 export default function DinnerPage() {
   const t = useTranslations('dinner');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
 
   useTutorial('dinner', [
     { id: 'dinner-title', titleKey: 'dinner.step1.title', descKey: 'dinner.step1.desc' },
@@ -83,6 +86,7 @@ export default function DinnerPage() {
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['dinner', coupleId] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   const addOption = useMutation({
@@ -91,6 +95,7 @@ export default function DinnerPage() {
       await supabase.from('dinner_options').insert({ couple_id: coupleId, name, category, note: note || null });
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['dinner', coupleId] }); setName(''); setNote(''); setShowForm(false); },
+    onError: () => toast(tc('error'), 'error'),
   });
 
   return (
@@ -107,7 +112,7 @@ export default function DinnerPage() {
         {/* Match banner */}
         {matches.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-gold text-xs uppercase tracking-widest">Matches!</h2>
+            <h2 className="text-gold text-xs uppercase tracking-widest">{t('matchesHeader')}</h2>
             {matches.map((m) => (
               <Card key={m.id} variant="elevated" className="flex items-center gap-3 border-gold/40">
                 <span className="text-2xl">🎉</span>
@@ -143,18 +148,28 @@ export default function DinnerPage() {
               <button
                 type="button"
                 onClick={() => swipe.mutate({ id: current.id, vote: 'no' })}
-                className="w-16 h-16 rounded-full border-2 border-red-500/50 text-red-400 flex items-center justify-center hover:bg-red-500/10 transition-colors"
+                disabled={swipe.isPending}
+                className="w-16 h-16 rounded-full border-2 border-red-500/50 text-red-400 flex items-center justify-center hover:bg-red-500/10 active:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label={t('swipeNo')}
               >
-                <X size={24} />
+                {swipe.isPending ? (
+                  <span className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                ) : (
+                  <X size={24} />
+                )}
               </button>
               <button
                 type="button"
                 onClick={() => swipe.mutate({ id: current.id, vote: 'yes' })}
-                className="w-16 h-16 rounded-full border-2 border-gold/50 text-gold flex items-center justify-center hover:bg-gold/10 transition-colors"
+                disabled={swipe.isPending}
+                className="w-16 h-16 rounded-full border-2 border-gold/50 text-gold flex items-center justify-center hover:bg-gold/10 active:bg-gold/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label={t('swipeYes')}
               >
-                <Check size={24} />
+                {swipe.isPending ? (
+                  <span className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                ) : (
+                  <Check size={24} />
+                )}
               </button>
             </div>
           </div>
@@ -184,8 +199,8 @@ export default function DinnerPage() {
             </div>
             <Field label={t('form.note')} value={note} onChange={(e) => setNote(e.target.value)} placeholder="optional details…" />
             <div className="flex gap-2">
-              <GoldButton onClick={() => addOption.mutate()} loading={addOption.isPending} size="sm" disabled={!name.trim()}>Add</GoldButton>
-              <GoldButton variant="ghost" size="sm" onClick={() => setShowForm(false)}>Cancel</GoldButton>
+              <GoldButton onClick={() => addOption.mutate()} loading={addOption.isPending} size="sm" disabled={!name.trim()}>{tc('add')}</GoldButton>
+              <GoldButton variant="ghost" size="sm" onClick={() => setShowForm(false)}>{tc('cancel')}</GoldButton>
             </div>
           </Card>
         ) : (

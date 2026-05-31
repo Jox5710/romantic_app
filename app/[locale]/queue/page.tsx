@@ -13,6 +13,7 @@ import { GoldSeal } from '@/components/ui/gold-seal';
 import { PlaySquare, Plus, Check } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
 import { format } from 'date-fns';
+import { useToast } from '@/components/ui/toast';
 
 type QueueCategory = 'movie' | 'show' | 'book' | 'place';
 const CATEGORIES: QueueCategory[] = ['movie', 'show', 'book', 'place'];
@@ -49,6 +50,8 @@ function useQueue(coupleId: string | null, cat: QueueCategory) {
 
 export default function QueuePage() {
   const t = useTranslations('queue');
+  const tc = useTranslations('common');
+  const { toast } = useToast();
 
   useTutorial('queue', [
     { id: 'queue-title', titleKey: 'queue.step1.title', descKey: 'queue.step1.desc' },
@@ -82,6 +85,7 @@ export default function QueuePage() {
       });
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['queue', coupleId, activeTab] }); setTitle(''); setUrl(''); setShowForm(false); },
+    onError: () => toast(tc('error'), 'error'),
   });
 
   const markWatched = useMutation({
@@ -89,6 +93,7 @@ export default function QueuePage() {
       await supabase.from('queue_items').update({ watched_at: new Date().toISOString() }).eq('id', id);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['queue', coupleId, activeTab] }),
+    onError: () => toast(tc('error'), 'error'),
   });
 
   return (
@@ -136,7 +141,8 @@ export default function QueuePage() {
                 <button
                   type="button"
                   onClick={() => markWatched.mutate(item.id)}
-                  className="text-muted hover:text-gold transition-colors"
+                  disabled={markWatched.isPending && markWatched.variables === item.id}
+                  className="text-muted hover:text-gold transition-colors disabled:opacity-50"
                   aria-label={t('watched')}
                 >
                   <Check size={16} />
@@ -160,8 +166,8 @@ export default function QueuePage() {
             <Field label={t('form.title')} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Name…" />
             <Field label={t('form.url')} value={url} onChange={(e) => setUrl(e.target.value)} type="url" placeholder="https://…" />
             <div className="flex gap-2">
-              <GoldButton onClick={() => addItem.mutate()} loading={addItem.isPending} size="sm" disabled={!title.trim()}>Add</GoldButton>
-              <GoldButton variant="ghost" size="sm" onClick={() => setShowForm(false)}>Cancel</GoldButton>
+              <GoldButton onClick={() => addItem.mutate()} loading={addItem.isPending} size="sm" disabled={!title.trim()}>{tc('add')}</GoldButton>
+              <GoldButton variant="ghost" size="sm" onClick={() => setShowForm(false)}>{tc('cancel')}</GoldButton>
             </div>
           </Card>
         ) : (
@@ -173,7 +179,7 @@ export default function QueuePage() {
         {/* Watched */}
         {watched.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-muted text-xs uppercase tracking-widest">Completed</h2>
+            <h2 className="text-muted text-xs uppercase tracking-widest">{t('completedHeader')}</h2>
             {watched.map((item) => (
               <Card key={item.id} variant="default" className="flex items-center gap-3 opacity-60">
                 <GoldSeal />

@@ -10,6 +10,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
 import { useToast } from '@/components/ui/toast';
 import { Heart } from 'lucide-react';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 const schema = z.object({
   myName: z.string().min(1),
@@ -27,6 +28,12 @@ export default function InvitePage() {
   const [done, setDone] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [copied, setCopied] = useState(false);
+
+  useTutorial('invite', [
+    { id: 'invite-title', titleKey: 'invite.step1.title', descKey: 'invite.step1.desc' },
+    { id: 'invite-wedding', titleKey: 'invite.step2.title', descKey: 'invite.step2.desc' },
+    { id: 'invite-passphrase', titleKey: 'invite.step3.title', descKey: 'invite.step3.desc' },
+  ]);
 
   const {
     register,
@@ -109,7 +116,7 @@ export default function InvitePage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-8 animate-fade-up">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2" data-tutorial-id="invite-title">
           <Heart className="mx-auto text-gold" size={32} fill="currentColor" />
           <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
           <p className="text-ivoryDim text-sm">{t('subtitle')}</p>
@@ -136,20 +143,24 @@ export default function InvitePage() {
             error={errors.partnerEmail?.message}
             {...register('partnerEmail')}
           />
-          <Field
-            label={t('weddingDate')}
-            type="date"
-            error={errors.weddingDate?.message}
-            {...register('weddingDate')}
-          />
-          <Field
-            label={t('passphrase')}
-            type="password"
-            placeholder="••••••••"
-            error={errors.passphrase?.message}
-            hint={t('passphraseHint')}
-            {...register('passphrase')}
-          />
+          <div data-tutorial-id="invite-wedding">
+            <Field
+              label={t('weddingDate')}
+              type="date"
+              error={errors.weddingDate?.message}
+              {...register('weddingDate')}
+            />
+          </div>
+          <div data-tutorial-id="invite-passphrase">
+            <Field
+              label={t('passphrase')}
+              type="password"
+              placeholder="••••••••"
+              error={errors.passphrase?.message}
+              hint={t('passphraseHint')}
+              {...register('passphrase')}
+            />
+          </div>
           <GoldButton type="submit" loading={isSubmitting} size="lg" className="w-full">
             {t('sendInvite')}
           </GoldButton>

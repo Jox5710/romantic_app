@@ -7,6 +7,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { useToast } from '@/components/ui/toast';
 import { useRouter } from '@/lib/i18n/navigation';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 export default function AwaitingPage() {
   const t = useTranslations('auth.awaiting');
@@ -14,6 +15,12 @@ export default function AwaitingPage() {
   const router = useRouter();
   const { coupleState, coupleId } = useCoupleState();
   const [submitting, setSubmitting] = useState(false);
+
+  useTutorial('awaiting', [
+    { id: 'awaiting-title', titleKey: 'awaiting.step1.title', descKey: 'awaiting.step1.desc' },
+    { id: 'awaiting-submit', titleKey: 'awaiting.step2.title', descKey: 'awaiting.step2.desc' },
+    { id: 'awaiting-title', titleKey: 'awaiting.step3.title', descKey: 'awaiting.step3.desc' },
+  ]);
 
   useEffect(() => {
     if (coupleState === 'approved') {
@@ -61,13 +68,13 @@ export default function AwaitingPage() {
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-8 text-center animate-fade-up">
         <div className="w-20 h-20 mx-auto rounded-full border-2 border-gold shimmer" />
-        <div className="space-y-2">
+        <div className="space-y-2" data-tutorial-id="awaiting-title">
           <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
           <p className="text-ivoryDim text-sm">{t('subtitle')}</p>
         </div>
 
         {coupleState === 'mutual' && (
-          <GoldButton onClick={submitForReview} loading={submitting} size="lg" className="w-full">
+          <GoldButton onClick={submitForReview} loading={submitting} size="lg" className="w-full" data-tutorial-id="awaiting-submit">
             {t('submitForReview')}
           </GoldButton>
         )}

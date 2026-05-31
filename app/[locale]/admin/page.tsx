@@ -7,6 +7,7 @@ import { RouteGuard } from '@/components/route-guard';
 import { Card } from '@/components/ui/card';
 import { Link } from '@/lib/i18n/navigation';
 import type { CoupleState } from '@/lib/supabase/types';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 interface Stats {
   total: number;
@@ -17,6 +18,12 @@ interface Stats {
 
 export default function AdminPage() {
   const t = useTranslations('admin');
+
+  useTutorial('admin', [
+    { id: 'admin-title', titleKey: 'admin.step1.title', descKey: 'admin.step1.desc' },
+    { id: 'admin-stats', titleKey: 'admin.step2.title', descKey: 'admin.step2.desc' },
+    { id: 'admin-couples-link', titleKey: 'admin.step3.title', descKey: 'admin.step3.desc' },
+  ]);
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, rejected: 0 });
 
   useEffect(() => {
@@ -39,12 +46,12 @@ export default function AdminPage() {
   return (
     <RouteGuard>
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        <div className="space-y-1">
+        <div className="space-y-1" data-tutorial-id="admin-title">
           <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
           <p className="text-ivoryDim text-sm">{t('subtitle')}</p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-tutorial-id="admin-stats">
           {[
             { label: t('stats.total'), value: stats.total },
             { label: t('stats.pending'), value: stats.pending },
@@ -60,6 +67,7 @@ export default function AdminPage() {
 
         <Link
           href="/admin/couples"
+          data-tutorial-id="admin-couples-link"
           className="inline-flex items-center gap-2 rounded-full border border-gold/40 px-6 py-3 text-gold text-sm hover:bg-surface2 transition-colors"
         >
           {t('couples.title')} →

@@ -60,6 +60,7 @@ function SortableItem({ item, onComplete }: { item: BucketItem; onComplete: (id:
 
 export default function BucketPage() {
   const t = useTranslations('bucket');
+  const tc = useTranslations('common');
 
   useTutorial('bucket', [
     { id: 'bucket-title', titleKey: 'bucket.step1.title', descKey: 'bucket.step1.desc' },
@@ -112,8 +113,8 @@ export default function BucketPage() {
                 <Field label={t('form.title')} value={title} onChange={(e) => setTitle(e.target.value)} autoFocus />
                 <Field label={t('form.category')} placeholder="travel, experience, home…" value={category} onChange={(e) => setCategory(e.target.value)} />
                 <div className="flex gap-2">
-                  <GoldButton onClick={addItem} loading={add.isPending} disabled={!title.trim()}>Add</GoldButton>
-                  <GoldButton variant="ghost" onClick={() => setShowForm(false)}>Cancel</GoldButton>
+                  <GoldButton onClick={addItem} loading={add.isPending} disabled={!title.trim()}>{tc('add')}</GoldButton>
+                  <GoldButton variant="ghost" onClick={() => setShowForm(false)}>{tc('cancel')}</GoldButton>
                 </div>
               </Card>
             </motion.div>

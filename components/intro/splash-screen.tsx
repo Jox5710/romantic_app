@@ -62,13 +62,13 @@ export function SplashScreen() {
     setShow(true);
     setChecked(true);
     setSeedReady(true);
-    const t1 = setTimeout(() => setExiting(true), 3400);
+    const t1 = setTimeout(() => setExiting(true), 2400);
     return () => clearTimeout(t1);
   }, []);
 
   useEffect(() => {
     if (!exiting) return;
-    const t = setTimeout(() => setDone(true), 600);
+    const t = setTimeout(() => setDone(true), 500);
     return () => clearTimeout(t);
   }, [exiting]);
 

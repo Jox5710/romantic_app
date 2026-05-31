@@ -14,10 +14,10 @@ test.describe('Account', () => {
     await page.goto(localePath('en', 'account'));
     await expect(page.locator('main h1')).toHaveText(/couple settings/i, { timeout: 10_000 });
 
-    // The Field component renders its label as a span, not <label for>, so
-    // getByLabel doesn't work. Pick the first text input under main form
-    // — that's name_a — and assert it hydrated from the DB.
-    const firstInput = page.locator('main form input[type="text"], main form input:not([type])').first();
+    // The Field component renders its label as a span (not <label for>) and
+    // the account page doesn't wrap its fields in a <form>. Pick the first
+    // non-date input under main — that's name_a — and assert it hydrated.
+    const firstInput = page.locator('main input:not([type="date"])').first();
     await expect(firstInput).toBeVisible({ timeout: 10_000 });
     await expect(firstInput).not.toHaveValue('', { timeout: 8_000 });
   });

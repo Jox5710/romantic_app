@@ -58,6 +58,10 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedTutorials, setCompletedTutorials] = useState<string[]>([]);
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
+  // Whichever page calls useTutorial() last "owns" the trigger button. This
+  // makes (?) work on nested routes like /admin/couples without us having to
+  // map pathname segments back to tutorial keys.
+  const [currentPageKey, setCurrentPageKey] = useState<string | null>(null);
   const registeredRef = useRef<Record<string, TutorialStep[]>>({});
   const pathname = usePathname();
 
@@ -116,11 +120,13 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     };
   }, [activeTutorial, computeRect]);
 
-  // Clear tutorial on navigation
+  // Clear tutorial + page-key on navigation. The new page will set its own
+  // key when its useTutorial() fires; until then there's no trigger target.
   useEffect(() => {
     setActiveTutorial(null);
     setCurrentStep(0);
     setHighlightRect(null);
+    setCurrentPageKey(null);
   }, [pathname]);
 
   function persistCompletion(key: string, prev: string[]) {
@@ -161,15 +167,15 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
 
   function registerPageTutorial(key: string, steps: TutorialStep[]) {
     registeredRef.current[key] = steps;
+    setCurrentPageKey(key);
   }
 
-  // Derive current page tutorial key from pathname
-  const pageTutorialKey = (pathname.replace(/^\//, '') || 'home').split('/')[0];
-  const canTriggerPageTutorial = pageTutorialKey in registeredRef.current;
+  const canTriggerPageTutorial = !!currentPageKey && currentPageKey in registeredRef.current;
 
   function triggerPageTutorial() {
-    const steps = registeredRef.current[pageTutorialKey];
-    if (steps) startTutorial(pageTutorialKey, steps);
+    if (!currentPageKey) return;
+    const steps = registeredRef.current[currentPageKey];
+    if (steps) startTutorial(currentPageKey, steps);
   }
 
   const steps = activeTutorial ? (registeredRef.current[activeTutorial] ?? []) : [];

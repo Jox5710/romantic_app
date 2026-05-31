@@ -16,6 +16,7 @@ import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 export default function PromisesPage() {
   const t = useTranslations('promises');
+  const tc = useTranslations('common');
 
   useTutorial('promises', [
     { id: 'promises-title', titleKey: 'promises.step1.title', descKey: 'promises.step1.desc' },
@@ -76,8 +77,8 @@ export default function PromisesPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <GoldButton onClick={submit} loading={add.isPending} disabled={!text.trim()}>Save</GoldButton>
-                  <GoldButton variant="ghost" onClick={() => setShowForm(false)}>Cancel</GoldButton>
+                  <GoldButton onClick={submit} loading={add.isPending} disabled={!text.trim()}>{tc('save')}</GoldButton>
+                  <GoldButton variant="ghost" onClick={() => setShowForm(false)}>{tc('cancel')}</GoldButton>
                 </div>
               </Card>
             </motion.div>
@@ -112,7 +113,7 @@ export default function PromisesPage() {
                       <GoldButton size="sm" onClick={() => handleCheck(p.id, true, p.kept_count, p.broken_count)} loading={checkedId === p.id}>
                         {t('kept')}
                       </GoldButton>
-                      <GoldButton size="sm" variant="ghost" onClick={() => handleCheck(p.id, false, p.kept_count, p.broken_count)}>
+                      <GoldButton size="sm" variant="ghost" onClick={() => handleCheck(p.id, false, p.kept_count, p.broken_count)} loading={checkedId === p.id}>
                         {t('broken')}
                       </GoldButton>
                     </div>

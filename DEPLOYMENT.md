@@ -358,3 +358,57 @@ A **green** run is the gate. Failures bucketed by priority are written to
 `playwright-report/SUMMARY.md`; any **P0** or **P1** failure blocks the deploy.
 See [`docs/QA-CHECKLIST.md`](docs/QA-CHECKLIST.md#automated-coverage-playwright)
 for the full suite description and runner options.
+
+---
+
+## 14. Wiring Soften (optional AI rewording)
+
+The whisper page has a "Soften" button that asks an LLM to rewrite a harsh
+message into a gentler one. The client just POSTs `{ text, locale }` to
+`NEXT_PUBLIC_SOFTEN_URL` and expects `{ softened: string }` back —
+**the app is provider-agnostic**. Wire it up with any LLM in production.
+
+When `NEXT_PUBLIC_SOFTEN_URL` is empty (the default), the button stays visible
+but shows a localized "AI rewording is coming soon — set NEXT_PUBLIC_SOFTEN_URL
+to enable" toast. Users can still send whispers without it.
+
+### Reference Cloud Function (Gemini)
+
+```js
+// soften.js — deploy as a Vercel Edge Function, Cloud Run service, or similar.
+// Keep GEMINI_API_KEY server-side; never expose to the client.
+export default async function handler(req) {
+  const { text, locale } = await req.json();
+  const r = await fetch(
+    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text:
+              `Rewrite this short message from one partner to the other into a ` +
+              `gentler, kinder version that says the same thing without anger. ` +
+              `Keep it under 220 characters. Respond in ${locale}.\n\n${text}`,
+          }],
+        }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 220 },
+      }),
+    },
+  );
+  const j = await r.json();
+  const softened = j?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  return new Response(JSON.stringify({ softened }),
+    { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+}
+```
+
+For Anthropic, swap the URL/body for the Messages API; for OpenAI, for `/v1/chat/completions`.
+
+Then set on the EC2 host (or via the GitHub variable so it bakes into the build):
+```
+NEXT_PUBLIC_SOFTEN_URL=https://your-endpoint.example.com/soften
+```
+
+Rebuild + redeploy the app container (`NEXT_PUBLIC_*` is baked at build time).

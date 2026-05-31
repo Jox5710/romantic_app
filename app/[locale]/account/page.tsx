@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/toast';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { useRouter } from '@/lib/i18n/navigation';
 import { Settings, LogOut } from 'lucide-react';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 interface Form {
   name_a: string;
@@ -24,6 +25,12 @@ interface Form {
 export default function AccountPage() {
   const t = useTranslations('account');
   const tMenu = useTranslations('userMenu');
+
+  useTutorial('account', [
+    { id: 'account-title', titleKey: 'account.step1.title', descKey: 'account.step1.desc' },
+    { id: 'account-fields', titleKey: 'account.step2.title', descKey: 'account.step2.desc' },
+    { id: 'account-save', titleKey: 'account.step3.title', descKey: 'account.step3.desc' },
+  ]);
   const { toast } = useToast();
   const router = useRouter();
   const { coupleId, session } = useCoupleState();
@@ -85,7 +92,7 @@ export default function AccountPage() {
   return (
     <RouteGuard>
       <div className="max-w-md mx-auto px-4 py-8 space-y-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" data-tutorial-id="account-title">
           <Settings size={26} className="text-gold" />
           <div>
             <h1 className="font-display-en text-3xl text-ivory">{t('title')}</h1>
@@ -97,7 +104,7 @@ export default function AccountPage() {
           <p className="text-xs text-muted">{session.user.email}</p>
         )}
 
-        <Card variant="elevated" className="space-y-4">
+        <Card variant="elevated" className="space-y-4" data-tutorial-id="account-fields">
           {loading ? (
             [1, 2, 3, 4].map((n) => <div key={n} className="h-12 rounded-xl shimmer" />)
           ) : (
@@ -112,7 +119,7 @@ export default function AccountPage() {
               </div>
               <Field label={t('weddingDate')} type="date" value={form.wedding_date} onChange={set('wedding_date')} />
 
-              <GoldButton onClick={save} loading={saving} size="lg" className="w-full">
+              <GoldButton onClick={save} loading={saving} size="lg" className="w-full" data-tutorial-id="account-save">
                 {t('save')}
               </GoldButton>
             </>
