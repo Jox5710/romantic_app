@@ -44,3 +44,17 @@ export function useAddPlace() {
     onError: (e: Error) => toast(e.message),
   });
 }
+
+export function useDeletePlace() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const supabase = createClient();
+      const { error } = await supabase.from('places').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['places'] }),
+    onError: (e: Error) => toast(e.message),
+  });
+}

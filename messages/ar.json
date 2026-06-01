@@ -280,11 +280,29 @@
       "visitedAt": "متى ذهبتما؟",
       "note": "ملاحظة عن هذا المكان"
     },
-    "noToken": "الخريطة غير متاحة. أضف رمز Mapbox (NEXT_PUBLIC_MAPBOX_TOKEN) لتفعيل الخريطة.",
     "hint": "انقر بزر يمين أو اضغط مطوّلاً لإضافة دبوس",
     "newPin": "دبوس جديد",
     "savePin": "احفظ الدبوس",
-    "noteOptional": "ملاحظة (اختياري)"
+    "noteOptional": "ملاحظة (اختياري)",
+    "deletePin": "احذف الدبوس",
+    "deleting": "جاري الحذف…",
+    "close": "إغلاق",
+    "searchPlaceholder": "ابحث عن دبوس أو مكان…",
+    "searchYourPlaces": "أماكنكما",
+    "searchLocations": "أماكن في العالم",
+    "searchEmpty": "لا توجد نتائج — جرّب اسم دولة.",
+    "searchSearching": "يبحث…",
+    "geolocationDenied": "تم رفض إذن الموقع.",
+    "geolocationUnavailable": "تعذّر جلب موقعك.",
+    "controls": {
+      "search": "بحث",
+      "zoomIn": "تكبير",
+      "zoomOut": "تصغير",
+      "world": "عرض العالم",
+      "egypt": "اذهب لمصر",
+      "myLocation": "موقعي",
+      "filter": "تصفية الدبابيس"
+    }
   },
   "constellation": {
     "title": "كوكبتنا",

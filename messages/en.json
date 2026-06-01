@@ -280,11 +280,29 @@
       "visitedAt": "When did you go?",
       "note": "A note about this place"
     },
-    "noToken": "Map unavailable. Add a Mapbox token (NEXT_PUBLIC_MAPBOX_TOKEN) to enable the map.",
     "hint": "Right-click or long-press to add a pin",
     "newPin": "New pin",
     "savePin": "Save pin",
-    "noteOptional": "Note (optional)"
+    "noteOptional": "Note (optional)",
+    "deletePin": "Remove pin",
+    "deleting": "Removing…",
+    "close": "Close",
+    "searchPlaceholder": "Search a pin or place…",
+    "searchYourPlaces": "Your places",
+    "searchLocations": "Locations",
+    "searchEmpty": "No matches — try a country name.",
+    "searchSearching": "Searching…",
+    "geolocationDenied": "Location permission denied.",
+    "geolocationUnavailable": "Couldn't get your location.",
+    "controls": {
+      "search": "Search",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "world": "World view",
+      "egypt": "Fly to Egypt",
+      "myLocation": "My location",
+      "filter": "Filter pins"
+    }
   },
   "constellation": {
     "title": "Our Constellation",

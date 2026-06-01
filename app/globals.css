@@ -133,6 +133,100 @@ body {
 }
 
 /* =====================
+   MAP — theme-aware tiles, glowing pins, restyled Leaflet controls
+   ----------------------------------------------------------------
+   The map paints its own chrome (search bar, side rail, hover card) using the
+   app's surface/gold/ivory tokens — those re-tint automatically on theme
+   change. The tile imagery itself gets a per-theme CSS filter so the OSM
+   raster lines pick up the Forever palette without having to swap providers.
+   Pin colors live in CSS vars so the divIcon HTML can reference them by var
+   name — no rerender needed when the theme flips.
+   ===================== */
+
+/* Pin palette per kind. Default = dusk (the visual baseline). Day pushes
+   colors deeper so the same hues read on a light background; night pushes
+   them brighter so they glow against near-black. */
+:root {
+  --pin-visited:      #c9a961;
+  --pin-dream:        #9b8abf;
+  --pin-first_date:   #e8c87a;
+  --pin-anniversary:  #d4a060;
+  --pin-home:         #b08040;
+}
+[data-theme='day'] {
+  --pin-visited:      #a8843f;
+  --pin-dream:        #7560a3;
+  --pin-first_date:   #c69b3f;
+  --pin-anniversary:  #b08040;
+  --pin-home:         #8a6234;
+}
+[data-theme='night'] {
+  --pin-visited:      #d4a060;
+  --pin-dream:        #b09acf;
+  --pin-first_date:   #f0d68a;
+  --pin-anniversary:  #e0b07a;
+  --pin-home:         #c08a55;
+}
+
+/* Tile container backdrop + per-theme recolor filter.
+   dusk:  light gray OSM lines → bright gold on near-black
+   night: same lines → deeper gold-amber on pure black
+   day:   warm Voyager tiles unfiltered (light, readable) */
+.leaflet-container {
+  background: var(--bg) !important;
+}
+[data-theme='dusk']  .leaflet-tile-pane { filter: sepia(1) hue-rotate(-10deg) saturate(3.2) brightness(1.05) contrast(1.1); }
+[data-theme='night'] .leaflet-tile-pane { filter: sepia(1) hue-rotate(-15deg) saturate(4)   brightness(0.85) contrast(1.2); }
+[data-theme='day']   .leaflet-tile-pane { filter: none; }
+
+/* Glowing pin (two layers: pulsing halo behind, steady glowing dot in front). */
+.forever-pin {
+  pointer-events: auto;
+}
+.forever-pin .halo {
+  position: absolute;
+  inset: -10px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--pin-color, #c9a961) 0%, transparent 70%);
+  opacity: 0.55;
+  animation: pin-pulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+.forever-pin .dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--pin-color, #c9a961);
+  border: 2px solid #fff;
+  box-shadow:
+    0 0 8px 2px var(--pin-color, #c9a961),
+    0 0 18px 4px color-mix(in srgb, var(--pin-color, #c9a961) 60%, transparent),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  animation: pin-drop 0.5s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+@keyframes pin-pulse {
+  0%   { transform: scale(0.6); opacity: 0.55; }
+  60%  { transform: scale(1.8); opacity: 0;    }
+  100% { transform: scale(1.8); opacity: 0;    }
+}
+@keyframes pin-drop {
+  0%   { transform: translateY(-12px) scale(0.4); opacity: 0; }
+  60%  { transform: translateY(2px) scale(1.15);  opacity: 1; }
+  100% { transform: translateY(0)    scale(1);     opacity: 1; }
+}
+
+/* Hide Leaflet's default attribution chrome (it floats over our chrome) and
+   the popup/tooltip styles since we render our own viewer card. We re-show
+   the OSM attribution via a static link in the JSX so we stay compliant. */
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--bg) 70%, transparent) !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+}
+.leaflet-control-attribution a { color: var(--gold) !important; }
+
+/* =====================
    REDUCED MOTION
    ===================== */
 @media (prefers-reduced-motion: reduce) {

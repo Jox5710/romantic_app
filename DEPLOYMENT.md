@@ -242,9 +242,8 @@ docker cp supabase/seed-partner.sql <db-container>:/tmp/ && docker exec -e PGPAS
 
 ### 7.2 Secrets
 
-| Name | Notes |
-|---|---|
-| `NEXT_PUBLIC_MAPBOX_TOKEN` | Mapbox tokens have URL restrictions — treat as a secret |
+No app-specific secrets are required for the map — Leaflet ships from npm and
+the tiles come from CartoDB / OpenStreetMap (free, no key).
 
 No AWS keys and no `GITHUB_TOKEN` are needed (OIDC + the auto-provided token cover those).
 

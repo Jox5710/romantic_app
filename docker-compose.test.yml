@@ -35,8 +35,6 @@ services:
       TEST_ADMIN_PASSWORD: jox@12345
       TEST_PARTNER_EMAIL: nourhansamy@fromantic.com
       TEST_PARTNER_PASSWORD: nourhan@youssef
-      # Disable Mapbox in tests so the no-token placeholder branch is exercised
-      NEXT_PUBLIC_MAPBOX_TOKEN: ""
     # Give the user's terminal a sensible default if they just `run` without args
     init: true
     ipc: host

@@ -3,8 +3,9 @@
  *  - navigates while logged in as admin (paired couple)
  *  - asserts the localized title renders
  *  - fails if there's any console error during ~3s of idle
- *  - asserts the map page shows the localized "no token" placeholder
- *    (NEXT_PUBLIC_MAPBOX_TOKEN is unset in the test compose, on purpose)
+ *
+ * The map uses Leaflet + free OpenStreetMap tiles — no API key required, so we
+ * just assert it renders the title like every other page.
  */
 import { test, expect } from '@playwright/test';
 import { localePath } from '../utils/i18n';
@@ -34,15 +35,6 @@ for (const { slug, titleRe, priority } of ROUTES) {
     const log = failOnConsoleError(page);
     await page.goto(localePath('en', slug));
     await expect(page.locator('main h1')).toHaveText(titleRe, { timeout: 10_000 });
-
-    // Special case: map should show the localized "no token" placeholder when
-    // NEXT_PUBLIC_MAPBOX_TOKEN is empty (our test container sets it to "").
-    if (slug === 'map') {
-      const placeholder = page.locator('text=/map unavailable|mapbox token/i').first();
-      // It's OK if a token IS provided (the placeholder won't show); we just
-      // assert no crash in either branch.
-      await placeholder.count();
-    }
 
     // Brief idle to surface late console errors
     await page.waitForTimeout(1_500);

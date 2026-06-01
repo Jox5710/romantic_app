@@ -63,10 +63,11 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export const metadata: Metadata = {
-  title: 'Forever',
-  description: 'A private sanctuary for the two of you.',
-};
+// Title + description come from the root [layout.tsx](../layout.tsx). Setting
+// them here would clobber the root's `title.template`, so this layout adds
+// nothing — locale-specific overrides (if ever needed) belong on individual
+// `page.tsx` files.
+export const metadata: Metadata = {};
 
 export default function LocaleLayout({
   children,
