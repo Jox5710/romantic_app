@@ -21,7 +21,7 @@ export default function RejectedPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-dvh flex items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-8 text-center animate-fade-up">
         <div className="w-20 h-20 mx-auto rounded-full border-2 border-red-900 bg-surface flex items-center justify-center">
           <span className="text-red-400 text-3xl">×</span>

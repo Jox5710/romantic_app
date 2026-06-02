@@ -7,7 +7,7 @@ import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 const UsMap = dynamic(() => import('@/components/map/us-map').then((m) => ({ default: m.UsMap })), {
   ssr: false,
-  loading: () => <div className="w-full h-[calc(100vh-5rem)] rounded-2xl shimmer" />,
+  loading: () => <div className="w-full h-[calc(100dvh-5rem)] rounded-2xl shimmer" />,
 });
 
 export default function MapPage() {

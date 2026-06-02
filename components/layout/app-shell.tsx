@@ -28,8 +28,10 @@ function TutorialTriggerButton() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen flex flex-col">
-      <header className="fixed top-0 inset-x-0 z-40 flex items-center justify-between gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-bg/80 backdrop-blur-sm border-b border-line">
+    <div className="relative min-h-dvh flex flex-col">
+      {/* safe-top + safe-x push the header below the iPhone notch and away
+          from rounded screen corners. Resolves to 0 on every other device. */}
+      <header className="fixed top-0 inset-x-0 z-40 flex items-center justify-between gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-bg/80 backdrop-blur-sm border-b border-line safe-top safe-x">
         <motion.div
           className="min-w-0 shrink"
           initial={{ opacity: 0, scale: 0.8 }}

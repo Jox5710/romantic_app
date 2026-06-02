@@ -30,7 +30,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-6 end-6 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+      {/* safe-bottom lifts toasts above the iOS home indicator. */}
+      <div className="fixed bottom-6 end-6 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none safe-bottom safe-x">
         <AnimatePresence>
           {toasts.map((t) => (
             <motion.div

@@ -166,7 +166,9 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
 // ─── Magic link form ──────────────────────────────────────────────────────────
 function MagicLinkForm({ t }: { t: ReturnType<typeof useTranslations> }) {
   const [sent, setSent] = useState(false);
+  const [checking, setChecking] = useState(false);
   const locale = useLocale();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -187,6 +189,33 @@ function MagicLinkForm({ t }: { t: ReturnType<typeof useTranslations> }) {
     else setSent(true);
   }
 
+  // Once we've sent the magic link, poll for a session every 3s. This is the
+  // mobile fix: when the user taps the link in a different browser context
+  // (Gmail / Mail in-app browser), localStorage sync via onAuthStateChange
+  // can't reach us — so we ask supabase-js directly. As soon as a session
+  // exists, redirect to the dashboard. Bounded to 10 minutes so a tab that's
+  // sat open all day doesn't keep polling forever.
+  useEffect(() => {
+    if (!sent) return;
+    const supabase = createClient();
+    let cancelled = false;
+    const tick = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled && data.session) router.replace('/');
+    };
+    const intervalId = setInterval(tick, 3000);
+    const stopId = setTimeout(() => clearInterval(intervalId), 10 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(intervalId); clearTimeout(stopId); };
+  }, [sent, router]);
+
+  async function manualCheck() {
+    setChecking(true);
+    const supabase = createClient();
+    const { data } = await supabase.auth.getSession();
+    setChecking(false);
+    if (data.session) router.replace('/');
+  }
+
   if (sent) {
     return (
       <motion.div
@@ -204,6 +233,14 @@ function MagicLinkForm({ t }: { t: ReturnType<typeof useTranslations> }) {
         </motion.div>
         <p className="text-ivory font-semibold">{t('sent')}</p>
         <p className="text-ivoryDim text-sm">{t('checkEmail')}</p>
+        <button
+          type="button"
+          onClick={manualCheck}
+          disabled={checking}
+          className="text-sm text-gold hover:underline disabled:opacity-50"
+        >
+          {checking ? t('checkingSession') : t('alreadySignedIn')}
+        </button>
       </motion.div>
     );
   }
@@ -423,7 +460,7 @@ export default function SignInPage() {
   }, [redirecting, router]);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <div className="relative min-h-dvh flex items-center justify-center p-4 overflow-hidden">
       <LoadingOverlay show={redirecting} label={t('redirecting')} fullscreen />
 
       {/* Adaptive background gradient */}

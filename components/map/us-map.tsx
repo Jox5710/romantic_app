@@ -175,6 +175,12 @@ export function UsMap() {
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!mapReady || !map || !places) return;
+    // Touch devices don't actually hover — Leaflet synthesizes mouseover on
+    // first tap and mouseout on second, which makes our hover viewer feel
+    // broken (opens then closes immediately). On touch we use click-to-toggle
+    // instead and skip the hover bindings.
+    const isHoverDevice = typeof window !== 'undefined'
+      && window.matchMedia('(hover: hover)').matches;
     import('leaflet').then((L) => {
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
@@ -191,24 +197,34 @@ export function UsMap() {
           });
           const marker = L.marker([p.lat, p.lng], { icon }).addTo(map);
 
-          // Hover → open viewer card. Grace timer for cursor travel.
-          marker.on('mouseover', () => {
-            if (hoverCloseTimer.current) clearTimeout(hoverCloseTimer.current);
-            setHovered(p);
-          });
-          marker.on('mouseout', () => {
-            if (hoverCloseTimer.current) clearTimeout(hoverCloseTimer.current);
-            hoverCloseTimer.current = setTimeout(() => setHovered(null), 180);
-          });
+          if (isHoverDevice) {
+            // Desktop: hover → open viewer card. Grace timer for cursor travel.
+            marker.on('mouseover', () => {
+              if (hoverCloseTimer.current) clearTimeout(hoverCloseTimer.current);
+              setHovered(p);
+            });
+            marker.on('mouseout', () => {
+              if (hoverCloseTimer.current) clearTimeout(hoverCloseTimer.current);
+              hoverCloseTimer.current = setTimeout(() => setHovered(null), 180);
+            });
 
-          // Click → fly-in zoom to that pin.
-          marker.on('click', () => {
-            if (prefersReducedMotion()) {
-              map.setView([p.lat, p.lng], 8);
-            } else {
-              map.flyTo([p.lat, p.lng], 8, { duration: 1.4, easeLinearity: 0.25 });
-            }
-          });
+            // Click → fly-in zoom to that pin.
+            marker.on('click', () => {
+              if (prefersReducedMotion()) {
+                map.setView([p.lat, p.lng], 8);
+              } else {
+                map.flyTo([p.lat, p.lng], 8, { duration: 1.4, easeLinearity: 0.25 });
+              }
+            });
+          } else {
+            // Touch: a tap toggles the viewer card open / closed. No fly-in,
+            // because the viewer card already covers the bottom area and a
+            // fly-in would scroll the pin out of view behind the card.
+            marker.on('click', () => {
+              if (hoverCloseTimer.current) clearTimeout(hoverCloseTimer.current);
+              setHovered((curr) => (curr?.id === p.id ? null : p));
+            });
+          }
 
           markersRef.current.push(marker);
         });
@@ -326,7 +342,7 @@ export function UsMap() {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="relative w-full h-[calc(100vh-7rem)]">
+    <div className="relative w-full h-[calc(100dvh-7rem)]">
       <div ref={mapRef} className="w-full h-full rounded-2xl overflow-hidden bg-surface2" />
 
       {/* Top-start: search bar */}

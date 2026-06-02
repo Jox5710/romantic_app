@@ -29,6 +29,12 @@ function AcceptInner() {
   const [accepting, setAccepting] = useState(false);
   const [myName, setMyName] = useState('');
   const [myNameAr, setMyNameAr] = useState('');
+  // Account password — lets the partner sign in with email+password next time
+  // instead of needing a magic link every login.
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const tSignIn = useTranslations('auth.signIn');
 
   useEffect(() => {
     if (!code) { setLoading(false); return; }
@@ -47,10 +53,25 @@ function AcceptInner() {
 
   async function accept() {
     if (!couple) return;
+
+    // Validate password locally before any network calls
+    setPasswordError(null);
+    if (password.length < 8) { setPasswordError(tSignIn('passwordShort')); return; }
+    if (password !== confirmPassword) { setPasswordError(tSignIn('passwordMismatch')); return; }
+
     setAccepting(true);
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+
+    // Set the account password first — if this fails (e.g. GoTrue policy)
+    // we bail before joining the couple so the user can retry cleanly.
+    const { error: pwErr } = await supabase.auth.updateUser({ password });
+    if (pwErr) {
+      toast(t('passwordError'));
+      setAccepting(false);
+      return;
+    }
 
     const { error: memberErr } = await supabase.from('couple_members').insert({
       user_id: user.id,
@@ -87,14 +108,14 @@ function AcceptInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-dvh flex items-center justify-center">
         <div className="w-12 h-12 rounded-full border-2 border-gold shimmer" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-dvh flex items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-8 text-center animate-fade-up">
         <Heart className="mx-auto text-gold" size={40} fill="currentColor" />
 
@@ -122,6 +143,22 @@ function AcceptInner() {
                 value={myNameAr}
                 onChange={(e) => setMyNameAr(e.target.value)}
               />
+              <Field
+                label={t('password')}
+                type="password"
+                placeholder="••••••••"
+                hint={t('passwordHint')}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Field
+                label={t('confirmPassword')}
+                type="password"
+                placeholder="••••••••"
+                error={passwordError ?? undefined}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
             </div>
             <GoldButton onClick={accept} loading={accepting} size="lg" className="w-full" data-tutorial-id="accept-button">
               {t('accept')}
@@ -141,7 +178,7 @@ function AcceptInner() {
 export default function AcceptPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-dvh flex items-center justify-center">
         <div className="w-12 h-12 rounded-full border-2 border-gold shimmer" />
       </div>
     }>

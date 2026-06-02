@@ -243,4 +243,12 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  /* Safe-area shims for notched / home-indicator-bearing iOS devices.
+     Resolves to 0 on every other device, so safe to sprinkle anywhere. */
+  .safe-top    { padding-top:    env(safe-area-inset-top, 0); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+  .safe-x {
+    padding-left:  env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
 }

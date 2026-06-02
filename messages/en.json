@@ -102,7 +102,9 @@
       "passwordShort": "At least 8 characters",
       "passwordMismatch": "Passwords don't match",
       "redirecting": "Opening your sanctuary…",
-      "oauthUnavailable": "{provider} sign-in isn't set up yet. Try magic link or password."
+      "oauthUnavailable": "{provider} sign-in isn't set up yet. Try magic link or password.",
+      "alreadySignedIn": "Already signed in? Tap to continue",
+      "checkingSession": "Checking…"
     },
     "invite": {
       "title": "Create your sanctuary",
@@ -121,7 +123,11 @@
       "copied": "Copied!",
       "errorCreating": "Could not create your sanctuary. Please try again.",
       "passphrase": "Capsule passphrase",
-      "passphraseHint": "Choose a shared passphrase for your time capsule letters. You cannot change this later."
+      "passphraseHint": "Choose a shared passphrase for your time capsule letters. You cannot change this later.",
+      "password": "Choose a password",
+      "passwordHint": "You'll use this with your email to sign in next time. At least 8 characters.",
+      "confirmPassword": "Confirm password",
+      "passwordError": "Could not save the password. Please try a stronger one."
     },
     "accept": {
       "title": "You've been invited",
@@ -135,7 +141,11 @@
       "myNameArPlaceholder": "اسمك بالعربية",
       "alreadyMember": "You're already part of a couple.",
       "notFoundTitle": "Invitation not found",
-      "notFoundBody": "This code may be invalid or already used."
+      "notFoundBody": "This code may be invalid or already used.",
+      "password": "Choose a password",
+      "passwordHint": "You'll use this with your email to sign in next time. At least 8 characters.",
+      "confirmPassword": "Confirm password",
+      "passwordError": "Could not save the password. Please try a stronger one."
     },
     "awaiting": {
       "title": "Awaiting our blessing",

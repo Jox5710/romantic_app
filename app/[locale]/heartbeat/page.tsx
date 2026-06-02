@@ -62,7 +62,7 @@ export default function HeartbeatPage() {
 
   return (
     <RouteGuard>
-      <div className="min-h-screen flex flex-col items-center justify-center gap-8 px-4 py-12">
+      <div className="min-h-dvh flex flex-col items-center justify-center gap-8 px-4 py-12">
         <div className="text-center space-y-1" data-tutorial-id="heartbeat-title">
           <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
           <p className="text-ivoryDim text-sm">{t('subtitle')}</p>

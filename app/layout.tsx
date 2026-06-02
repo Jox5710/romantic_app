@@ -19,10 +19,14 @@ export const metadata: Metadata = {
 };
 
 // themeColor + viewport live in the `viewport` export now (Next 14 requirement).
+// viewportFit: 'cover' is the on-switch for env(safe-area-inset-*) on iOS —
+// without it, the safe-* utility classes in globals.css all resolve to 0 and
+// the fixed header sits behind the notch.
 export const viewport: Viewport = {
   themeColor: '#c9a961',
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
