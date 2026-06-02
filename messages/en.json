@@ -101,7 +101,8 @@
       "signUpSuccess": "Account created! Check your email to confirm.",
       "passwordShort": "At least 8 characters",
       "passwordMismatch": "Passwords don't match",
-      "redirecting": "Opening your sanctuary…"
+      "redirecting": "Opening your sanctuary…",
+      "oauthUnavailable": "{provider} sign-in isn't set up yet. Try magic link or password."
     },
     "invite": {
       "title": "Create your sanctuary",

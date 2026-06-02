@@ -23,6 +23,10 @@
 .DS_Store
 *.pem
 
+# local-only AWS / infra notes — never commit (contains account + instance IDs)
+docs/ec2-instance.md
+docs/*.local.md
+
 # debug
 npm-debug.log*
 yarn-debug.log*

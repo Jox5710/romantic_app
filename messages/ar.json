@@ -101,7 +101,8 @@
       "signUpSuccess": "تم إنشاء الحساب! تحقق من بريدك لتأكيده.",
       "passwordShort": "٨ أحرف على الأقل",
       "passwordMismatch": "كلمتا المرور غير متطابقتين",
-      "redirecting": "نفتح ملاذكما…"
+      "redirecting": "نفتح ملاذكما…",
+      "oauthUnavailable": "تسجيل الدخول عبر {provider} غير مفعّل بعد. جرّب رابط الدخول أو كلمة المرور."
     },
     "invite": {
       "title": "أنشئ ملاذكما",
