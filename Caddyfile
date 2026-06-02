@@ -1,21 +1,28 @@
 # Forever — production reverse proxy with automatic Let's Encrypt SSL.
 #
-# Replace forever.example.com / api.forever.example.com with your real domains
-# before first deploy. Caddy provisions and renews certs automatically as long
-# as port 80 and 443 are open and DNS resolves both A-records to this EC2.
+# Hostnames are driven by env vars so the same Caddyfile works for any deploy
+# (nip.io for free-instant HTTPS, real domain for production). Set them in
+# .env.production:
+#
+#   APP_HOSTNAME=51-21-167-103.nip.io
+#   API_HOSTNAME=api-51-21-167-103.nip.io
+#
+# Then the docker-compose Caddy service passes them through, Caddy provisions
+# Let's Encrypt certs automatically as long as port 80 and 443 are open and
+# DNS resolves both to this EC2.
 
-# Frontend (Next.js Node server in the `app` container on port 3000)
-forever.example.com {
+# Frontend (Next.js server in the `app` container on its internal port 3000)
+{$APP_HOSTNAME} {
 	encode zstd gzip
 	reverse_proxy app:3000
 }
 
-# Supabase API gateway (Kong on port 8000) — auth, rest, realtime, storage all live behind here
-api.forever.example.com {
+# Supabase API gateway (Kong on internal port 8000)
+{$API_HOSTNAME} {
 	encode zstd gzip
 
-	# Realtime needs the upgrade headers; Caddy's reverse_proxy passes them by default,
-	# but we set them explicitly so the intent is documented.
+	# Realtime needs the upgrade headers; Caddy's reverse_proxy passes them by
+	# default, but we set them explicitly so the intent is documented.
 	@websockets {
 		header Connection *Upgrade*
 		header Upgrade websocket

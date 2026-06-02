@@ -1,0 +1,44 @@
+# Add Caddy reverse-proxy with automatic Let's Encrypt SSL.
+#
+# Usage on EC2 (alongside the dev compose file):
+#   docker compose -f docker-compose.yml -f docker-compose.override.yml \
+#                  -f docker-compose.caddy.yml \
+#                  --env-file .env.production up -d
+#
+# Required env vars in .env.production:
+#   APP_HOSTNAME=51-21-167-103.nip.io
+#   API_HOSTNAME=api-51-21-167-103.nip.io
+#
+# Ports 80 + 443 must be open in the EC2 security group (Caddy needs both
+# for the ACME HTTP-01 challenge + the actual HTTPS listener).
+#
+# Note: this stack composes on top of docker-compose.yml's `app` service —
+# the app stays on its internal Docker-network port 3000 and Caddy reaches it
+# as `app:3000`. The host port-3000 binding from docker-compose.yml can also
+# remain (useful for direct HTTP debugging) or be removed if you want a
+# clean HTTPS-only surface.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      APP_HOSTNAME: ${APP_HOSTNAME}
+      API_HOSTNAME: ${API_HOSTNAME}
+    depends_on:
+      - app
+      - kong
+    networks:
+      - supabase-net
+
+volumes:
+  caddy_data:
+  caddy_config:
