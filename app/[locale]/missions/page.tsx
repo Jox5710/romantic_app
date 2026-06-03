@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { RouteGuard } from '@/components/route-guard';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
@@ -12,24 +12,6 @@ import { format, addDays } from 'date-fns';
 import { Swords } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
 import { useToast } from '@/components/ui/toast';
-
-const MISSION_POOL = [
-  "Bring home their favourite snack without being asked.",
-  "Leave a sticky note somewhere they'll find it today.",
-  "Give a 5-minute shoulder rub tonight.",
-  "Send a voice note just to say I love you.",
-  "Cook or order their favourite meal.",
-  "Write three things you love about them and read it aloud.",
-  "Plan a micro-adventure for next weekend.",
-  "Make them coffee or tea in the morning, just right.",
-  "Put their phone on charge before they notice it's low.",
-  "Tell them one thing they did recently that made you proud.",
-];
-
-function randomMission(coupleId: string) {
-  const seed = parseInt(coupleId.slice(0, 8), 16) + new Date().getDate();
-  return MISSION_POOL[seed % MISSION_POOL.length];
-}
 
 interface Mission {
   id: string;
@@ -59,6 +41,7 @@ function useMissions(coupleId: string | null) {
 export default function MissionsPage() {
   const t = useTranslations('missions');
   const tc = useTranslations('common');
+  const locale = useLocale();
   const { toast } = useToast();
 
   useTutorial('missions', [
@@ -77,7 +60,17 @@ export default function MissionsPage() {
   const assign = useMutation({
     mutationFn: async () => {
       if (!coupleId || !session) return;
-      const text = randomMission(coupleId);
+      // Ask Gemini for a personalized mission via our server-side route.
+      // The route reads the couple's names through RLS and crafts the prompt.
+      const r = await fetch('/api/llm/mission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locale }),
+      });
+      if (!r.ok) throw new Error('mission generation failed');
+      const j = (await r.json()) as { mission?: string };
+      const text = j.mission?.trim();
+      if (!text) throw new Error('empty mission');
       await supabase.from('missions').insert({
         couple_id: coupleId,
         assigned_to: session.user.id,

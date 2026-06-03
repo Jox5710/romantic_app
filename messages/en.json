@@ -333,7 +333,6 @@
       "wish": "What do you need?",
       "soften": "Soften this",
       "softenUnavailable": "Gentle rewording isn't available right now.",
-      "softenComingSoon": "AI rewording is coming soon — set NEXT_PUBLIC_SOFTEN_URL to enable.",
       "send": "Send whisper",
       "cooldown": "You've already sent a whisper today. Come back tomorrow.",
       "delivering": "Your whisper will arrive in 30 minutes."

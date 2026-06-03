@@ -360,54 +360,58 @@ for the full suite description and runner options.
 
 ---
 
-## 14. Wiring Soften (optional AI rewording)
+## 14. AI features (Gemini, server-side)
 
-The whisper page has a "Soften" button that asks an LLM to rewrite a harsh
-message into a gentler one. The client just POSTs `{ text, locale }` to
-`NEXT_PUBLIC_SOFTEN_URL` and expects `{ softened: string }` back —
-**the app is provider-agnostic**. Wire it up with any LLM in production.
+The app calls Gemini directly from its own Next.js Route Handlers under
+`app/api/llm/*`. The provider API key lives in the **server** environment
+only (no `NEXT_PUBLIC_` prefix) and the browser never sees it.
 
-When `NEXT_PUBLIC_SOFTEN_URL` is empty (the default), the button stays visible
-but shows a localized "AI rewording is coming soon — set NEXT_PUBLIC_SOFTEN_URL
-to enable" toast. Users can still send whispers without it.
+Wire-up is a single env variable on the EC2 host:
 
-### Reference Cloud Function (Gemini)
-
-```js
-// soften.js — deploy as a Vercel Edge Function, Cloud Run service, or similar.
-// Keep GEMINI_API_KEY server-side; never expose to the client.
-export default async function handler(req) {
-  const { text, locale } = await req.json();
-  const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text:
-              `Rewrite this short message from one partner to the other into a ` +
-              `gentler, kinder version that says the same thing without anger. ` +
-              `Keep it under 220 characters. Respond in ${locale}.\n\n${text}`,
-          }],
-        }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 220 },
-      }),
-    },
-  );
-  const j = await r.json();
-  const softened = j?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-  return new Response(JSON.stringify({ softened }),
-    { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
-}
+```
+# /opt/forever/.env.production
+GEMINI_API_KEY=AIzaSy...   # https://aistudio.google.com/apikey
 ```
 
-For Anthropic, swap the URL/body for the Messages API; for OpenAI, for `/v1/chat/completions`.
+Then recreate just the app container:
 
-Then set on the EC2 host (or via the GitHub variable so it bakes into the build):
-```
-NEXT_PUBLIC_SOFTEN_URL=https://your-endpoint.example.com/soften
+```bash
+docker compose --env-file .env.production up -d --force-recreate app
 ```
 
-Rebuild + redeploy the app container (`NEXT_PUBLIC_*` is baked at build time).
+When `GEMINI_API_KEY` is empty, the routes return `503 { error: 'llmUnavailable' }`
+and the calling pages show a localized failure toast. Users can still use the
+non-AI parts of every feature.
+
+### Routes live today
+
+| Route | Used by | Returns |
+|---|---|---|
+| `POST /api/llm/soften` | Whisper page — "Soften this" Sparkles button | `{ softened: string }` |
+| `POST /api/llm/mission` | Missions page — "Get a mission" button (replaces the old hardcoded MISSION_POOL) | `{ mission: string }` |
+
+Both routes:
+- require a Supabase session cookie (return `401` otherwise — gates the quota against anonymous abuse)
+- use `gemini-1.5-flash` (free tier: 15 RPM, 1500 RPD — plenty for two users)
+- send a locale-aware prompt template and post-process the response to strip preambles / wrapping quotes
+
+### Backlog — modules with viable AI fit, not yet wired
+
+These have prompt sketches and a clean seam in their page file. Pull any
+of them forward by adding a new Route Handler under `app/api/llm/<name>/`
+with the same auth gate + `generate(prompt)` shape.
+
+| Module | New route | UI seam | Prompt intent |
+|---|---|---|---|
+| Echo | `/api/llm/echo-narrative` | `echo/page.tsx` list header | "Weave these N memories from the same date into one tender 2-3 sentence narrative." |
+| Promises | `/api/llm/promise-refine` | the add-promise form | "Refine a vague promise into a measurable one-cadence commitment." |
+| Gratitude | `/api/llm/gratitude-themes` | gratitude/page.tsx weekly card | "Summarize these 7 gratitude entries into 1-2 themes the couple is leaning into." |
+| Timeline | `/api/llm/memory-caption` | add-memory form | "Suggest 3 caption options for a memory dated {date} described as: {raw}." |
+| Dinner | `/api/llm/dinner-suggest` | dinner/page.tsx add form | "Suggest 3 dinner options the couple hasn't tried, based on their swipe history." |
+| Queue | `/api/llm/queue-recommend` | queue/page.tsx empty state | "Recommend 5 movies similar to the couple's watched list, mixing genres they both lean toward." |
+| Voices | `/api/llm/voice-transcribe` | voices/page.tsx NoteCard | "Transcribe this 60-second voice note." *(Multimodal — Gemini 1.5 Flash accepts inline-data audio; bigger lift than text-only routes.)* |
+
+Modules **left AI-free on purpose**: mirror, prompt, bucket, capsule (encrypted —
+the server cannot see the plaintext, so AI assistance there would be theatre),
+vibe, map, constellation, heartbeat, blueprint, truce, canvas. Adding LLM to any
+of those would be AI-for-AI's-sake, not user value.

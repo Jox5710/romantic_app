@@ -60,8 +60,6 @@ export default function WhisperPage() {
     setSoftening(false);
     if (result.status === 'ok' && result.softened) {
       setWhat(result.softened);
-    } else if (result.status === 'unconfigured') {
-      toast(tCompose('softenComingSoon'));
     } else {
       toast(tCompose('softenUnavailable'));
     }
