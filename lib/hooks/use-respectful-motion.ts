@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 
 /**
@@ -20,17 +19,10 @@ import { useReducedMotion } from 'framer-motion';
  */
 export function useRespectfulMotion() {
   const reducedMotion = useReducedMotion();
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const handler = () => setVisible(document.visibilityState === 'visible');
-    handler();
-    document.addEventListener('visibilitychange', handler);
-    return () => document.removeEventListener('visibilitychange', handler);
-  }, []);
-
-  const shouldLoop = !reducedMotion && visible;
+  // Browsers throttle rAF in background tabs automatically; toggling repeat
+  // 0 → Infinity on visibilitychange restarts animations from frame 0,
+  // flashing every looping icon on tab return. Only gate on reduced-motion.
+  const shouldLoop = !reducedMotion;
   return {
     shouldLoop,
     repeat: shouldLoop ? Infinity : 0,

@@ -91,13 +91,16 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   }, [session, isAdmin, coupleState, loading, path, router]);
 
   if (loading) {
-    // Wrap in a static-positioned parent so Next's app-router auto-scroll
-    // handler has a non-fixed root to target (silences dev-only warning).
-    return (
-      <div className="min-h-screen">
-        <SealedLoading />
-      </div>
-    );
+    if (!session) {
+      return (
+        <div className="min-h-screen">
+          <SealedLoading />
+        </div>
+      );
+    }
+    // Session exists but couple state still resolving — render immediately
+    // (children show their own shimmer loaders)
+    return <>{children}</>;
   }
   return <>{children}</>;
 }

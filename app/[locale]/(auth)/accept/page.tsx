@@ -73,6 +73,14 @@ function AcceptInner() {
       return;
     }
 
+    // updateUser rotates the JWT; refresh so the next RLS-gated insert uses the new token.
+    const { error: refreshErr } = await supabase.auth.refreshSession();
+    if (refreshErr) {
+      toast(t('sessionError'));
+      setAccepting(false);
+      return;
+    }
+
     const { error: memberErr } = await supabase.from('couple_members').insert({
       user_id: user.id,
       couple_id: couple.id,

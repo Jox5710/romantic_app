@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { RouteGuard } from '@/components/route-guard';
 import { Hero } from '@/components/hero/hero';
 import { ModuleGrid } from '@/components/layout/module-grid';
@@ -9,19 +7,11 @@ import { AnniversaryBanner } from '@/components/hero/anniversary-banner';
 import { useAnniversaryMilestones } from '@/lib/hooks/use-anniversary';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
-
-interface CoupleData {
-  name_a: string | null;
-  name_b: string | null;
-  name_a_ar: string | null;
-  name_b_ar: string | null;
-  wedding_date: string | null;
-  created_at: string;
-}
+import { useCouple } from '@/lib/queries/use-couple';
 
 export default function DashboardPage() {
   const { coupleId } = useCoupleState();
-  const [couple, setCouple] = useState<CoupleData | null>(null);
+  const { data: couple } = useCouple(coupleId ?? null);
 
   // Gate the tutorial on couple data being loaded, so it starts only once the
   // Hero + module grid (and their data-tutorial-id targets) are actually on screen.
@@ -34,17 +24,6 @@ export default function DashboardPage() {
     ],
     !!couple,
   );
-
-  useEffect(() => {
-    if (!coupleId) return;
-    const supabase = createClient();
-    supabase
-      .from('couples')
-      .select('name_a,name_b,name_a_ar,name_b_ar,wedding_date,created_at')
-      .eq('id', coupleId)
-      .single()
-      .then(({ data }) => setCouple(data as CoupleData | null));
-  }, [coupleId]);
 
   const milestone = useAnniversaryMilestones(
     couple?.created_at ?? null,

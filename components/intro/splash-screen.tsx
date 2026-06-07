@@ -55,10 +55,23 @@ export function SplashScreen() {
   const t = useTranslations('splash');
   const { repeat } = useRespectfulMotion();
 
-  // Play the intro on every full page load (hard refresh). The splash mounts in
-  // Providers, which only remounts on a real page load — not on client-side
-  // navigation — so this shows once per hard refresh, never between in-app routes.
+  // Play the splash exactly ONCE per browser session — on first app open.
+  // sessionStorage persists across in-app navigation, locale changes (en↔ar),
+  // and refreshes within the same tab, but clears when the tab/browser closes,
+  // so reopening the app plays it again. This guarantees: no replay on locale
+  // switch, refresh, or navigation — only a genuinely fresh open shows it.
   useEffect(() => {
+    let alreadyPlayed = false;
+    try {
+      alreadyPlayed = !!sessionStorage.getItem('forever_splash_played');
+    } catch {}
+
+    if (alreadyPlayed) {
+      setChecked(true);
+      return;
+    }
+
+    try { sessionStorage.setItem('forever_splash_played', '1'); } catch {}
     setShow(true);
     setChecked(true);
     setSeedReady(true);

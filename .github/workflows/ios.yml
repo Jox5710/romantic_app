@@ -1,0 +1,67 @@
+name: Build iOS (unsigned IPA)
+
+# Builds an UNSIGNED .ipa of the Forever native shell on a free GitHub-hosted
+# macOS runner. No Apple Developer account or certificates are needed here —
+# signing happens later on your Windows PC via Sideloadly with a free Apple ID.
+#
+# Trigger manually from the Actions tab, or by pushing a tag like `ios-v1`.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'ios-*'
+
+jobs:
+  build:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Sync Capacitor (copies config + runs pod install)
+        run: npx cap sync ios
+
+      - name: Build unsigned archive
+        run: |
+          set -eo pipefail
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$PWD/build/App.xcarchive" \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM=""
+
+      - name: Package unsigned IPA
+        run: |
+          set -eo pipefail
+          cd build
+          mkdir -p Payload
+          cp -R App.xcarchive/Products/Applications/App.app Payload/App.app
+          zip -qr Forever-unsigned.ipa Payload
+          ls -lh Forever-unsigned.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Forever-unsigned-ipa
+          path: mobile/build/Forever-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30

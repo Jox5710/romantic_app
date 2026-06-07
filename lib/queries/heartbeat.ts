@@ -22,6 +22,10 @@ export function useTodayHeartbeats(coupleId: string | null) {
       return data ?? [];
     },
     enabled: !!coupleId,
+    // Realtime is unavailable in this deployment, so poll to keep the You/Partner
+    // counts live. Pauses automatically while the tab is hidden.
+    refetchInterval: 6000,
+    refetchIntervalInBackground: false,
   });
 }
 

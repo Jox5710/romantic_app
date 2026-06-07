@@ -439,10 +439,17 @@ export default function SignInPage() {
   const { session, loading } = useCoupleState();
   const [tab, setTab] = useState<Tab>('magic');
 
-  useTutorial('signIn', [
-    { id: 'signin-title', titleKey: 'signIn.step1.title', descKey: 'signIn.step1.desc' },
-    { id: 'signin-form', titleKey: 'signIn.step2.title', descKey: 'signIn.step2.desc' },
-  ]);
+  // Gate the tutorial so it doesn't fire while a LoadingOverlay covers the targets.
+  const redirecting = !loading && !!session;
+
+  useTutorial(
+    'signIn',
+    [
+      { id: 'signin-title', titleKey: 'signIn.step1.title', descKey: 'signIn.step1.desc' },
+      { id: 'signin-form', titleKey: 'signIn.step2.title', descKey: 'signIn.step2.desc' },
+    ],
+    !redirecting,
+  );
   const [particles, setParticles] = useState<ParticleData[]>([]);
   const [hearts, setHearts] = useState<HeartData[]>([]);
 
@@ -454,7 +461,6 @@ export default function SignInPage() {
 
   // Single source of truth: once the shared auth state reports a session, leave
   // /sign-in. The home page's RouteGuard then routes onwards (invite / awaiting / dashboard).
-  const redirecting = !loading && !!session;
   useEffect(() => {
     if (redirecting) router.replace('/');
   }, [redirecting, router]);
@@ -497,7 +503,7 @@ export default function SignInPage() {
           style={{ background: 'radial-gradient(ellipse at center, rgba(201,169,97,0.5), transparent 70%)' }}
         />
 
-        <div className="rounded-3xl border border-gold/25 bg-surface/75 backdrop-blur-xl shadow-popLg p-8 space-y-7">
+        <div className="rounded-3xl border border-gold/25 bg-surface/75 backdrop-blur-xl shadow-popLg p-5 sm:p-8 space-y-7">
           {/* Logo + Title */}
           <div className="text-center space-y-4">
             <motion.div

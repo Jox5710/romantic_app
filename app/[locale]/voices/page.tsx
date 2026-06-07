@@ -136,17 +136,36 @@ export default function VoicesPage() {
     setSupported(!!navigator.mediaDevices?.getUserMedia);
   }, []);
 
+  // Live updates: when either partner adds a note, refetch (realtime is now
+  // enabled on voice_notes). Without this the partner's note never appears
+  // until a manual reload.
+  useEffect(() => {
+    if (!coupleId) return;
+    const ch = supabase
+      .channel(`voices-${coupleId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'voice_notes', filter: `couple_id=eq.${coupleId}` }, () => {
+        qc.invalidateQueries({ queryKey: ['voices', coupleId] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [coupleId, qc, supabase]);
+
   const saveNote = useMutation({
     mutationFn: async ({ blob, duration }: { blob: Blob; duration: number }) => {
       if (!coupleId || !session) return;
-      const path = `${coupleId}/${Date.now()}.webm`;
-      await supabase.storage.from('voice-notes').upload(path, blob);
-      await supabase.from('voice_notes').insert({
+      const ext = blob.type.includes('mp4') ? 'mp4' : blob.type.includes('ogg') ? 'ogg' : 'webm';
+      const path = `${coupleId}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('voice-notes')
+        .upload(path, blob, { contentType: blob.type || 'audio/webm' });
+      if (upErr) throw upErr;
+      const { error: insErr } = await supabase.from('voice_notes').insert({
         couple_id: coupleId,
         author_id: session.user.id,
         storage_path: path,
-        duration_sec: Math.round(duration),
+        duration_sec: Math.max(1, Math.round(duration)),
       });
+      if (insErr) throw insErr;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['voices', coupleId] }),
     onError: () => toast(tc('error'), 'error'),
@@ -170,13 +189,25 @@ export default function VoicesPage() {
   function stopRecording() {
     if (!mediaRef.current || !startTimeRef.current) return;
     const duration = (Date.now() - startTimeRef.current.getTime()) / 1000;
-    mediaRef.current.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-      saveNote.mutate({ blob, duration });
+    const mr = mediaRef.current;
+    const mime = mr.mimeType || 'audio/webm';
+    mr.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: mime });
+      // Ignore accidental ultra-short taps that produce an empty/garbage clip.
+      if (duration >= 0.4 && blob.size > 0) saveNote.mutate({ blob, duration });
+      mr.stream.getTracks().forEach((tr) => tr.stop());
     };
-    mediaRef.current.stop();
-    mediaRef.current.stream.getTracks().forEach((t) => t.stop());
+    mr.stop();
+    mediaRef.current = null;
     setRecording(false);
+  }
+
+  // Tap-to-toggle: a single click starts, the next stops. Far more reliable
+  // than press-and-hold, which on mobile fires touch + synthetic-mouse events
+  // together and double-triggered start/stop (the "voices not working" bug).
+  function toggleRecording() {
+    if (recording) stopRecording();
+    else startRecording();
   }
 
   return (
@@ -195,14 +226,12 @@ export default function VoicesPage() {
           <div className="flex flex-col items-center gap-4 py-6">
             <button
               type="button"
-              onMouseDown={startRecording}
-              onMouseUp={stopRecording}
-              onTouchStart={startRecording}
-              onTouchEnd={stopRecording}
+              onClick={toggleRecording}
+              disabled={saveNote.isPending}
               className={[
-                'w-24 h-24 rounded-full flex items-center justify-center transition-all duration-200',
+                'w-24 h-24 rounded-full flex items-center justify-center transition-all duration-200 select-none disabled:opacity-50',
                 recording
-                  ? 'bg-red-500 scale-110 shadow-lg shadow-red-500/30'
+                  ? 'bg-red-500 scale-110 shadow-lg shadow-red-500/30 animate-pulse'
                   : 'bg-gold/10 border-2 border-gold text-gold hover:bg-gold/20',
               ].join(' ')}
               aria-label={recording ? t('recording') : t('record')}
@@ -210,7 +239,7 @@ export default function VoicesPage() {
               <Mic size={32} className={recording ? 'text-white' : 'text-gold'} />
             </button>
             <p className="text-xs text-muted text-center">
-              {saveNote.isPending ? t('uploading') : recording ? t('recording') : t('record')}
+              {saveNote.isPending ? t('uploading') : recording ? `${t('recording')} — ${t('tapToStop')}` : t('tapToRecord')}
             </p>
           </div>
         ) : (

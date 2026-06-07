@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { RouteGuard } from '@/components/route-guard';
@@ -33,6 +34,7 @@ export default function AccountPage() {
   ]);
   const { toast } = useToast();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { coupleId, session } = useCoupleState();
 
   const [form, setForm] = useState<Form>({
@@ -78,6 +80,9 @@ export default function AccountPage() {
       })
       .eq('id', coupleId);
     setSaving(false);
+    if (!error) {
+      await queryClient.invalidateQueries({ queryKey: ['couple', coupleId] });
+    }
     toast(error ? t('error') : t('saved'), error ? 'error' : 'success');
   }
 

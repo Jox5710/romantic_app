@@ -29,7 +29,7 @@ export default function WhisperPage() {
   const locale = useLocale();
   const { toast } = useToast();
   const { session, coupleId } = useCoupleState();
-  const { data: whispers } = useWhispers(coupleId);
+  const { data: whispers, isLoading } = useWhispers(coupleId);
   const { data: sentToday } = useSentTodayWhisper(session?.user.id ?? null);
   const send = useSendWhisper();
   const respond = useRespondToWhisper();
@@ -91,7 +91,15 @@ export default function WhisperPage() {
           <p className="text-ivoryDim text-sm mt-1">{t('subtitle')}</p>
         </div>
 
-        {sentToday ? (
+        {/* Loading skeleton */}
+        {isLoading && (
+          <div className="space-y-4">
+            <div className="h-32 rounded-2xl shimmer" />
+            <div className="h-24 rounded-2xl shimmer" />
+          </div>
+        )}
+
+        {!isLoading && sentToday ? (
           <Card variant="elevated" className="text-center py-6 space-y-2">
             <p className="text-gold text-2xl">✦</p>
             <p className="text-ivory">{tCompose('cooldown')}</p>
@@ -153,7 +161,7 @@ export default function WhisperPage() {
           </Card>
         )}
 
-        {deliveredToMe.length > 0 && (
+        {!isLoading && deliveredToMe.length > 0 && (
           <div className="space-y-3" data-tutorial-id="whisper-inbox">
             <h2 className="text-gold text-sm uppercase tracking-wider">{t('read.from')}</h2>
             {deliveredToMe.map((w) => (

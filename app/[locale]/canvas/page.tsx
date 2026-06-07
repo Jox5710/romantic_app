@@ -159,7 +159,7 @@ export default function CanvasPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <PenLine size={24} className="text-gold" />
-            <h1 className="font-display-en text-3xl text-ivory">{t('title')}</h1>
+            <h1 className="font-display-en text-2xl sm:text-3xl text-ivory">{t('title')}</h1>
           </div>
           <GoldButton
             variant="ghost"
@@ -192,7 +192,7 @@ export default function CanvasPage() {
             ref={canvasRef}
             width={700}
             height={500}
-            className="w-full touch-none cursor-crosshair"
+            className="w-full max-h-[60vh] sm:max-h-none object-contain touch-none cursor-crosshair"
             onMouseDown={onStart}
             onMouseMove={onMove}
             onMouseUp={onEnd}

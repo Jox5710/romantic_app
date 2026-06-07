@@ -7,6 +7,7 @@ import { TutorialProvider } from './tutorial/tutorial-provider';
 import { TutorialOverlay } from './tutorial/tutorial-overlay';
 import { SplashScreen } from './intro/splash-screen';
 import { CoupleStateProvider } from '@/lib/hooks/couple-state-context';
+import { NotificationProvider } from './notifications/notification-provider';
 import { useState } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             // immediately via queryClient.invalidateQueries, so freshness is
             // preserved where it matters.
             staleTime: 5 * 60 * 1000,
+            gcTime: 30 * 60 * 1000,   // keeps cache 30 min instead of default 5 min
             retry: 2,
             refetchOnWindowFocus: false,
           },
@@ -35,6 +37,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <TutorialProvider>
               <SplashScreen />
               <TutorialOverlay />
+              <NotificationProvider />
               {children}
             </TutorialProvider>
           </ToastProvider>

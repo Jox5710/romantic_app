@@ -37,6 +37,7 @@ export function useCurrentMirrorSession(coupleId: string | null) {
       return newSession;
     },
     enabled: !!coupleId,
+    staleTime: 60 * 60 * 1000,
   });
 }
 
@@ -56,6 +57,7 @@ export function usePastMirrorSessions(coupleId: string | null) {
       return data ?? [];
     },
     enabled: !!coupleId,
+    staleTime: 60 * 60 * 1000,
   });
 }
 

@@ -342,7 +342,7 @@ export function UsMap() {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="relative w-full h-[calc(100dvh-7rem)]">
+    <div className="relative w-full h-[calc(100dvh-9rem)] sm:h-[calc(100dvh-7rem)]">
       <div ref={mapRef} className="w-full h-full rounded-2xl overflow-hidden bg-surface2" />
 
       {/* Top-start: search bar */}
@@ -458,7 +458,7 @@ export function UsMap() {
 
       {/* Pending-pin form (bottom-start) */}
       {pending && (
-        <div className="absolute bottom-6 start-6 z-[1000] w-80">
+        <div className="absolute bottom-4 start-3 end-3 z-[1000] w-auto sm:bottom-6 sm:start-6 sm:end-auto sm:w-80">
           <Card variant="elevated" className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs text-gold uppercase tracking-wider">{t('newPin')}</p>
@@ -482,7 +482,7 @@ export function UsMap() {
       {/* Hover viewer (bottom-end) */}
       {hovered && (
         <div
-          className="absolute bottom-6 end-20 z-[1000] w-72"
+          className="absolute bottom-4 start-3 end-20 z-[1000] w-auto sm:bottom-6 sm:start-auto sm:end-20 sm:w-72"
           onMouseEnter={cancelHoverClose}
           onMouseLeave={scheduleHoverClose}
         >
@@ -527,7 +527,7 @@ export function UsMap() {
       )}
 
       {/* Hint pill */}
-      <p className="absolute top-4 start-1/2 -translate-x-1/2 z-[999] text-xs text-ivoryDim bg-bg/70 backdrop-blur-sm rounded-full px-3 py-1.5 pointer-events-none">
+      <p className="hidden sm:block absolute top-4 start-1/2 -translate-x-1/2 z-[999] text-xs text-ivoryDim bg-bg/70 backdrop-blur-sm rounded-full px-3 py-1.5 pointer-events-none">
         {t('hint')}
       </p>
 

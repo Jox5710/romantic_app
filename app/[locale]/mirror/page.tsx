@@ -22,7 +22,7 @@ export default function MirrorPage() {
   ]);
   const locale = useLocale();
   const { session, coupleId } = useCoupleState();
-  const { data: session_ } = useCurrentMirrorSession(coupleId);
+  const { data: session_, isLoading } = useCurrentMirrorSession(coupleId);
   const { data: past } = usePastMirrorSessions(coupleId);
   const submit = useSubmitMirrorAnswer();
 
@@ -53,7 +53,13 @@ export default function MirrorPage() {
           <p className="text-ivoryDim text-sm mt-1">{t('subtitle')}</p>
         </div>
 
-        {session_ ? (
+        {isLoading && (
+          <div className="space-y-3">
+            {[1, 2, 3].map((n) => <div key={n} className="h-16 rounded-2xl shimmer" />)}
+          </div>
+        )}
+
+        {!isLoading && (session_ ? (
           <Card variant="elevated" className="space-y-6" data-tutorial-id="mirror-question">
             <p className="text-xs text-muted uppercase tracking-wider">
               {t('week', { date: format(new Date(session_.week_of), 'PP') })}
@@ -108,9 +114,9 @@ export default function MirrorPage() {
             <p className="font-display-en text-2xl text-ivory">{t('empty.title')}</p>
             <p className="text-muted text-sm">{t('empty.body')}</p>
           </div>
-        )}
+        ))}
 
-        {past && past.length > 0 && (
+        {!isLoading && past && past.length > 0 && (
           <div className="space-y-4">
             <p className="text-xs text-muted uppercase tracking-wider">{t('pastTitle')}</p>
             {past.map((s: { id: string; week_of: string; mirror_questions: { question_en: string; question_ar: string }; mirror_answers: Array<{ answer: string; user_id: string }> }) => {

@@ -20,6 +20,7 @@ export function usePlaces(coupleId: string | null) {
       return data ?? [];
     },
     enabled: !!coupleId,
+    staleTime: 30 * 60 * 1000,
   });
 }
 

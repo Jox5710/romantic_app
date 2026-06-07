@@ -24,7 +24,9 @@
       "Bash(git check-ignore *)",
       "Read(//c/Users/youss/.ssh//**)",
       "Read(//c/Users/youss/Downloads//**)",
-      "PowerShell(icacls \"$env:USERPROFILE\\\\.ssh\\\\forever.pem\")"
+      "PowerShell(icacls \"$env:USERPROFILE\\\\.ssh\\\\forever.pem\")",
+      "Bash(npm -v)",
+      "Bash(claude --version)"
     ],
     "additionalDirectories": [
       "d:\\romantic_app\\romantic_app"

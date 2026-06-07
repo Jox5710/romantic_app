@@ -14,9 +14,11 @@ import { Lock, MailOpen, Plus, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { CapsuleRecipient } from '@/lib/supabase/types';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
+import { useToast } from '@/components/ui/toast';
 
 export default function CapsulePage() {
   const t = useTranslations('capsule');
+  const { toast } = useToast();
 
   useTutorial('capsule', [
     { id: 'capsule-title', titleKey: 'capsule.step1.title', descKey: 'capsule.step1.desc' },
@@ -24,7 +26,7 @@ export default function CapsulePage() {
     { id: 'capsule-list', titleKey: 'capsule.step3.title', descKey: 'capsule.step3.desc' },
   ]);
   const { session, coupleId } = useCoupleState();
-  const { data: letters } = useCapsuleLetters(coupleId);
+  const { data: letters, isLoading } = useCapsuleLetters(coupleId);
   const add = useAddCapsuleLetter();
 
   const [showForm, setShowForm] = useState(false);
@@ -63,7 +65,7 @@ export default function CapsulePage() {
       setOpeningId(null);
       setOpenPassphrase('');
     } catch {
-      alert('Wrong passphrase or corrupted letter.');
+      toast(t('wrongPassphrase'), 'error');
     }
   }
 
@@ -86,7 +88,7 @@ export default function CapsulePage() {
                   <h2 className="text-gold text-sm uppercase tracking-wider">{t('compose')}</h2>
                   <button type="button" onClick={() => setShowForm(false)} className="text-muted hover:text-ivory"><X size={16} /></button>
                 </div>
-                <TextareaField textarea label={t('form.body')} value={body} onChange={(e) => setBody(e.target.value)} rows={6} />
+                <TextareaField textarea dir="auto" label={t('form.body')} value={body} onChange={(e) => setBody(e.target.value)} rows={6} />
                 <div className="space-y-1.5">
                   <label className="text-xs text-ivoryDim uppercase tracking-wider">{t('form.recipient')}</label>
                   <div className="flex gap-2">
@@ -101,14 +103,20 @@ export default function CapsulePage() {
                 <Field label={t('form.unlockAt')} type="date" value={unlockAt} onChange={(e) => setUnlockAt(e.target.value)} />
                 <Field label={t('form.passphrase')} type="password" placeholder="••••••••" hint={t('form.passphraseHint')} value={passphrase} onChange={(e) => setPassphrase(e.target.value)} />
                 <GoldButton onClick={submit} loading={saving} disabled={!body.trim() || !unlockAt || !passphrase} className="w-full">
-                  Seal letter
+                  {t('seal')}
                 </GoldButton>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {!letters?.length ? (
+        {isLoading && (
+          <div className="space-y-4">
+            {[1, 2].map((n) => <div key={n} className="h-28 rounded-2xl shimmer" />)}
+          </div>
+        )}
+
+        {!isLoading && (!letters?.length ? (
           <div className="text-center py-16 space-y-3">
             <Lock size={32} className="mx-auto text-muted" />
             <p className="font-display-en text-2xl text-ivory">{t('empty.title')}</p>
@@ -126,25 +134,25 @@ export default function CapsulePage() {
                     <div className="flex-1">
                       <p className="text-sm text-ivory">{t(`form.recipients.${letter.recipient}`)}</p>
                       <p className="text-xs text-muted">
-                        {unlocked ? `Unlocked ${format(new Date(letter.unlock_at), 'PP')}` : t('sealed', { date: format(new Date(letter.unlock_at), 'PP') })}
+                        {unlocked ? t('unlocked', { date: format(new Date(letter.unlock_at), 'PP') }) : t('sealed', { date: format(new Date(letter.unlock_at), 'PP') })}
                       </p>
                     </div>
                   </div>
                   {opened ? (
-                    <p className="text-ivory text-sm leading-relaxed bg-surface2 rounded-xl p-4">{opened}</p>
+                    <p dir="auto" className="text-ivory text-sm leading-relaxed bg-surface2 rounded-xl p-4">{opened}</p>
                   ) : unlocked && openingId !== letter.id ? (
                     <GoldButton size="sm" variant="ghost" onClick={() => setOpeningId(letter.id)}>{t('open')}</GoldButton>
                   ) : unlocked && openingId === letter.id ? (
                     <div className="flex gap-2">
-                      <Field type="password" placeholder="Passphrase" value={openPassphrase} onChange={(e) => setOpenPassphrase(e.target.value)} className="flex-1" />
-                      <GoldButton size="sm" onClick={() => openLetter(letter.id, letter.ciphertext, letter.nonce)}>Open</GoldButton>
+                      <Field type="password" placeholder={t('form.passphrase')} value={openPassphrase} onChange={(e) => setOpenPassphrase(e.target.value)} className="flex-1" />
+                      <GoldButton size="sm" onClick={() => openLetter(letter.id, letter.ciphertext, letter.nonce)}>{t('openShort')}</GoldButton>
                     </div>
                   ) : null}
                 </Card>
               );
             })}
           </div>
-        )}
+        ))}
       </div>
     </RouteGuard>
   );

@@ -281,7 +281,7 @@ alter table gratitudes enable row level security;
 
 -- couples
 create policy "members_read_own_couple" on couples for select using (
-  id = current_couple_id() or is_admin(auth.uid())
+  id = current_couple_id() or initiator_id = auth.uid() or is_admin(auth.uid())
 );
 create policy "any_user_creates_draft" on couples for insert with check (initiator_id = auth.uid());
 create policy "members_update_draft_invited" on couples for update using (

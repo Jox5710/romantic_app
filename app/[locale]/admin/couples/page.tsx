@@ -109,7 +109,7 @@ export default function CouplesQueuePage() {
   return (
     <RouteGuard>
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
+        <h1 className="font-display-en text-2xl sm:text-4xl text-ivory">{t('title')}</h1>
 
         <div className="flex gap-2 flex-wrap" data-tutorial-id="admin-couples-filter">
           {filters.map(({ key, label }) => (
@@ -164,7 +164,7 @@ export default function CouplesQueuePage() {
           </div>
 
           {selected && (
-            <Card variant="elevated" className="space-y-4 self-start sticky top-20">
+            <Card variant="elevated" className="space-y-4 self-start sticky top-16 sm:top-20">
               <div className="flex items-start justify-between">
                 <h2 className={`${nameFont} text-2xl text-ivory`}>
                   {pairNames(selected).a} {isArabic ? 'و' : '&'} {pairNames(selected).b}
@@ -184,7 +184,7 @@ export default function CouplesQueuePage() {
 
               {selected.state === 'pending_admin' && (
                 <div className="space-y-3" data-tutorial-id="admin-couples-actions">
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <GoldButton onClick={bless} loading={blessing} size="sm">
                       {t('bless')} ✦
                     </GoldButton>

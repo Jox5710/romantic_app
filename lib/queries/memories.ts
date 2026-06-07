@@ -19,6 +19,7 @@ export function useMemories(coupleId: string | null) {
       return data ?? [];
     },
     enabled: !!coupleId,
+    staleTime: 15 * 60 * 1000,
   });
 }
 

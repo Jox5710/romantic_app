@@ -10,7 +10,8 @@ export function useCapsuleLetters(coupleId: string | null) {
     queryFn: async () => {
       if (!coupleId) return [];
       const supabase = createClient();
-      // Only unlocked letters come back (RLS enforces unlock_at <= now)
+      // Returns all of the couple's letters — sealed and unlocked. RLS scopes
+      // them to the caller's couple; the UI gates decryption on unlock_at.
       const { data, error } = await supabase
         .from('capsule_letters')
         .select('*')

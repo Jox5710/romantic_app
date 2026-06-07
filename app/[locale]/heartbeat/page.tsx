@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { RouteGuard } from '@/components/route-guard';
@@ -8,6 +8,8 @@ import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { useTodayHeartbeats, useSendHeartbeat } from '@/lib/queries/heartbeat';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
+import { EnableNotifications } from '@/components/notifications/enable-notifications';
+import { nativeHaptic } from '@/lib/native';
 
 export default function HeartbeatPage() {
   const t = useTranslations('heartbeat');
@@ -18,7 +20,7 @@ export default function HeartbeatPage() {
     { id: 'heartbeat-counts', titleKey: 'heartbeat.step3.title', descKey: 'heartbeat.step3.desc' },
   ]);
   const { session, coupleId } = useCoupleState();
-  const { data: beats, refetch } = useTodayHeartbeats(coupleId);
+  const { data: beats, isLoading, refetch } = useTodayHeartbeats(coupleId);
   const send = useSendHeartbeat();
   const [pulsing, setPulsing] = useState(false);
 
@@ -55,20 +57,50 @@ export default function HeartbeatPage() {
     await send.mutateAsync({ couple_id: coupleId, from_user: session.user.id, to_user: partnerUserId });
     setPulsing(true);
     setTimeout(() => setPulsing(false), 1000);
+    // Native taptic on the app; web vibrate in a browser. Fire-and-forget.
+    void nativeHaptic();
+    // Push a notification to the partner's devices — reaches them even if their
+    // app is fully closed. Fire-and-forget; failures never block the tap.
+    fetch('/api/push/heartbeat', { method: 'POST' }).catch(() => {});
   }
 
   const myBeats = beats?.filter((b) => b.from_user === session?.user.id).length ?? 0;
   const partnerBeats = beats?.filter((b) => b.from_user !== session?.user.id).length ?? 0;
 
+  // Pulse when the partner's count grows (the polled query is our live signal
+  // while realtime is unavailable). Skip the very first render.
+  const prevPartner = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevPartner.current !== null && partnerBeats > prevPartner.current) {
+      setPulsing(true);
+      const id = setTimeout(() => setPulsing(false), 1000);
+      prevPartner.current = partnerBeats;
+      return () => clearTimeout(id);
+    }
+    prevPartner.current = partnerBeats;
+  }, [partnerBeats]);
+
   return (
     <RouteGuard>
       <div className="min-h-dvh flex flex-col items-center justify-center gap-8 px-4 py-12">
-        <div className="text-center space-y-1" data-tutorial-id="heartbeat-title">
-          <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
-          <p className="text-ivoryDim text-sm">{t('subtitle')}</p>
+        <div className="text-center space-y-3" data-tutorial-id="heartbeat-title">
+          <div className="space-y-1">
+            <h1 className="font-display-en text-4xl text-ivory">{t('title')}</h1>
+            <p className="text-ivoryDim text-sm">{t('subtitle')}</p>
+          </div>
+          <div className="flex justify-center">
+            <EnableNotifications />
+          </div>
         </div>
 
-        <button
+        {isLoading && (
+          <div className="space-y-3">
+            <div className="h-32 rounded-full mx-auto w-32 shimmer" />
+            <div className="h-8 rounded-2xl shimmer" />
+          </div>
+        )}
+
+        {!isLoading && <button
           type="button"
           onClick={tap}
           disabled={send.isPending}
@@ -93,9 +125,9 @@ export default function HeartbeatPage() {
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
           </motion.div>
-        </button>
+        </button>}
 
-        <div className="flex gap-8 text-center" data-tutorial-id="heartbeat-counts">
+        {!isLoading && <div className="flex gap-8 text-center" data-tutorial-id="heartbeat-counts">
           <div>
             <p className="text-3xl font-display-en text-gold">{myBeats}</p>
             <p className="text-xs text-muted">You sent</p>
@@ -104,7 +136,7 @@ export default function HeartbeatPage() {
             <p className="text-3xl font-display-en text-gold">{partnerBeats}</p>
             <p className="text-xs text-muted">Partner sent</p>
           </div>
-        </div>
+        </div>}
 
         <p className="text-xs text-muted">{t('today')}</p>
       </div>

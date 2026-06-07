@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Capacitor / native build outputs
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/app/release/
+android/app/debug/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+ios/App/Pods/
+ios/App/build/
+ios/App/output/
+ios/DerivedData/
+*.ipa
+*.xcarchive
+Payload/
+
+# OS noise
+.DS_Store

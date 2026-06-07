@@ -64,6 +64,13 @@ export default function InvitePage() {
       return;
     }
 
+    // updateUser rotates the JWT; refresh so the next RLS-gated insert uses the new token.
+    const { error: refreshErr } = await supabase.auth.refreshSession();
+    if (refreshErr) {
+      toast(t('sessionError'));
+      return;
+    }
+
     const inviteCode = Math.random().toString(36).slice(2, 8).toUpperCase();
 
     const { data: couple, error: coupleErr } = await supabase

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { RouteGuard } from '@/components/route-guard';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
@@ -48,18 +48,17 @@ export default function ConstellationPage() {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; memory: Memory } | null>(null);
   const starsRef = useRef<Star[]>([]);
 
+  const stars = useMemo(() => buildStars(memories ?? [], 350, 250), [memories]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !memories?.length) return;
+    if (!canvas || !stars.length) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const { width, height } = canvas;
-    const cx = width / 2;
-    const cy = height / 2;
-    const stars = buildStars(memories as Memory[], cx, cy);
     starsRef.current = stars;
 
+    const { width, height } = canvas;
     ctx.clearRect(0, 0, width, height);
 
     // Draw connecting lines
@@ -88,7 +87,7 @@ export default function ConstellationPage() {
       ctx.fillStyle = '#e8c87a';
       ctx.fill();
     });
-  }, [memories]);
+  }, [stars]);
 
   function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current!;

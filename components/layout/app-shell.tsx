@@ -2,10 +2,12 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { ThemeSwitcher } from '@/components/theme/theme-switcher';
 import { LangSwitcher } from './lang-switcher';
 import { UserMenu } from './user-menu';
-import { Link } from '@/lib/i18n/navigation';
+import { Link, usePathname } from '@/lib/i18n/navigation';
 import { useTutorialContext } from '@/components/tutorial/tutorial-provider';
 
 function TutorialTriggerButton() {
@@ -27,30 +29,49 @@ function TutorialTriggerButton() {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isHome = pathname === '/';
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
+  const t = useTranslations('nav');
+
   return (
     <div className="relative min-h-dvh flex flex-col">
       {/* safe-top + safe-x push the header below the iPhone notch and away
           from rounded screen corners. Resolves to 0 on every other device. */}
       <header className="fixed top-0 inset-x-0 z-40 flex items-center justify-between gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-bg/80 backdrop-blur-sm border-b border-line safe-top safe-x">
-        <motion.div
-          className="min-w-0 shrink"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 200, delay: 0.1 }}
-        >
-          <Link href="/" className="flex items-center gap-2 text-gold">
-            <Image
-              src="/forever-logo.png"
-              alt="Forever"
-              width={110}
-              height={60}
-              style={{ height: 'auto' }}
-              className="w-[72px] md:w-[110px] object-contain drop-shadow-[0_0_10px_rgba(201,169,97,0.55)]"
-              priority
-            />
-            <span className="font-display-en brand-latin text-xl sm:text-2xl hidden xs:inline">Forever</span>
-          </Link>
-        </motion.div>
+        <div className="flex items-center min-w-0 shrink">
+          {/* Back button — visible on all non-home pages */}
+          {!isHome && (
+            <Link
+              href="/"
+              className="flex items-center gap-1 text-muted hover:text-ivory transition-colors shrink-0 mr-2"
+              aria-label={t('home')}
+            >
+              {isArabic ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+              <span className="hidden sm:inline text-sm">{t('home')}</span>
+            </Link>
+          )}
+          <motion.div
+            className="min-w-0 shrink"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 200, delay: 0.1 }}
+          >
+            <Link href="/" className="flex items-center gap-2 text-gold">
+              <Image
+                src="/forever-logo.png"
+                alt="Forever"
+                width={110}
+                height={60}
+                style={{ height: 'auto' }}
+                className="w-[72px] md:w-[110px] object-contain drop-shadow-[0_0_10px_rgba(201,169,97,0.55)]"
+                priority
+              />
+              <span className="font-display-en brand-latin text-xl sm:text-2xl hidden xs:inline">Forever</span>
+            </Link>
+          </motion.div>
+        </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <TutorialTriggerButton />

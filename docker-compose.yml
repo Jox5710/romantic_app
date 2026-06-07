@@ -79,6 +79,7 @@ services:
     environment:
       PGRST_DB_URI: "postgres://authenticator:${POSTGRES_PASSWORD:-your-super-secret-password}@db:5432/postgres"
       PGRST_DB_SCHEMAS: ${PGRST_DB_SCHEMAS:-public,storage,graphql_public}
+      PGRST_LOG_LEVEL: info
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters}
       PGRST_DB_USE_LEGACY_GUCS: "false"
@@ -246,6 +247,19 @@ services:
       # Server-only — never gets a NEXT_PUBLIC_ prefix on purpose so Next.js
       # keeps it out of the browser bundle. Used by app/api/llm/* routes.
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # Server-only — service-role key for admin API routes that need to bypass RLS.
+      # Never gets a NEXT_PUBLIC_ prefix so it stays out of the browser bundle.
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlYWx0aW1lIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTg0NTQ1MCwiZXhwIjoyMDk1MjA1NDUwfQ.UIE5g0W_igCZ2lhs7JoyeK2SLG4EUHZTmdTyEcNRTvM}
+      # Web Push (VAPID). Public key is also exposed to the browser bundle so the
+      # client can subscribe; the private key stays server-only.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@forever.local}
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      # Native push (FCM → Android directly, relays to APNs for iOS). Full
+      # Firebase service-account JSON on one line. Empty until a Firebase
+      # project is created; the server no-ops native push gracefully when unset.
+      FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT:-}
       # Enable polling so file-changes on Windows host are detected inside the container
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
