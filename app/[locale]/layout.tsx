@@ -17,32 +17,36 @@ import type { Metadata } from 'next';
 // --- Fonts (local files in app/fonts) ---
 // English display headers
 const playfair = localFont({
-  src: '../fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.ttf',
+  src: '../fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.woff2',
   variable: '--font-playfair',
   display: 'swap',
   weight: '400 900',
 });
 
-// Arabic display headers + couple names (calligraphic)
+// Arabic display headers + couple names (calligraphic).
+// preload:false — only Arabic pages use these, so English pages shouldn't
+// eagerly fetch them (they still load on-demand via `display: swap`).
 const arefRuqaa = localFont({
   src: [
-    { path: '../fonts/Aref_Ruqaa/ArefRuqaa-Regular.ttf', weight: '400', style: 'normal' },
-    { path: '../fonts/Aref_Ruqaa/ArefRuqaa-Bold.ttf', weight: '700', style: 'normal' },
+    { path: '../fonts/Aref_Ruqaa/ArefRuqaa-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/Aref_Ruqaa/ArefRuqaa-Bold.woff2', weight: '700', style: 'normal' },
   ],
   variable: '--font-aref-ruqaa',
   display: 'swap',
+  preload: false,
 });
 
 // Arabic body / subtitles / descriptions
 const tajawal = localFont({
   src: [
-    { path: '../fonts/Tajawal/Tajawal-Light.ttf', weight: '300', style: 'normal' },
-    { path: '../fonts/Tajawal/Tajawal-Regular.ttf', weight: '400', style: 'normal' },
-    { path: '../fonts/Tajawal/Tajawal-Medium.ttf', weight: '500', style: 'normal' },
-    { path: '../fonts/Tajawal/Tajawal-Bold.ttf', weight: '700', style: 'normal' },
+    { path: '../fonts/Tajawal/Tajawal-Light.woff2', weight: '300', style: 'normal' },
+    { path: '../fonts/Tajawal/Tajawal-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/Tajawal/Tajawal-Medium.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/Tajawal/Tajawal-Bold.woff2', weight: '700', style: 'normal' },
   ],
   variable: '--font-tajawal',
   display: 'swap',
+  preload: false,
 });
 
 const manrope = Manrope({
@@ -57,6 +61,7 @@ const caveat = Caveat({
   weight: ['400', '500', '700'],
   variable: '--font-caveat',
   display: 'swap',
+  preload: false, // decorative accent — load on demand, don't block first paint
 });
 
 export function generateStaticParams() {

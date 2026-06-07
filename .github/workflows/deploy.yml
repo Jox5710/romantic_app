@@ -7,56 +7,15 @@ on:
 
 permissions:
   contents: read
-  packages: write          # push to GitHub Container Registry
   id-token: write          # OIDC handshake with AWS (no static keys)
 
-env:
-  IMAGE: ghcr.io/${{ github.repository }}
-
+# The live site runs the OPTIMIZED PRODUCTION build (node server.js), built
+# locally ON the EC2 box from .env.production via docker-compose.prodlocal.yml.
+# We deploy by SSM-running a git-pull + prod rebuild on the instance — no GHCR
+# image and no NEXT_PUBLIC_* GitHub variables needed (NEXT_PUBLIC_* are baked at
+# build time from .env.production, including NEXT_PUBLIC_VAPID_PUBLIC_KEY).
 jobs:
-  # ──────────────────────────────────────────────────────────────────────────
-  # 1) Build the Next.js standalone server image and push to GHCR.
-  #    NEXT_PUBLIC_* are baked into the client bundle at build time (output: 'standalone').
-  # ──────────────────────────────────────────────────────────────────────────
-  build:
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.meta.outputs.tag }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: docker/setup-buildx-action@v3
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - id: meta
-        run: echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-
-      - uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ${{ env.IMAGE }}:latest
-            ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
-          build-args: |
-            NEXT_PUBLIC_SUPABASE_URL=${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-            NEXT_PUBLIC_BASE_PATH=${{ vars.BASE_PATH || '' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # ──────────────────────────────────────────────────────────────────────────
-  # 2) Deploy: assume an AWS IAM role via OIDC, fire an SSM Run Command on EC2
-  #    to git-pull, docker-pull, and recreate only the `app` + `caddy` containers.
-  # ──────────────────────────────────────────────────────────────────────────
   deploy:
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
@@ -64,24 +23,20 @@ jobs:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: SSM Run Command — pull & restart
+      - name: SSM Run Command — git pull & prod rebuild
         env:
           INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
-          IMAGE_TAG: ${{ needs.build.outputs.tag }}
-          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           CMD_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
-            --comment "Deploy ${IMAGE_TAG}" \
+            --comment "Deploy ${GITHUB_SHA::7}" \
             --parameters commands="[
               \"set -e\",
               \"cd /opt/forever\",
               \"git pull --ff-only origin main\",
-              \"export GH_REPO='${GH_REPO}' IMAGE_TAG='${IMAGE_TAG}'\",
-              \"docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production pull app\",
-              \"docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d --remove-orphans app caddy\",
+              \"docker compose -f docker-compose.yml -f docker-compose.prodlocal.yml --env-file .env.production up -d --build app\",
               \"docker image prune -f\"
             ]" \
             --query "Command.CommandId" --output text)

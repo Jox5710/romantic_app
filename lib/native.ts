@@ -67,6 +67,22 @@ export async function nativeHaptic(): Promise<void> {
   vibrate();
 }
 
+/**
+ * Dismiss the Capacitor launch splash (native only). Called once the web app is
+ * interactive so the app shows a single splash (OS splash → app), never the
+ * web splash on top of it.
+ */
+export async function hideNativeSplash(): Promise<void> {
+  const c = cap();
+  const Splash = c?.Plugins?.SplashScreen;
+  if (!c?.isNativePlatform?.() || !Splash) return;
+  try {
+    await Splash.hide();
+  } catch {
+    /* plugin missing / already hidden — ignore */
+  }
+}
+
 /** Current native push permission, mapped onto the web NotificationPermission shape. */
 export async function nativePushPermission(): Promise<NotificationPermission> {
   const c = cap();

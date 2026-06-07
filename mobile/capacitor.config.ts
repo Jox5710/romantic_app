@@ -34,7 +34,12 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1200,
+      // Keep the OS splash up until the web app calls hide() (done from
+      // SplashScreen.tsx once React mounts) so there's no blank gap while the
+      // remote site loads. launchShowDuration is just a safety ceiling for a
+      // failed/very-slow load; the normal path dismisses much sooner.
+      launchShowDuration: 4000,
+      launchAutoHide: true,
       backgroundColor: '#0a0a0f',
       androidScaleType: 'CENTER_CROP',
       showSpinner: false,

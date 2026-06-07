@@ -1,0 +1,28 @@
+# Local production override — builds the optimized standalone image ON THE VPS
+# (no GHCR/CI dependency) and runs it as `node server.js` with NODE_ENV=production.
+# Caddy (base stack) keeps proxying app:3000 on 443; no host port needed.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prodlocal.yml \
+#                  --env-file .env.production up -d --build app
+#
+# Revert to dev hot-reload:
+#   docker compose --env-file .env.production up -d app
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile          # prod multi-stage (overrides Dockerfile.dev)
+      args:
+        # NEXT_PUBLIC_* are inlined at build time — must pass them all here.
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY:-}
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
+        NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+    image: forever-app:prod
+    volumes: !reset []                 # drop the dev bind-mount + anon volumes
+    ports: !reset []                   # Caddy reaches app:3000 on the network
+    environment:
+      NODE_ENV: "production"
+      WATCHPACK_POLLING: ""
+      CHOKIDAR_USEPOLLING: ""

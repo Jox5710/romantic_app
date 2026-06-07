@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 
-const STAR_COUNT = 80;
+// Trimmed from 80 → 34: far fewer animated DOM nodes keeps low-end phones smooth
+// with no perceptible loss in the ambient star field.
+const STAR_COUNT = 34;
 
 export function AmbientStars() {
   const containerRef = useRef<HTMLDivElement>(null);
