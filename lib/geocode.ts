@@ -32,7 +32,13 @@ interface NominatimRow {
   boundingbox?: [string, string, string, string]; // [south, north, west, east]
 }
 
-export async function geocode(q: string, signal?: AbortSignal): Promise<GeocodeResult[]> {
+export async function geocode(
+  q: string,
+  signal?: AbortSignal,
+  /** BCP-47 locale string, e.g. "ar" or "en". Passed to Nominatim as
+   *  Accept-Language so result display_names prefer that language. */
+  locale?: string,
+): Promise<GeocodeResult[]> {
   const trimmed = q.trim();
   if (trimmed.length < 2) return [];
 
@@ -48,10 +54,21 @@ export async function geocode(q: string, signal?: AbortSignal): Promise<GeocodeR
   }
   lastFiredAt = Date.now();
 
-  const url = `${ENDPOINT}?q=${encodeURIComponent(trimmed)}&format=jsonv2&limit=5&addressdetails=0`;
+  // Bias results toward Egypt (countrycodes=eg) without excluding worldwide
+  // results — Nominatim treats countrycodes as a soft preference when combined
+  // with a broad query, so non-Egyptian matches still surface when relevant.
+  // We only add the parameter when the URL wouldn't already have it.
+  const url = `${ENDPOINT}?q=${encodeURIComponent(trimmed)}&format=jsonv2&limit=5&addressdetails=0&countrycodes=eg`;
+  const headers: Record<string, string> = { 'Accept': 'application/json' };
+  if (locale) {
+    // e.g. "ar,en;q=0.9" or "en,ar;q=0.9" — lets Nominatim pick the right
+    // script for place-name labels without breaking non-Egyptian lookups.
+    const fallback = locale.startsWith('ar') ? 'en' : 'ar';
+    headers['Accept-Language'] = `${locale},${fallback};q=0.8`;
+  }
   const res = await fetch(url, {
     signal,
-    headers: { 'Accept': 'application/json' },
+    headers,
   });
   if (!res.ok) return [];
   const rows = (await res.json()) as NominatimRow[];

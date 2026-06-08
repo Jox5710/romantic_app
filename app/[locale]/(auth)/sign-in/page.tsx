@@ -435,6 +435,7 @@ function PasswordForm({ t }: { t: ReturnType<typeof useTranslations> }) {
 export default function SignInPage() {
   const t = useTranslations('auth.signIn');
   const router = useRouter();
+  const locale = useLocale();
   const { repeat } = useRespectfulMotion();
   const { session, loading } = useCoupleState();
   const [tab, setTab] = useState<Tab>('magic');
@@ -460,10 +461,16 @@ export default function SignInPage() {
   }, []);
 
   // Single source of truth: once the shared auth state reports a session, leave
-  // /sign-in. The home page's RouteGuard then routes onwards (invite / awaiting / dashboard).
+  // /sign-in. We do a FULL document navigation (not an SPA router.replace) so the
+  // dashboard mounts completely fresh with the new auth cookie — this fixes the
+  // post-login blank/no-icons render that previously required a manual refresh
+  // (the dashboard's framer entrance animations were stuck at opacity 0 after the
+  // client-side redirect). The home page's RouteGuard then routes onwards
+  // (invite / awaiting / dashboard). basePath is empty in prod, so `/${locale}`
+  // is the correct target.
   useEffect(() => {
-    if (redirecting) router.replace('/');
-  }, [redirecting, router]);
+    if (redirecting) window.location.assign(`/${locale}`);
+  }, [redirecting, locale]);
 
   return (
     <div className="relative min-h-dvh flex items-center justify-center p-4 overflow-hidden">

@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 
 export function useMemories(coupleId: string | null) {
   return useQuery({
@@ -41,7 +42,10 @@ export function useAddMemory() {
       const { error } = await supabase.from('memories').insert(values);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['memories'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['memories'] });
+      notifyPartner('memory');
+    },
     onError: (e: Error) => toast(e.message),
   });
 }

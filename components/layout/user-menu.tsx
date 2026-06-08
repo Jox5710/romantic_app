@@ -72,7 +72,7 @@ export function UserMenu() {
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
             // Open toward the inline-end side in both LTR and RTL
-            className="absolute end-0 mt-2 w-60 rounded-2xl border border-gold/25 bg-surface/95 backdrop-blur-xl shadow-popLg overflow-hidden z-50"
+            className="absolute end-0 mt-2 w-60 rounded-2xl border border-gold/30 bg-surface backdrop-blur-xl shadow-popLg overflow-hidden z-50"
           >
             <div className="px-4 py-3 border-b border-line">
               <p className="text-[10px] uppercase tracking-wider text-muted">Forever</p>

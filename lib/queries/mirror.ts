@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 import { startOfWeek, format } from 'date-fns';
 
 export function useCurrentMirrorSession(coupleId: string | null) {
@@ -70,7 +71,10 @@ export function useSubmitMirrorAnswer() {
       const { error } = await supabase.from('mirror_answers').insert(values);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['mirror-session'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['mirror-session'] });
+      notifyPartner('mirror');
+    },
     onError: (e: Error) => toast(e.message),
   });
 }

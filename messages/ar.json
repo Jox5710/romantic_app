@@ -28,6 +28,7 @@
   },
   "nav": {
     "home": "الرئيسية",
+    "refresh": "حدّث هذه الصفحة",
     "timeline": "المسيرة",
     "bucket": "قائمة الأحلام",
     "prompt": "سؤال اليوم",
@@ -271,6 +272,10 @@
     "energy": "الطاقة",
     "craving": "أشتهي…",
     "cravingPlaceholder": "عناق، قهوة، صمت…",
+    "useCustom": "اكتب حالتك بنفسك",
+    "usePresets": "اختر مزاجاً",
+    "customLabel": "حالتك",
+    "customPlaceholder": "صف شعورك الآن…",
     "empty": {
       "title": "لا حالة بعد",
       "body": "اضبط حالتك ودع شريكك يشعر بك."
@@ -309,6 +314,8 @@
     "searchLocations": "أماكن في العالم",
     "searchEmpty": "لا توجد نتائج — جرّب اسم دولة.",
     "searchSearching": "يبحث…",
+    "searchEgypt": "ابحث في مصر — مدن وأماكن…",
+    "zoomHere": "انقر مرتين في أي مكان للتقريب",
     "geolocationDenied": "تم رفض إذن الموقع.",
     "geolocationUnavailable": "تعذّر جلب موقعك.",
     "controls": {
@@ -324,6 +331,10 @@
   "constellation": {
     "title": "كوكبتنا",
     "subtitle": "ذكرياتكما، مكتوبة في النجوم",
+    "hint": "اضغط نجمة لتعيش الذكرى",
+    "reset": "إعادة العرض",
+    "memoriesCount": "{count} نجمة",
+    "viewMemory": "افتح الذكرى",
     "empty": {
       "title": "السماء هادئة",
       "body": "أضف ذكريات لترى كوكبتكما تنمو."

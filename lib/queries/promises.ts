@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 import type { PromiseCadence } from '@/lib/supabase/types';
 
 export function usePromises(coupleId: string | null) {
@@ -34,7 +35,10 @@ export function useAddPromise() {
       const { error } = await supabase.from('promises').insert({ ...values, kept_count: 0, broken_count: 0, active: true });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['promises'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['promises'] });
+      notifyPartner('promise');
+    },
     onError: (e: Error) => toast(e.message),
   });
 }

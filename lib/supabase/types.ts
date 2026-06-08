@@ -272,6 +272,7 @@ export interface Database {
           mood: string | null;
           energy: number | null;
           craving: string | null;
+          custom_mood: string | null;
           updated_at: string;
         };
         Insert: {
@@ -280,6 +281,7 @@ export interface Database {
           mood?: string | null;
           energy?: number | null;
           craving?: string | null;
+          custom_mood?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -288,6 +290,7 @@ export interface Database {
           mood?: string | null;
           energy?: number | null;
           craving?: string | null;
+          custom_mood?: string | null;
           updated_at?: string;
         };
         Relationships: [];

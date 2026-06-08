@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { RouteGuard } from '@/components/route-guard';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { notifyPartner } from '@/lib/push';
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { GoldSeal } from '@/components/ui/gold-seal';
@@ -86,7 +87,10 @@ export default function MissionsPage() {
     mutationFn: async (id: string) => {
       await supabase.from('missions').update({ completed_at: new Date().toISOString() }).eq('id', id);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['missions', coupleId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['missions', coupleId] });
+      notifyPartner('mission');
+    },
     onError: () => toast(tc('error'), 'error'),
   });
 

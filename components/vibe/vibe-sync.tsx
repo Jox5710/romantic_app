@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 
 export function VibeSync() {
   const t = useTranslations('vibe');
+  const tMoods = useTranslations('vibe.moods');
   const { session, coupleId } = useCoupleState();
   const { data: vibes, refetch } = useVibes(coupleId);
   const upsert = useUpsertVibe();
@@ -19,8 +20,17 @@ export function VibeSync() {
   const [mood, setMood] = useState('tender');
   const [energy, setEnergy] = useState(3);
   const [craving, setCraving] = useState('');
+  const [useCustom, setUseCustom] = useState(false);
+  const [customMood, setCustomMood] = useState('');
 
   const partnerVibe = vibes?.find((v) => v.user_id !== session?.user.id);
+
+  // Show the partner's custom vibe verbatim; otherwise translate their preset
+  // mood key. Guard against an unknown key (renamed preset) so it never throws.
+  function moodLabel(v: { mood: string; custom_mood?: string | null }): string {
+    if (v.custom_mood) return v.custom_mood;
+    try { return tMoods(v.mood); } catch { return v.mood; }
+  }
 
   useEffect(() => {
     if (!coupleId) return;
@@ -36,7 +46,15 @@ export function VibeSync() {
 
   async function save() {
     if (!coupleId || !session) return;
-    await upsert.mutateAsync({ couple_id: coupleId, user_id: session.user.id, mood, energy, craving });
+    const custom = useCustom ? customMood.trim() : '';
+    await upsert.mutateAsync({
+      couple_id: coupleId,
+      user_id: session.user.id,
+      mood,
+      energy,
+      craving,
+      custom_mood: custom || null, // null clears it; custom takes precedence in the UI
+    });
   }
 
   return (
@@ -47,8 +65,28 @@ export function VibeSync() {
       </div>
 
       <Card variant="elevated" className="space-y-5">
-        <h2 className="text-gold text-sm uppercase tracking-wider">{t('myVibe')}</h2>
-        <MoodPicker value={mood} onChange={setMood} />
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-gold text-sm uppercase tracking-wider">{t('myVibe')}</h2>
+          <button
+            type="button"
+            onClick={() => setUseCustom((v) => !v)}
+            className="text-xs text-ivoryDim hover:text-gold underline underline-offset-4 transition-colors"
+          >
+            {useCustom ? t('usePresets') : t('useCustom')}
+          </button>
+        </div>
+
+        {useCustom ? (
+          <Field
+            label={t('customLabel')}
+            placeholder={t('customPlaceholder')}
+            value={customMood}
+            onChange={(e) => setCustomMood(e.target.value)}
+            maxLength={60}
+          />
+        ) : (
+          <MoodPicker value={mood} onChange={setMood} />
+        )}
 
         <div className="space-y-2">
           <p className="text-xs text-ivoryDim uppercase tracking-wider">{t('energy')}</p>
@@ -85,7 +123,7 @@ export function VibeSync() {
       {partnerVibe ? (
         <Card variant="elevated" className="space-y-3">
           <h2 className="text-gold text-sm uppercase tracking-wider">{t('partnerVibe')}</h2>
-          <p className="text-ivory text-lg">{partnerVibe.mood}</p>
+          <p className="text-ivory text-lg">{moodLabel(partnerVibe)}</p>
           {partnerVibe.energy && (
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (

@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 import { format } from 'date-fns';
 
 function hashDate(dateStr: string, count: number): number {
@@ -65,7 +66,10 @@ export function useSubmitAnswer() {
       const { error } = await supabase.from('prompt_answers').insert(values);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['prompt-answers'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['prompt-answers'] });
+      notifyPartner('prompt');
+    },
     onError: (e: Error) => toast(e.message),
   });
 }

@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 
 export function useVibes(coupleId: string | null) {
   return useQuery({
@@ -32,6 +33,7 @@ export function useUpsertVibe() {
       mood: string;
       energy: number;
       craving: string;
+      custom_mood?: string | null;
     }) => {
       const supabase = createClient();
       const { error } = await supabase.from('vibe_pings').upsert(
@@ -40,7 +42,10 @@ export function useUpsertVibe() {
       );
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['vibes'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['vibes'] });
+      notifyPartner('vibe');
+    },
     onError: (e: Error) => toast(e.message),
   });
 }

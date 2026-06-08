@@ -16,14 +16,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // 5 min — read-heavy feature pages (timeline, gratitude, queue…)
-            // stop refetching on every focus/mount. Mutations still invalidate
-            // immediately via queryClient.invalidateQueries, so freshness is
-            // preserved where it matters.
-            staleTime: 5 * 60 * 1000,
+            // 30s — short enough that returning to the app / switching features
+            // pulls a partner's latest changes automatically (no manual refresh),
+            // long enough to avoid hammering during a single screen's lifetime.
+            // Mutations still invalidate immediately via invalidateQueries.
+            staleTime: 30 * 1000,
             gcTime: 30 * 60 * 1000,   // keeps cache 30 min instead of default 5 min
             retry: 2,
-            refetchOnWindowFocus: false,
+            // Auto-refresh when the user comes back to the tab/app or regains
+            // connectivity — the main "always up to date with your partner" path
+            // for features without a dedicated realtime subscription.
+            refetchOnWindowFocus: true,
+            refetchOnReconnect: true,
           },
         },
       }),

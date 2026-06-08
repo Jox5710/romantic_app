@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 import { addMinutes } from 'date-fns';
 import type { WhisperFeeling, WhisperResponse } from '@/lib/supabase/types';
 
@@ -69,6 +70,7 @@ export function useSendWhisper() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['whispers'] });
       qc.invalidateQueries({ queryKey: ['whisper-today'] });
+      notifyPartner('whisper');
     },
     onError: (e: Error) => toast(e.message),
   });

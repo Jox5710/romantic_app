@@ -18,22 +18,79 @@ function TutorialTooltip() {
   if (!currentStepData) return null;
 
   // Compute tooltip position. Width is responsive (never wider than the viewport
-  // minus a 12px gutter each side) and the left edge is clamped so the card can
-  // never overflow off-screen — critical on small/RTL phones.
+  // minus a margin each side) and all edges are fully clamped — critical on
+  // small/RTL phones. We also respect safe-area insets on notched devices.
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
   const vh = typeof window !== 'undefined' ? window.innerHeight : 768;
-  const margin = 12;
+
+  // Safe-area insets: read a hidden sentinel element with padding set to
+  // env(safe-area-inset-top/bottom) if available, else use conservative
+  // fallback constants so the tooltip never slips under notches / home bars.
+  let safeTop = 0;
+  let safeBottom = 0;
+  if (typeof document !== 'undefined') {
+    // Inline style trick: a zero-size element whose padding resolves the env()
+    // value. This avoids needing CSS variables in globals.css.
+    try {
+      const probe = document.createElement('div');
+      probe.style.cssText =
+        'position:fixed;pointer-events:none;opacity:0;' +
+        'padding-top:env(safe-area-inset-top,0px);' +
+        'padding-bottom:env(safe-area-inset-bottom,0px);' +
+        'width:0;height:0';
+      document.body.appendChild(probe);
+      const cs = getComputedStyle(probe);
+      safeTop = parseFloat(cs.paddingTop) || 0;
+      safeBottom = parseFloat(cs.paddingBottom) || 0;
+      document.body.removeChild(probe);
+    } catch { /* ignore — safe areas fall back to 0 */ }
+  }
+
+  // Effective viewport bounds after safe areas.
+  const margin = 14;
+  const minY = margin + safeTop;
+  const maxY = vh - margin - safeBottom;
   const width = Math.min(320, vw - margin * 2);
 
+  // Estimated tooltip height for pre-placement checks (actual render may vary).
+  const TOOLTIP_H = 200;
+
   let tooltipStyle: CSSProperties = { position: 'fixed', zIndex: 160, width };
+
   if (!highlightRect) {
-    tooltipStyle = { ...tooltipStyle, top: '50%', left: (vw - width) / 2, transform: 'translateY(-50%)' };
+    // No target: centre in the usable viewport.
+    const top = Math.max(minY, (vh - TOOLTIP_H) / 2);
+    tooltipStyle = { ...tooltipStyle, top, left: (vw - width) / 2 };
   } else {
-    const below = highlightRect.bottom + 240 < vh;
-    tooltipStyle.top = below ? highlightRect.bottom + 16 : undefined;
-    tooltipStyle.bottom = below ? undefined : vh - highlightRect.top + 16;
+    // Horizontal: centre on the target, clamped within safe margins.
     const centerX = highlightRect.left + highlightRect.width / 2;
-    tooltipStyle.left = Math.max(margin, Math.min(centerX - width / 2, vw - width - margin));
+    const rawLeft = isRTL
+      ? highlightRect.right - width                    // anchor to inline-end in RTL
+      : centerX - width / 2;
+    const clampedLeft = Math.max(margin, Math.min(rawLeft, vw - width - margin));
+
+    // Vertical: prefer below the target.
+    const spaceBelow = maxY - (highlightRect.bottom + 16);
+    const spaceAbove = (highlightRect.top - 16) - minY;
+    const fitsBelow = spaceBelow >= TOOLTIP_H;
+    const fitsAbove = spaceAbove >= TOOLTIP_H;
+
+    let top: number;
+    if (fitsBelow) {
+      // Preferred: place below.
+      top = highlightRect.bottom + 16;
+    } else if (fitsAbove) {
+      // Fallback: place above (anchor from bottom of tooltip).
+      top = highlightRect.top - 16 - TOOLTIP_H;
+    } else {
+      // Neither fits: centre vertically in the usable viewport.
+      top = Math.max(minY, (vh - TOOLTIP_H) / 2);
+    }
+
+    // Final clamp so it never leaves the visible screen.
+    top = Math.max(minY, Math.min(top, maxY - TOOLTIP_H));
+
+    tooltipStyle = { ...tooltipStyle, top, left: clampedLeft };
   }
 
   const isLast = currentStep === totalSteps - 1;

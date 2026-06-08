@@ -21,6 +21,28 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return out;
 }
 
+/** Event types that notify the partner — mirror of NotifType in lib/server-notify.ts. */
+export type NotifyType =
+  | 'vibe' | 'whisper' | 'gratitude' | 'bucket' | 'prompt'
+  | 'mirror' | 'promise' | 'mission' | 'memory' | 'dinner' | 'canvas';
+
+/**
+ * Notify the partner of a feature action. Fire-and-forget: never throws, never
+ * blocks the UI. The SENDER calls this right after a successful mutation; the
+ * server fans out web push + FCM to the partner's devices.
+ */
+export function notifyPartner(type: NotifyType): void {
+  try {
+    void fetch('/api/push/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type }),
+    }).catch(() => {});
+  } catch {
+    /* ignore — notifications are best-effort */
+  }
+}
+
 export function pushSupported(): boolean {
   return (
     typeof window !== 'undefined' &&

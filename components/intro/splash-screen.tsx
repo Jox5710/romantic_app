@@ -33,15 +33,15 @@ export function SplashScreen() {
     try { sessionStorage.setItem('forever_splash_played', '1'); } catch {}
 
     const start = Date.now();
-    const MIN_MS = 350;   // graceful minimum so it doesn't flash-and-vanish
-    const CAP_MS = 1400;  // hard ceiling — never "stuck"
+    const MIN_MS = 1100;  // long enough to actually SEE the brand + pulse animation
+    const CAP_MS = 2600;  // hard ceiling — never "stuck"
     let done = false;
 
     const finish = () => {
       if (done) return;
       done = true;
       el.classList.add('boot-hide');
-      window.setTimeout(() => el.remove(), 480); // after the CSS fade
+      window.setTimeout(() => el.remove(), 520); // after the CSS fade (.45s + buffer)
     };
 
     const schedule = () => {

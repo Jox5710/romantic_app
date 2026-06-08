@@ -20,6 +20,8 @@ import {
 import type { PlaceKind } from '@/lib/supabase/types';
 import type { Map as LeafletMap, Marker, TileLayer } from 'leaflet';
 import { geocode, type GeocodeResult } from '@/lib/geocode';
+import { EGYPT_PLACES, type EgyptPlace } from '@/lib/egypt-locations';
+import { useLocale } from 'next-intl';
 
 type Theme = 'dusk' | 'day' | 'night';
 
@@ -68,6 +70,7 @@ function prefersReducedMotion(): boolean {
 export function UsMap() {
   const t = useTranslations('map');
   const tc = useTranslations('common');
+  const locale = useLocale();
   const { toast } = useToast();
   const { theme } = useTheme();
 
@@ -127,6 +130,13 @@ export function UsMap() {
         maxZoom: 19,
       }).addTo(map);
       tileLayerRef.current = tile;
+
+      // Disable built-in partial double-click zoom; replace with a smooth
+      // fly-to-max-zoom so double-clicking feels intentional and dramatic.
+      map.doubleClickZoom.disable();
+      map.on('dblclick', (e) => {
+        map.flyTo(e.latlng, map.getMaxZoom(), { duration: 0.9 });
+      });
 
       // Right-click / long-press drops a pending pin and zooms in.
       map.on('contextmenu', (e) => {
@@ -232,7 +242,7 @@ export function UsMap() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [places, mapReady, visibleKinds]);
 
-  // ─── 4. Search — pin matches (instant) + geocode (debounced 600ms) ──────────
+  // ─── 4. Search — pin matches (instant) + Egypt places (instant) + geocode (debounced 600ms) ──
   const trimmedQuery = query.trim();
   const matchingPlaces = useMemo(() => {
     if (trimmedQuery.length < 1) return [];
@@ -240,6 +250,16 @@ export function UsMap() {
     return placesList.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 5);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trimmedQuery, places]);
+
+  // Instant match against the bundled Egypt places list. Matches on either
+  // English or Arabic name so Arabic-script input works naturally.
+  const matchingEgypt = useMemo<EgyptPlace[]>(() => {
+    if (trimmedQuery.length < 1) return [];
+    const q = trimmedQuery.toLowerCase().trim();
+    return EGYPT_PLACES.filter(
+      (p) => p.en.toLowerCase().includes(q) || p.ar.includes(trimmedQuery),
+    ).slice(0, 6);
+  }, [trimmedQuery]);
 
   useEffect(() => {
     geoAbortRef.current?.abort();
@@ -252,7 +272,7 @@ export function UsMap() {
 
     const t = setTimeout(async () => {
       try {
-        const res = await geocode(trimmedQuery, controller.signal);
+        const res = await geocode(trimmedQuery, controller.signal, locale);
         if (!controller.signal.aborted) setGeoResults(res);
       } catch {
         // Aborted or network — silent (UI shows empty state).
@@ -299,12 +319,12 @@ export function UsMap() {
   function locateMe() {
     if (!navigator.geolocation) { toast(t('geolocationUnavailable'), 'error'); return; }
     navigator.geolocation.getCurrentPosition(
-      (pos) => fly([pos.coords.latitude, pos.coords.longitude], 11),
+      (pos) => fly([pos.coords.latitude, pos.coords.longitude], 15),
       (err) => {
         if (err.code === err.PERMISSION_DENIED) toast(t('geolocationDenied'), 'error');
         else toast(t('geolocationUnavailable'), 'error');
       },
-      { timeout: 8000, maximumAge: 60_000 },
+      { enableHighAccuracy: true, timeout: 12_000, maximumAge: 0 },
     );
   }
 
@@ -372,6 +392,8 @@ export function UsMap() {
 
           {trimmedQuery.length >= 1 && (
             <div className="mt-2 rounded-xl border border-line bg-surface/95 backdrop-blur-md shadow-popLg overflow-hidden max-h-[60vh] overflow-y-auto">
+
+              {/* ── Your saved pins ── */}
               {matchingPlaces.length > 0 && (
                 <>
                   <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-gold bg-surface2/60">
@@ -382,7 +404,7 @@ export function UsMap() {
                       key={p.id}
                       type="button"
                       onClick={() => flyToPin(p)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-start text-sm text-ivory hover:bg-surface2/60 transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-start text-sm text-ivory hover:bg-surface2/60 transition-colors"
                     >
                       <span
                         className="w-2 h-2 rounded-full shrink-0"
@@ -395,6 +417,34 @@ export function UsMap() {
                 </>
               )}
 
+              {/* ── Egypt landmarks (instant, client-side) ── */}
+              {matchingEgypt.length > 0 && (
+                <>
+                  <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-gold bg-surface2/60">
+                    {t('searchEgypt')}
+                  </p>
+                  {matchingEgypt.map((p) => (
+                    <button
+                      key={`eg-${p.lat}-${p.lng}`}
+                      type="button"
+                      onClick={() => {
+                        fly([p.lat, p.lng], 13);
+                        setSearchOpen(false);
+                        setQuery('');
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-start text-sm text-ivory hover:bg-surface2/60 transition-colors"
+                    >
+                      <MapPin size={12} className="text-gold/70 shrink-0" />
+                      <span className="truncate flex-1">{locale === 'ar' ? p.ar : p.en}</span>
+                      {locale !== 'ar' && (
+                        <span className="text-[10px] text-muted shrink-0 font-arabic">{p.ar}</span>
+                      )}
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {/* ── Nominatim / worldwide geocoder ── */}
               <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-gold bg-surface2/60 flex items-center justify-between">
                 <span>{t('searchLocations')}</span>
                 {searching && <span className="text-muted normal-case tracking-normal">{t('searchSearching')}</span>}
@@ -405,13 +455,13 @@ export function UsMap() {
                     key={`${r.lat}-${r.lng}-${i}`}
                     type="button"
                     onClick={() => flyToGeo(r)}
-                    className="w-full flex items-start gap-2 px-3 py-2 text-start text-sm text-ivory hover:bg-surface2/60 transition-colors"
+                    className="w-full flex items-start gap-2 px-3 py-2.5 text-start text-sm text-ivory hover:bg-surface2/60 transition-colors"
                   >
                     <MapPin size={12} className="text-gold/70 mt-0.5 shrink-0" />
                     <span className="line-clamp-2 leading-snug">{r.display_name}</span>
                   </button>
                 ))
-              ) : !searching && matchingPlaces.length === 0 && trimmedQuery.length >= 2 ? (
+              ) : !searching && matchingPlaces.length === 0 && matchingEgypt.length === 0 && trimmedQuery.length >= 2 ? (
                 <p className="px-3 py-3 text-xs text-muted text-center">{t('searchEmpty')}</p>
               ) : null}
             </div>
@@ -526,10 +576,15 @@ export function UsMap() {
         </div>
       )}
 
-      {/* Hint pill */}
-      <p className="hidden sm:block absolute top-4 start-1/2 -translate-x-1/2 z-[999] text-xs text-ivoryDim bg-bg/70 backdrop-blur-sm rounded-full px-3 py-1.5 pointer-events-none">
-        {t('hint')}
-      </p>
+      {/* Hint pills — stacked vertically so they don't overlap the search bar */}
+      <div className="hidden sm:flex flex-col items-center gap-1.5 absolute top-4 start-1/2 -translate-x-1/2 z-[999] pointer-events-none">
+        <p className="text-xs text-ivoryDim bg-bg/70 backdrop-blur-sm rounded-full px-3 py-1.5">
+          {t('hint')}
+        </p>
+        <p className="text-[10px] text-muted/80 bg-bg/60 backdrop-blur-sm rounded-full px-3 py-1">
+          {t('zoomHere')}
+        </p>
+      </div>
 
       {/* Decorative — keeps unused i18n key warnings quiet for tc */}
       <span className="sr-only">{tc('loading')}</span>

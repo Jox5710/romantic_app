@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { RouteGuard } from '@/components/route-guard';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { notifyPartner } from '@/lib/push';
 import { Card } from '@/components/ui/card';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
@@ -84,8 +85,12 @@ export default function DinnerPage() {
       } else {
         await supabase.from('dinner_options').update({ swipe_b: vote, matched_at: matched ? new Date().toISOString() : null }).eq('id', id);
       }
+      return { matched };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['dinner', coupleId] }),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['dinner', coupleId] });
+      if (res?.matched) notifyPartner('dinner');
+    },
     onError: () => toast(tc('error'), 'error'),
   });
 
@@ -94,7 +99,7 @@ export default function DinnerPage() {
       if (!coupleId) return;
       await supabase.from('dinner_options').insert({ couple_id: coupleId, name, category, note: note || null });
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['dinner', coupleId] }); setName(''); setNote(''); setShowForm(false); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['dinner', coupleId] }); notifyPartner('dinner'); setName(''); setNote(''); setShowForm(false); },
     onError: () => toast(tc('error'), 'error'),
   });
 

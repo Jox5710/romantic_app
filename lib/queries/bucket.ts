@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 
 export function useBucketItems(coupleId: string | null) {
   return useQuery({
@@ -32,7 +33,10 @@ export function useAddBucketItem() {
       const { error } = await supabase.from('bucket_items').insert(values);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['bucket'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['bucket'] });
+      notifyPartner('bucket');
+    },
     onError: (e: Error) => toast(e.message),
   });
 }

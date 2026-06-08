@@ -79,25 +79,41 @@ all.
 
 ---
 
-## Native push (FCM) — enabling it
+## Native push (FCM) — system-wide notifications
 
-Push code is wired and works; it just needs a **free Firebase project** to send.
+Push fires on **every partner action** (heartbeat, vibe, whisper, gratitude,
+bucket, daily prompt, mirror, promise, mission, memory, dinner, board) — the
+sender's app calls `notifyPartner(type)` → `/api/push/notify` →
+`lib/server-notify.ts` fans out Web Push (browsers) + FCM (native) to the
+partner's devices. Tapping a notification deep-links to the relevant page.
 
-1. Create a Firebase project → add an **Android app** with package
-   `com.forever.app` → download `google-services.json` into
-   `android/app/google-services.json`.
-2. Apply the google-services Gradle plugin (classpath in `android/build.gradle`,
-   `apply plugin` in `android/app/build.gradle`).
-3. In Firebase → Project Settings → Service accounts → **Generate new private
-   key**. Paste that JSON (one line) into `FIREBASE_SERVICE_ACCOUNT` in
-   `/opt/forever/.env.production`, then redeploy the web app:
-   `docker compose --env-file .env.production up -d --build app`.
-4. Rebuild the APK. Android push now works end-to-end.
+**Android (wired in this repo):**
+- `android/app/google-services.json` is present for project `forever-b7117`.
+- `AndroidManifest.xml` declares `POST_NOTIFICATIONS` (required on Android 13+).
+- `registerNativePush()` (`lib/native.ts`) is hardened so a permission grant can
+  **never crash the app**, even if FCM init fails.
+
+> ⚠️ **Package-name caveat:** the Firebase Android app must be registered with
+> package **`com.forever.app`**. If `google-services.json` was generated for a
+> different package, the Gradle plugin fails the build (we patched the local file
+> to `com.forever.app` so it builds, but for guaranteed *delivery* register
+> `com.forever.app` in Firebase and replace `android/app/google-services.json`).
+
+**Server send key:** in Firebase → Project Settings → Service accounts →
+**Generate new private key**, paste that JSON (one line) into
+`FIREBASE_SERVICE_ACCOUNT` in `/opt/forever/.env.production`, then redeploy with
+the prod compose (see repo root). Without it the server simply doesn't send (no
+crash).
+
+**Granting permission on the phone:** open the app → the "Enable notifications"
+button prompts the OS permission dialog (Android 13+). If you tap *Deny*, re-enable
+in Android Settings → Apps → Forever → Notifications.
 
 **iOS push** additionally needs the **$99/yr Apple Developer Program** (free
 Apple IDs can't enable the APNs entitlement): upload an APNs key (.p8) to
 Firebase and rebuild with a real signing team. No code changes required —
-`lib/fcm.ts` already routes iOS through FCM→APNs.
+`lib/fcm.ts` already routes iOS through FCM→APNs. Until then the iOS app installs
+and runs fine; it just won't receive push.
 
 ---
 

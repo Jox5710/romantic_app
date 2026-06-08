@@ -1,20 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { GoldButton } from '@/components/ui/gold-button';
 import { useToast } from '@/components/ui/toast';
-import { useRouter } from '@/lib/i18n/navigation';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 export default function AwaitingPage() {
   const t = useTranslations('auth.awaiting');
   const { toast } = useToast();
-  const router = useRouter();
+  const locale = useLocale();
   const { coupleState, coupleId } = useCoupleState();
   const [submitting, setSubmitting] = useState(false);
+
+  // Full document load (not SPA) so the dashboard mounts fresh on approval —
+  // same reasoning as the sign-in redirect (avoids a blank first render).
+  const goHome = () => window.location.assign(`/${locale}`);
 
   useTutorial('awaiting', [
     { id: 'awaiting-title', titleKey: 'awaiting.step1.title', descKey: 'awaiting.step1.desc' },
@@ -24,9 +27,10 @@ export default function AwaitingPage() {
 
   useEffect(() => {
     if (coupleState === 'approved') {
-      router.replace('/');
+      goHome();
     }
-  }, [coupleState, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coupleState]);
 
   useEffect(() => {
     if (!coupleId) return;
@@ -43,14 +47,15 @@ export default function AwaitingPage() {
         },
         (payload) => {
           if ((payload.new as { state: string }).state === 'approved') {
-            router.replace('/');
+            goHome();
           }
         },
       )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [coupleId, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coupleId]);
 
   async function submitForReview() {
     if (!coupleId) return;

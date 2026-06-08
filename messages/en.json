@@ -28,6 +28,7 @@
   },
   "nav": {
     "home": "Home",
+    "refresh": "Refresh this page",
     "timeline": "Timeline",
     "bucket": "Bucket List",
     "prompt": "Daily Prompt",
@@ -271,6 +272,10 @@
     "energy": "Energy",
     "craving": "I'm craving…",
     "cravingPlaceholder": "A hug, a coffee, silence…",
+    "useCustom": "Write your own vibe",
+    "usePresets": "Pick a mood",
+    "customLabel": "Your vibe",
+    "customPlaceholder": "Describe how you feel right now…",
     "empty": {
       "title": "No vibe yet",
       "body": "Set your vibe and let your partner feel you."
@@ -309,6 +314,8 @@
     "searchLocations": "Locations",
     "searchEmpty": "No matches — try a country name.",
     "searchSearching": "Searching…",
+    "searchEgypt": "Search Egypt — cities & places…",
+    "zoomHere": "Double-tap anywhere to zoom in",
     "geolocationDenied": "Location permission denied.",
     "geolocationUnavailable": "Couldn't get your location.",
     "controls": {
@@ -324,6 +331,10 @@
   "constellation": {
     "title": "Our Constellation",
     "subtitle": "Your memories, written in stars",
+    "hint": "Tap a star to relive a memory",
+    "reset": "Reset view",
+    "memoriesCount": "{count} stars",
+    "viewMemory": "Open memory",
     "empty": {
       "title": "The sky is quiet",
       "body": "Add memories to see your constellation grow."

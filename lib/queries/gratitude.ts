@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 import { format } from 'date-fns';
 
 export function useGratitudes(coupleId: string | null) {
@@ -37,7 +38,10 @@ export function useAddGratitude() {
       });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['gratitudes'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['gratitudes'] });
+      notifyPartner('gratitude');
+    },
     onError: (e: Error) => toast(e.message),
   });
 }

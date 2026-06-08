@@ -114,11 +114,14 @@ export async function registerNativePush(): Promise<void> {
   const Push = c?.Plugins?.PushNotifications;
   if (!c?.isNativePlatform?.() || !Push) return;
 
-  try {
-    if (!pushListenersWired) {
-      pushListenersWired = true;
+  // Wire listeners exactly once. Each step is independently guarded so a single
+  // plugin hiccup (e.g. FCM not yet configured) can never bubble up and crash
+  // the app — the #1 cause of the "grant permission → app dies" report.
+  if (!pushListenersWired) {
+    pushListenersWired = true;
 
-      // Native delivered the FCM/APNs token → store it server-side.
+    // Native delivered the FCM/APNs token → store it server-side.
+    try {
       await Push.addListener('registration', (data: unknown) => {
         const token = (data as { value?: string })?.value;
         if (!token) return;
@@ -128,19 +131,31 @@ export async function registerNativePush(): Promise<void> {
           body: JSON.stringify({ token, platform: nativePlatform() }),
         }).catch(() => {});
       });
+    } catch { /* listener wiring failed — non-fatal */ }
 
-      // User tapped a notification → deep-link to the relevant page.
+    // Registration errored natively (e.g. missing google-services.json). Swallow
+    // it here so it never surfaces as an unhandled native exception.
+    try {
+      await Push.addListener('registrationError', () => { /* ignore — push just won't arrive */ });
+    } catch { /* ignore */ }
+
+    // User tapped a notification → deep-link to the relevant page.
+    try {
       await Push.addListener('pushNotificationActionPerformed', (data: unknown) => {
         const url = (data as { notification?: { data?: { url?: string } } })
           ?.notification?.data?.url;
-        if (url) window.location.href = url;
+        if (url && typeof url === 'string') {
+          try { window.location.href = url; } catch { /* ignore */ }
+        }
       });
-    }
+    } catch { /* ignore */ }
+  }
 
+  try {
     const perm = (await Push.requestPermissions()) as { receive?: string };
     if (perm?.receive !== 'granted') return;
     await Push.register();
   } catch {
-    /* not native / plugin unavailable — ignore */
+    /* permission/register failed — ignore, app stays alive */
   }
 }

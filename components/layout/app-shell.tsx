@@ -2,13 +2,51 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 import { ThemeSwitcher } from '@/components/theme/theme-switcher';
 import { LangSwitcher } from './lang-switcher';
 import { UserMenu } from './user-menu';
-import { Link, usePathname } from '@/lib/i18n/navigation';
+import { Link, usePathname, useRouter } from '@/lib/i18n/navigation';
 import { useTutorialContext } from '@/components/tutorial/tutorial-provider';
+
+/**
+ * Refresh the CURRENT page in place — refetch its data + re-run the route's
+ * server render — WITHOUT navigating home. (The logo / back chevron go to the
+ * dashboard, which is what the user did NOT want from a "refresh".)
+ */
+function RefreshButton() {
+  const qc = useQueryClient();
+  const router = useRouter();
+  const t = useTranslations('nav');
+  const [spinning, setSpinning] = useState(false);
+
+  async function refresh() {
+    if (spinning) return;
+    setSpinning(true);
+    try {
+      await qc.invalidateQueries();   // refetch every active query on this screen
+      router.refresh();               // re-run server components for the current route
+    } finally {
+      setTimeout(() => setSpinning(false), 600); // let the spin read as deliberate
+    }
+  }
+
+  return (
+    <motion.button
+      type="button"
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.92 }}
+      onClick={refresh}
+      aria-label={t('refresh')}
+      className="flex items-center justify-center w-9 h-9 rounded-full bg-surface border border-gold/30 text-gold hover:text-goldBright hover:border-gold/60 transition-colors shadow-pop"
+    >
+      <RefreshCw size={15} className={spinning ? 'animate-spin' : ''} />
+    </motion.button>
+  );
+}
 
 function TutorialTriggerButton() {
   const { canTriggerPageTutorial, triggerPageTutorial } = useTutorialContext();
@@ -74,6 +112,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <RefreshButton />
           <TutorialTriggerButton />
           <ThemeSwitcher />
           <LangSwitcher />

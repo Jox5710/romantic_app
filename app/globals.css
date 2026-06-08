@@ -227,6 +227,62 @@ body {
 .leaflet-control-attribution a { color: var(--gold) !important; }
 
 /* =====================
+   AMBIENT STAR TWINKLE
+   ===================== */
+@keyframes twinkle {
+  0%   { opacity: var(--star-lo, 0.1); transform: scale(0.85); }
+  100% { opacity: var(--star-hi, 0.7); transform: scale(1.15); }
+}
+
+/* =====================
+   GALAXY / NEBULA BACKGROUND
+   ===================== */
+
+/* Slow galaxy-arm rotation — used on the nebula overlay */
+@keyframes galaxyRotate {
+  from { transform: rotate(0deg) scale(1); }
+  to   { transform: rotate(360deg) scale(1); }
+}
+
+/* Nebula cloud drifts and breathes */
+@keyframes nebulaDrift {
+  0%   { transform: translate(0, 0)    scale(1);    opacity: 0.55; }
+  30%  { transform: translate(3%, 2%)  scale(1.06); opacity: 0.70; }
+  60%  { transform: translate(-2%, 4%) scale(0.97); opacity: 0.50; }
+  100% { transform: translate(0, 0)    scale(1);    opacity: 0.55; }
+}
+
+/* Parallax star-layer floats — three speeds */
+@keyframes starFloat1 {
+  0%,100% { transform: translate(0, 0); }
+  40%     { transform: translate(6px, -8px); }
+  70%     { transform: translate(-4px, 5px); }
+}
+@keyframes starFloat2 {
+  0%,100% { transform: translate(0, 0); }
+  35%     { transform: translate(-9px, 6px); }
+  65%     { transform: translate(5px, -5px); }
+}
+@keyframes starFloat3 {
+  0%,100% { transform: translate(0, 0); }
+  50%     { transform: translate(4px, 10px); }
+}
+
+/* Heart float (reused by floating hearts layer) */
+@keyframes heartFloat {
+  0%   { transform: translateY(0)    rotate(0deg)   scale(1);    opacity: 0; }
+  10%  { opacity: 0.45; }
+  85%  { opacity: 0.35; }
+  100% { transform: translateY(-110vh) rotate(15deg) scale(1.1); opacity: 0; }
+}
+
+/* Quick fade-in for constellation memory cards */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* =====================
    REDUCED MOTION
    ===================== */
 @media (prefers-reduced-motion: reduce) {

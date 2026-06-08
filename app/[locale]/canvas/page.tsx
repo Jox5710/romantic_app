@@ -10,6 +10,7 @@ import { GoldButton } from '@/components/ui/gold-button';
 import { PenLine, Trash2 } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
 import { useToast } from '@/components/ui/toast';
+import { notifyPartner } from '@/lib/push';
 
 interface Stroke {
   id: string;
@@ -91,7 +92,10 @@ export default function CanvasPage() {
         width: 3,
       });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['canvas', coupleId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['canvas', coupleId] });
+      notifyPartner('canvas');
+    },
     onError: () => toast(tc('error'), 'error'),
   });
 
@@ -192,7 +196,7 @@ export default function CanvasPage() {
             ref={canvasRef}
             width={700}
             height={500}
-            className="w-full max-h-[60vh] sm:max-h-none object-contain touch-none cursor-crosshair"
+            className="w-full h-[calc(100dvh-9rem)] sm:h-[calc(100dvh-7rem)] object-contain touch-none cursor-crosshair"
             onMouseDown={onStart}
             onMouseMove={onMove}
             onMouseUp={onEnd}
