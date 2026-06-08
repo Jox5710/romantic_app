@@ -849,6 +849,10 @@ export interface Database {
     Functions: {
       is_admin: { Args: { uid: string }; Returns: boolean };
       current_couple_id: { Args: Record<string, never>; Returns: string };
+      accept_invite: {
+        Args: { p_code: string; p_name_b?: string | null; p_name_b_ar?: string | null };
+        Returns: string;
+      };
     };
     Enums: {
       [_ in never]: never;

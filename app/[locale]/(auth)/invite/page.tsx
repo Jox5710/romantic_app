@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,9 +33,12 @@ type FormValues = z.infer<typeof schema>;
 
 export default function InvitePage() {
   const t = useTranslations('auth.invite');
+  const locale = useLocale();
   const { toast } = useToast();
   const [done, setDone] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
+  const [partnerEmail, setPartnerEmail] = useState('');
   const [copied, setCopied] = useState(false);
 
   useTutorial('invite', [
@@ -105,7 +108,23 @@ export default function InvitePage() {
       return;
     }
 
+    // Send the partner a REAL invitation email (authenticating link → /accept).
+    // Best-effort: if SMTP isn't configured or sending fails, we still show the
+    // shareable link below as a fallback.
+    try {
+      const res = await fetch('/api/invite/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coupleId: couple.id, locale }),
+      });
+      const json = await res.json().catch(() => ({}));
+      setEmailSent(res.ok && json?.sent === true);
+    } catch {
+      setEmailSent(false);
+    }
+
     setInviteCode(inviteCode);
+    setPartnerEmail(values.partnerEmail);
     setDone(true);
   }
 
@@ -118,6 +137,13 @@ export default function InvitePage() {
         <div className="text-center space-y-6 max-w-sm animate-fade-up">
           <p className="text-gold font-display-en text-5xl">✉</p>
           <h2 className="text-ivory font-display-en text-3xl">{t('inviteSent')}</h2>
+          {emailSent ? (
+            <p className="text-ivoryDim text-sm">
+              {t('emailedTo')} <span className="text-gold break-all">{partnerEmail}</span>
+            </p>
+          ) : (
+            <p className="text-ivoryDim text-sm">{t('emailFallback')}</p>
+          )}
           <div className="bg-surface2 rounded-xl p-4 space-y-2">
             <p className="text-xs text-muted uppercase tracking-wider">{t('shareLink')}</p>
             <p className="text-gold font-mono text-sm break-all">{inviteUrl}</p>

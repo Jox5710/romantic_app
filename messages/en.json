@@ -129,7 +129,9 @@
       "passwordHint": "You'll use this with your email to sign in next time. At least 8 characters.",
       "confirmPassword": "Confirm password",
       "passwordError": "Could not save the password. Please try a stronger one.",
-      "sessionError": "Session error, please sign in again."
+      "sessionError": "Session error, please sign in again.",
+      "emailedTo": "Invitation emailed to",
+      "emailFallback": "We couldn't send the email automatically — share the link below with your partner."
     },
     "accept": {
       "title": "You've been invited",
@@ -148,14 +150,16 @@
       "passwordHint": "You'll use this with your email to sign in next time. At least 8 characters.",
       "confirmPassword": "Confirm password",
       "passwordError": "Could not save the password. Please try a stronger one.",
-      "sessionError": "Session error, please sign in again."
+      "sessionError": "Session error, please sign in again.",
+      "partnerLabel": "Your partner"
     },
     "awaiting": {
       "title": "Awaiting our blessing",
       "subtitle": "Your sanctuary is being reviewed. We'll notify you when it's approved.",
       "submitForReview": "Submit for review",
       "pending": "Under review — thank you for your patience.",
-      "rejected": "Your request was not approved."
+      "rejected": "Your request was not approved.",
+      "waitingForPartner": "Waiting for your partner to accept the invitation…"
     },
     "rejected": {
       "title": "Not approved",
@@ -1128,6 +1132,12 @@
     "heartbeat": {
       "title": "A heartbeat from your love 💓",
       "body": "Your partner just sent you a heartbeat."
+    },
+    "iosInstall": {
+      "title": "Turn on notifications",
+      "step1": "Tap the Share button in Safari",
+      "step2": "Choose “Add to Home Screen”",
+      "step3": "Open Forever from your home screen, then tap Enable"
     }
   }
 }

@@ -50,6 +50,30 @@ export function nativePlatform(): 'ios' | 'android' | 'web' {
 }
 
 /**
+ * True on iOS/iPadOS Safari (web, NOT the native shell). Covers iPadOS 13+,
+ * which masquerades as a Mac but reports touch points. Used to surface the
+ * Add-to-Home-Screen path, since iOS only allows web push from an INSTALLED PWA.
+ */
+export function isIOS(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  if (isNative()) return false;
+  const ua = navigator.userAgent || '';
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  // iPadOS 13+ reports as "MacIntel" but is touch-capable.
+  return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+}
+
+/** True when running as an installed PWA (home-screen / standalone display). */
+export function isStandalonePWA(): boolean {
+  if (typeof window === 'undefined') return false;
+  const iosStandalone = (navigator as unknown as { standalone?: boolean }).standalone === true;
+  const displayStandalone =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(display-mode: standalone)').matches;
+  return iosStandalone || displayStandalone;
+}
+
+/**
  * Fire a short haptic. On native uses the Haptics plugin (real taptic engine /
  * vibrator); on web falls back to the existing `navigator.vibrate` helper.
  */

@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { GoldButton } from '@/components/ui/gold-button';
 import { Field } from '@/components/ui/field';
 import { useToast } from '@/components/ui/toast';
-import { useRouter } from '@/lib/i18n/navigation';
 import { Heart } from 'lucide-react';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
 
@@ -20,11 +19,11 @@ function AcceptInner() {
     { id: 'accept-names', titleKey: 'accept.step2.title', descKey: 'accept.step2.desc' },
     { id: 'accept-button', titleKey: 'accept.step3.title', descKey: 'accept.step3.desc' },
   ]);
-  const router = useRouter();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const code = searchParams.get('code') ?? '';
 
-  const [couple, setCouple] = useState<{ id: string; name_a: string | null } | null>(null);
+  const [couple, setCouple] = useState<{ id: string; name_a: string | null; name_a_ar: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [myName, setMyName] = useState('');
@@ -41,11 +40,11 @@ function AcceptInner() {
     const supabase = createClient();
     supabase
       .from('couples')
-      .select('id, name_a')
+      .select('id, name_a, name_a_ar')
       .eq('invite_code', code.toUpperCase())
       .eq('state', 'invited')
       .maybeSingle()
-      .then(({ data }: { data: { id: string; name_a: string | null } | null }) => {
+      .then(({ data }: { data: { id: string; name_a: string | null; name_a_ar: string | null } | null }) => {
         setCouple(data ?? null);
         setLoading(false);
       });
@@ -81,37 +80,24 @@ function AcceptInner() {
       return;
     }
 
-    const { error: memberErr } = await supabase.from('couple_members').insert({
-      user_id: user.id,
-      couple_id: couple.id,
-      role: 'partner',
-      display_name: myName.trim() || null,
-      confirmed_at: new Date().toISOString(),
+    // One atomic, security-definer step: join as partner AND auto-approve the
+    // couple (no admin gate). See migration 00000000000011_accept_invite.sql.
+    const { error: acceptErr } = await supabase.rpc('accept_invite', {
+      p_code: code.toUpperCase(),
+      p_name_b: myName.trim() || null,
+      p_name_b_ar: myNameAr.trim() || null,
     });
 
-    if (memberErr) {
-      toast(memberErr.message);
+    if (acceptErr) {
+      toast(acceptErr.message);
       setAccepting(false);
       return;
     }
 
-    const { error: coupleErr } = await supabase
-      .from('couples')
-      .update({
-        partner_id: user.id,
-        state: 'mutual',
-        name_b: myName.trim() || null,
-        name_b_ar: myNameAr.trim() || null,
-      })
-      .eq('id', couple.id);
-
-    if (coupleErr) {
-      toast(coupleErr.message);
-      setAccepting(false);
-      return;
-    }
-
-    router.replace('/awaiting');
+    // Full document load so the dashboard mounts fresh (same reasoning as the
+    // sign-in redirect — avoids a blank first render). The couple is already
+    // 'approved', so the route guard sends us straight to the dashboard.
+    window.location.assign(`/${locale}`);
   }
 
   if (loading) {
@@ -138,6 +124,12 @@ function AcceptInner() {
               )}
             </div>
             <div className="space-y-4 text-start" data-tutorial-id="accept-names">
+              <Field
+                label={t('partnerLabel')}
+                value={(locale === 'ar' ? couple.name_a_ar : null) || couple.name_a || ''}
+                className="text-gold/90 cursor-default"
+                readOnly
+              />
               <Field
                 label={t('myName')}
                 placeholder={t('myNamePlaceholder')}

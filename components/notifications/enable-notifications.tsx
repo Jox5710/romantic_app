@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Bell, BellOff, BellRing } from 'lucide-react';
+import { Bell, BellOff, BellRing, Share, PlusSquare } from 'lucide-react';
 import {
   notificationsSupported, getPermission, requestNotificationPermission,
 } from '@/lib/notifications';
 import { subscribeToPush } from '@/lib/push';
-import { isNative, nativePushPermission, registerNativePush } from '@/lib/native';
+import {
+  isNative, nativePushPermission, registerNativePush, isIOS, isStandalonePWA,
+} from '@/lib/native';
 
 /**
  * Permission prompt for notifications. Browsers only allow requesting
@@ -17,13 +19,40 @@ import { isNative, nativePushPermission, registerNativePush } from '@/lib/native
 export function EnableNotifications() {
   const t = useTranslations('notifications');
   const [perm, setPerm] = useState<NotificationPermission | 'unsupported'>('default');
+  // iOS Safari (non-installed) can't do web push at all — the only path is to
+  // Add-to-Home-Screen first. Detected client-side to avoid hydration mismatch.
+  const [iosInstall, setIosInstall] = useState(false);
 
   useEffect(() => {
     // In the native shell, web Notification may be absent — gate on the native
     // push permission instead so the button still appears.
     if (isNative()) { void nativePushPermission().then(setPerm); return; }
+    if (isIOS() && !isStandalonePWA()) { setIosInstall(true); return; }
     setPerm(notificationsSupported() ? getPermission() : 'unsupported');
   }, []);
+
+  if (iosInstall) {
+    return (
+      <div className="flex flex-col gap-2 rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-xs text-ivoryDim max-w-xs">
+        <span className="flex items-center gap-2 text-gold font-medium">
+          <Bell size={14} className="shrink-0" />
+          {t('iosInstall.title')}
+        </span>
+        <span className="flex items-center gap-2">
+          <Share size={13} className="shrink-0 text-gold/80" />
+          {t('iosInstall.step1')}
+        </span>
+        <span className="flex items-center gap-2">
+          <PlusSquare size={13} className="shrink-0 text-gold/80" />
+          {t('iosInstall.step2')}
+        </span>
+        <span className="flex items-center gap-2">
+          <BellRing size={13} className="shrink-0 text-gold/80" />
+          {t('iosInstall.step3')}
+        </span>
+      </div>
+    );
+  }
 
   if (perm === 'unsupported' || perm === 'granted') return null;
 
