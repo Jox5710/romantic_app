@@ -44,3 +44,5 @@ next-env.d.ts
 
 # production env — real secrets, never commit
 .env.production
+di_sevice 2.md
+di_sevice.md
