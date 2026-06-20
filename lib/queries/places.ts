@@ -46,6 +46,29 @@ export function useAddPlace() {
   });
 }
 
+export function useUpdatePlace() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (values: {
+      id: string;
+      name?: string;
+      lat?: number;
+      lng?: number;
+      kind?: PlaceKind;
+      visited_at?: string | null;
+      note?: string | null;
+    }) => {
+      const { id, ...patch } = values;
+      const supabase = createClient();
+      const { error } = await supabase.from('places').update(patch).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['places'] }),
+    onError: (e: Error) => toast(e.message),
+  });
+}
+
 export function useDeletePlace() {
   const qc = useQueryClient();
   const { toast } = useToast();

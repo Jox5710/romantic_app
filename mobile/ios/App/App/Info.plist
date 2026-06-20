@@ -45,5 +45,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Forever uses your location to center the map and drop pins on places that matter to you.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Forever needs access to your photos so you can create AI portraits of the two of you.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Forever saves your generated portraits to your photo library.</string>
 </dict>
 </plist>

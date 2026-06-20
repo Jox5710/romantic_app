@@ -17,6 +17,7 @@
  */
 
 import { vibrate } from './notifications';
+import { ANDROID_CHANNELS } from './notify-tunes';
 
 type CapPlugin = {
   [method: string]: (...args: unknown[]) => Promise<unknown>;
@@ -122,6 +123,70 @@ export async function nativePushPermission(): Promise<NotificationPermission> {
   }
 }
 
+/**
+ * Create one Android notification channel per notification type, each with its
+ * own custom sound ("tune") + vibration. On Android 8+ sound/vibration are fixed
+ * per channel at creation time and can't be set per message, so this is the only
+ * way to give each event its own tune. No-op off Android / outside the shell, and
+ * idempotent (createChannel updates an existing channel). Uses the
+ * @capacitor/local-notifications plugin via the injected global.
+ */
+let channelsCreated = false;
+export async function ensureNotificationChannels(): Promise<void> {
+  const c = cap();
+  const LN = c?.Plugins?.LocalNotifications;
+  if (!c?.isNativePlatform?.() || nativePlatform() !== 'android' || !LN || channelsCreated) return;
+  channelsCreated = true;
+  for (const ch of ANDROID_CHANNELS) {
+    try {
+      await LN.createChannel({
+        id: ch.id,
+        name: ch.name,
+        description: ch.description,
+        importance: ch.importance,
+        sound: `${ch.sound}.wav`, // resolves res/raw/<name>.wav
+        vibration: true,
+        visibility: 1,
+        lights: true,
+        lightColor: '#c9a961',
+      });
+    } catch { /* plugin missing / channel error — non-fatal */ }
+  }
+}
+
+/**
+ * High-accuracy current position. Uses the native @capacitor/geolocation plugin
+ * inside the shell (which requests the OS location permission the manifest now
+ * declares); falls back to web `navigator.geolocation` in a browser/PWA. Returns
+ * null on denial/unavailability so callers can show a friendly message.
+ */
+export async function nativeGetPosition(): Promise<{ lat: number; lng: number } | null> {
+  const c = cap();
+  const Geo = c?.Plugins?.Geolocation;
+  if (c?.isNativePlatform?.() && Geo) {
+    try {
+      const perm = (await Geo.requestPermissions()) as { location?: string };
+      if (perm?.location === 'denied') return null;
+      const pos = (await Geo.getCurrentPosition({ enableHighAccuracy: true, timeout: 12_000 })) as {
+        coords?: { latitude: number; longitude: number };
+      };
+      if (pos?.coords) return { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      return null;
+    } catch {
+      return null;
+    }
+  }
+  // Web fallback
+  return new Promise((resolve) => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 12_000, maximumAge: 0 },
+    );
+  });
+}
+
 let pushListenersWired = false;
 
 /**
@@ -137,6 +202,10 @@ export async function registerNativePush(): Promise<void> {
   const c = cap();
   const Push = c?.Plugins?.PushNotifications;
   if (!c?.isNativePlatform?.() || !Push) return;
+
+  // Make sure each notification type's channel (custom sound + vibration) exists
+  // before the first push arrives.
+  void ensureNotificationChannels();
 
   // Wire listeners exactly once. Each step is independently guarded so a single
   // plugin hiccup (e.g. FCM not yet configured) can never bubble up and crash

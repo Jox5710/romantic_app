@@ -49,7 +49,8 @@
     "dinner": "Swipe to Eat",
     "canvas": "Canvas",
     "queue": "The Queue",
-    "voices": "Voice Notes"
+    "voices": "Voice Notes",
+    "pose": "Pose Studio"
   },
   "theme": {
     "dusk": "Dusk",
@@ -554,7 +555,9 @@
     "empty": {
       "title": "A blank canvas",
       "body": "Draw something for your partner to discover."
-    }
+    },
+    "undo": "Undo",
+    "eraser": "Eraser"
   },
   "queue": {
     "title": "The Queue",
@@ -1139,5 +1142,30 @@
       "step2": "Choose “Add to Home Screen”",
       "step3": "Open Forever from your home screen, then tap Enable"
     }
+  },
+  "pose": {
+    "title": "Pose Studio",
+    "subtitle": "Blend your two photos into one romantic portrait",
+    "remaining": "{n} left today",
+    "uploadStep": "Add a photo of each of you",
+    "photoYou": "You",
+    "photoPartner": "Your partner",
+    "poseStep": "Choose a pose",
+    "customLabel": "Or describe your own pose",
+    "customPlaceholder": "e.g. dancing under string lights",
+    "useCustom": "Use this pose",
+    "generate": "Create our portrait",
+    "comeBackTomorrow": "You've used today's portraits — come back tomorrow 💛",
+    "needPhotos": "Add a photo of each of you first",
+    "needPose": "Pick a pose first",
+    "quotaReached": "You've reached today's limit of 2 portraits",
+    "genFailed": "Couldn't create the image — please try again",
+    "download": "Download in HD",
+    "gallery": "Your portraits",
+    "loading1": "Bringing you two together…",
+    "loading2": "Painting the light just right…",
+    "loading3": "Finding the perfect angle…",
+    "loading4": "Adding a little magic…",
+    "loadingHint": "This usually takes 10–20 seconds"
   }
 }

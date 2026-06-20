@@ -125,3 +125,57 @@ export async function generate(prompt: string): Promise<string> {
   queueTail = run.catch(() => {});
   return run as Promise<string>;
 }
+
+// ─── Image generation (multimodal: image-in → image-out) ─────────────────────
+
+export interface ImagePart {
+  /** e.g. 'image/jpeg' | 'image/png' */
+  mimeType: string;
+  /** base64-encoded bytes, NO data-URL prefix */
+  data: string;
+}
+
+export class NoImageError extends Error {
+  constructor() {
+    super('The image model returned no image (likely a safety block).');
+    this.name = 'NoImageError';
+  }
+}
+
+// Distinct from the text MODEL_CHAIN — this is an image-capable model.
+const IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
+
+/**
+ * Combine input images with a text prompt and return a single generated image.
+ * Used by the pose studio (two couple photos → one romantic portrait). Shares
+ * the global FIFO queue so it can't burst the API alongside text calls.
+ */
+export async function generateImage(prompt: string, images: ImagePart[]): Promise<ImagePart> {
+  const run = queueTail.then(async () => {
+    const wait = MIN_INTERVAL_MS - (Date.now() - lastStart);
+    if (wait > 0) await sleep(wait);
+    lastStart = Date.now();
+
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) throw new MissingKeyError();
+    const genai = new GoogleGenerativeAI(key);
+    const model = genai.getGenerativeModel({ model: IMAGE_MODEL });
+
+    const parts = [
+      { text: prompt },
+      ...images.map((im) => ({ inlineData: { mimeType: im.mimeType, data: im.data } })),
+    ];
+
+    const result = await model.generateContent(parts);
+    const outParts = result.response.candidates?.[0]?.content?.parts ?? [];
+    for (const p of outParts) {
+      const inline = (p as { inlineData?: { mimeType?: string; data?: string } }).inlineData;
+      if (inline?.data) {
+        return { mimeType: inline.mimeType || 'image/png', data: inline.data };
+      }
+    }
+    throw new NoImageError();
+  });
+  queueTail = run.catch(() => {});
+  return run as Promise<ImagePart>;
+}

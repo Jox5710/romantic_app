@@ -842,6 +842,72 @@ export interface Database {
         };
         Relationships: [];
       };
+      pose_creations: {
+        Row: {
+          id: string;
+          couple_id: string;
+          created_by: string;
+          pose_label: string;
+          result_path: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          couple_id: string;
+          created_by: string;
+          pose_label: string;
+          result_path: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          couple_id?: string;
+          created_by?: string;
+          pose_label?: string;
+          result_path?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      pose_quota: {
+        Row: { couple_id: string; day: string; count: number };
+        Insert: { couple_id: string; day: string; count?: number };
+        Update: { couple_id?: string; day?: string; count?: number };
+        Relationships: [];
+      };
+      pose_votes: {
+        Row: {
+          couple_id: string;
+          option_a: string | null;
+          option_b: string | null;
+          author_a: string | null;
+          author_b: string | null;
+          choice_a: string | null;
+          choice_b: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          couple_id: string;
+          option_a?: string | null;
+          option_b?: string | null;
+          author_a?: string | null;
+          author_b?: string | null;
+          choice_a?: string | null;
+          choice_b?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          couple_id?: string;
+          option_a?: string | null;
+          option_b?: string | null;
+          author_a?: string | null;
+          author_b?: string | null;
+          choice_a?: string | null;
+          choice_b?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -852,6 +918,10 @@ export interface Database {
       accept_invite: {
         Args: { p_code: string; p_name_b?: string | null; p_name_b_ar?: string | null };
         Returns: string;
+      };
+      reserve_pose_generation: {
+        Args: { p_couple_id: string; p_limit: number };
+        Returns: number;
       };
     };
     Enums: {
