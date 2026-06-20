@@ -5,7 +5,7 @@ import { Link } from '@/lib/i18n/navigation';
 import {
   BookOpen, ListChecks, MessageSquare, Lock, Zap, Map,
   Stars, Wind, Eye, ScrollText, CalendarDays, Heart, Feather,
-  ClipboardList, Swords, Utensils, PenLine, PlaySquare, Mic,
+  ClipboardList, Swords, Utensils, PenLine, PlaySquare, Mic, Sparkles,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -30,6 +30,7 @@ const modules = [
   { href: '/canvas',        icon: PenLine,        key: 'canvas' },
   { href: '/queue',         icon: PlaySquare,     key: 'queue' },
   { href: '/voices',        icon: Mic,            key: 'voices' },
+  { href: '/pose',          icon: Sparkles,       key: 'pose' },
 ] as const;
 
 export function ModuleGrid() {

@@ -78,6 +78,10 @@ export default function AwaitingPage() {
           <p className="text-ivoryDim text-sm">{t('subtitle')}</p>
         </div>
 
+        {coupleState === 'invited' && (
+          <p className="text-muted text-sm italic">{t('waitingForPartner')}</p>
+        )}
+
         {coupleState === 'mutual' && (
           <GoldButton onClick={submitForReview} loading={submitting} size="lg" className="w-full" data-tutorial-id="awaiting-submit">
             {t('submitForReview')}

@@ -27,6 +27,11 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- Fallback channel for any FCM message without an explicit per-type channel. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="heartbeat" />
     </application>
 
     <!-- Permissions -->
@@ -34,4 +39,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Android 13+ runtime notification permission (required for FCM push) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Custom vibration patterns on notification channels -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- "My Location" on the map -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 </manifest>

@@ -48,22 +48,23 @@ interface SelectedMemory {
   memory: Memory;
 }
 
-// ─── Star layout ──────────────────────────────────────────────────────────────
-
-function buildStars(memories: Memory[], cxBitmap: number, cyBitmap: number, dpr: number): Star[] {
-  const now = performance.now();
-  return memories.map((m, i) => {
-    const r = (20 + i * 18) * dpr;
-    const angle = i * GOLDEN_ANGLE;
-    return {
-      x: cxBitmap + r * Math.cos(angle),
-      y: cyBitmap + r * Math.sin(angle),
-      baseRadius: (i === 0 ? 5 : 3 + Math.sin(i * 1.37) * 1.5) * dpr,
-      memory: m,
-      phase: (i * 0.618 * Math.PI * 2) % (Math.PI * 2),
-      birthTime: now + i * 80, // stagger fade-in
-    };
-  });
+// ─── Glow sprite ────────────────────────────────────────────────────────────
+// A radial gold gradient is expensive to build; creating one PER STAR PER FRAME
+// (ctx.createRadialGradient in the loop) was the main source of lag. Instead we
+// render the gradient ONCE into an offscreen sprite and cheaply drawImage it,
+// scaled per star — O(1) gradient cost regardless of how many memories exist.
+function makeGlowSprite(): HTMLCanvasElement {
+  const size = 128;
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const g = c.getContext('2d')!;
+  const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  grad.addColorStop(0, 'rgba(201,169,97,0.55)');
+  grad.addColorStop(0.4, 'rgba(201,169,97,0.18)');
+  grad.addColorStop(1, 'rgba(201,169,97,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, size, size);
+  return c;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -89,9 +90,17 @@ export default function ConstellationPage() {
   const starsRef = useRef<Star[]>([]);
   // Gold colors read once from CSS vars
   const colorsRef = useRef({ gold: '#c9a961', goldBright: '#e8c87a' });
+  // Cached glow sprite (built once after mount).
+  const glowSpriteRef = useRef<HTMLCanvasElement | null>(null);
+  // Last canvas size, to skip no-op ResizeObserver fires that would otherwise
+  // re-seed the stars and replay the birth animation (the mobile flicker bug).
+  const lastSizeRef = useRef({ w: 0, h: 0 });
 
   // ── Interaction state ────────────────────────────────────────────────────
   const [hoveredId, setHoveredId]       = useState<string | null>(null);
+  // Mirror of hoveredId for the rAF loop — lets drawLoop stay dependency-free
+  // (so the animation loop is NEVER torn down/restarted on hover).
+  const hoveredIdRef = useRef<string | null>(null);
   const [selected,  setSelected]        = useState<SelectedMemory | null>(null);
   // Parallax offset in display pixels — updated by mousemove / devicemotion
   const parallaxRef = useRef({ x: 0, y: 0 });
@@ -119,7 +128,12 @@ export default function ConstellationPage() {
   }, []);
 
   // ── Main rAF draw loop ────────────────────────────────────────────────────
+  // Dependency-free + ALWAYS reschedules at the end, so the loop runs for the
+  // whole page lifetime even if the canvas/memories appear after mount, and is
+  // never recreated on hover. Reads all dynamic state from refs.
   const drawLoop = useCallback(() => {
+    rafRef.current = requestAnimationFrame(drawLoop);
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -139,11 +153,10 @@ export default function ConstellationPage() {
     }
 
     ctx.clearRect(0, 0, bw, bh);
+    if (stars.length === 0) return;
 
-    if (stars.length === 0) {
-      rafRef.current = requestAnimationFrame(drawLoop);
-      return;
-    }
+    const hoveredId = hoveredIdRef.current;
+    const sprite = glowSpriteRef.current;
 
     // ── Apply parallax transform to the whole field ───────────────────────
     ctx.save();
@@ -155,7 +168,7 @@ export default function ConstellationPage() {
       ? 1
       : Math.min(1, (now - LINE_DRAW_START) / (BIRTH_DURATION_MS * 1.6));
 
-    if (lineProgress > 0) {
+    if (lineProgress > 0 && stars.length > 1) {
       const totalSegments = stars.length - 1;
       ctx.strokeStyle = 'rgba(201,169,97,0.15)';
       ctx.lineWidth = 1;
@@ -193,21 +206,15 @@ export default function ConstellationPage() {
       const isHovered = s.memory.id === hoveredId;
       const radius    = s.baseRadius * (1 + twinkle * 0.15) * (isHovered ? 1.5 : 1);
       const glowMult  = isHovered ? 2.2 : 1;
+      const glowR     = radius * 3.5 * glowMult;
 
-      ctx.save();
+      // Outer glow — cheap drawImage of the cached sprite (no per-frame gradient)
+      if (sprite) {
+        ctx.globalAlpha = birthAlpha * Math.min(1, 0.75 + twinkle * 0.5);
+        ctx.drawImage(sprite, s.x - glowR, s.y - glowR, glowR * 2, glowR * 2);
+      }
+
       ctx.globalAlpha = birthAlpha;
-
-      // Outer glow
-      const glowR = radius * 3.5 * glowMult;
-      const glow  = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
-      glow.addColorStop(0, `rgba(201,169,97,${0.45 + twinkle * 0.2})`);
-      glow.addColorStop(0.4, `rgba(201,169,97,${0.15 + twinkle * 0.1})`);
-      glow.addColorStop(1, 'rgba(201,169,97,0)');
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, glowR, 0, Math.PI * 2);
-      ctx.fillStyle = glow;
-      ctx.fill();
-
       // Star core
       ctx.beginPath();
       ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
@@ -222,17 +229,17 @@ export default function ConstellationPage() {
         ctx.lineWidth = 1.2 * dpr;
         ctx.stroke();
       }
-
-      ctx.restore();
+      ctx.globalAlpha = 1;
     });
 
     ctx.restore(); // end parallax transform
-
-    rafRef.current = requestAnimationFrame(drawLoop);
-  }, [hoveredId]);
+  }, []);
 
   // ── Rebuild stars whenever memories or canvas size changes ────────────────
-  const rebuildStars = useCallback(() => {
+  // `animate=true` (memories changed) restarts the birth fade-in; `animate=false`
+  // (a resize) re-lays-out positions but PRESERVES each star's birthTime so the
+  // animation doesn't replay on every ResizeObserver tick.
+  const rebuildStars = useCallback((animate: boolean) => {
     const canvas = canvasRef.current;
     if (!canvas || !memories?.length) {
       starsRef.current = [];
@@ -241,28 +248,53 @@ export default function ConstellationPage() {
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     const cx  = canvas.width / 2;
     const cy  = canvas.height / 2;
-    starsRef.current = buildStars(memories as Memory[], cx, cy, dpr);
+    const now = performance.now();
+    const prev = starsRef.current;
+    starsRef.current = (memories as Memory[]).map((m, i) => {
+      const r = (20 + i * 18) * dpr;
+      const angle = i * GOLDEN_ANGLE;
+      const keep = !animate && prev[i]?.memory.id === m.id ? prev[i] : null;
+      return {
+        x: cx + r * Math.cos(angle),
+        y: cy + r * Math.sin(angle),
+        baseRadius: (i === 0 ? 5 : 3 + Math.sin(i * 1.37) * 1.5) * dpr,
+        memory: m,
+        phase: (i * 0.618 * Math.PI * 2) % (Math.PI * 2),
+        birthTime: keep ? keep.birthTime : now + i * 80,
+      };
+    });
   }, [memories]);
 
-  // ── Read CSS vars once after mount ────────────────────────────────────────
+  // ── Read CSS vars + build the glow sprite once after mount ────────────────
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const style = getComputedStyle(document.documentElement);
     const gold       = style.getPropertyValue('--gold').trim()       || '#c9a961';
     const goldBright = style.getPropertyValue('--gold-bright').trim() || '#e8c87a';
     colorsRef.current = { gold, goldBright };
+    glowSpriteRef.current = makeGlowSprite();
   }, []);
 
   // ── Setup: resize observer + rAF loop ────────────────────────────────────
   useEffect(() => {
     resize();
-    rebuildStars();
+    rebuildStars(true);
+    const c = containerRef.current;
+    if (c) lastSizeRef.current = { w: c.clientWidth, h: c.clientHeight };
 
     const ro = new ResizeObserver(() => {
+      const el = containerRef.current;
+      if (!el) return;
+      // Skip no-op fires (e.g. mobile URL-bar show/hide that doesn't actually
+      // change the box) so stars don't re-seed and replay the birth animation.
+      const w = el.clientWidth, h = el.clientHeight;
+      const last = lastSizeRef.current;
+      if (Math.abs(w - last.w) < 2 && Math.abs(h - last.h) < 2) return;
+      lastSizeRef.current = { w, h };
       resize();
-      rebuildStars();
+      rebuildStars(false);
     });
-    if (containerRef.current) ro.observe(containerRef.current);
+    if (c) ro.observe(c);
 
     rafRef.current = requestAnimationFrame(drawLoop);
 
@@ -274,17 +306,12 @@ export default function ConstellationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Re-seed stars when memories load/change ───────────────────────────────
+  // ── Re-seed (and animate) stars when memories load/change ─────────────────
   useEffect(() => {
-    rebuildStars();
-  }, [rebuildStars]);
-
-  // ── Re-run loop when hovered star changes (so glow repaints) ─────────────
-  useEffect(() => {
-    cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(drawLoop);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [drawLoop]);
+    resize();
+    rebuildStars(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memories]);
 
   // ── Parallax: mouse ───────────────────────────────────────────────────────
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
@@ -312,13 +339,20 @@ export default function ConstellationPage() {
   }
 
   // ── Hover ─────────────────────────────────────────────────────────────────
+  // Update React state only when the hovered id actually changes — avoids a
+  // setState (and re-render) on every single mousemove event.
+  function setHovered(id: string | null) {
+    if (hoveredIdRef.current === id) return;
+    hoveredIdRef.current = id;
+    setHoveredId(id);
+  }
   function handleCanvasMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
     const hit = hitTest(e.clientX, e.clientY);
-    setHoveredId(hit?.memory.id ?? null);
+    setHovered(hit?.memory.id ?? null);
     (e.currentTarget as HTMLCanvasElement).style.cursor = hit ? 'pointer' : 'crosshair';
   }
   function handleCanvasMouseLeave() {
-    setHoveredId(null);
+    setHovered(null);
   }
 
   // ── Click / tap ───────────────────────────────────────────────────────────

@@ -13,6 +13,8 @@
  * user to have granted Notification permission.
  */
 
+import { vibrationFor } from './notify-tunes';
+
 let swReg: ServiceWorkerRegistration | null = null;
 
 export function notificationsSupported(): boolean {
@@ -58,7 +60,8 @@ export async function showNotification(
   body: string,
   opts: { url?: string; tag?: string } = {},
 ): Promise<void> {
-  vibrate();
+  const pattern = vibrationFor(opts.tag);
+  vibrate(pattern);
   if (!notificationsSupported() || Notification.permission !== 'granted') return;
 
   const options = {
@@ -67,7 +70,7 @@ export async function showNotification(
     badge: '/icons/icon-192.png',
     tag: opts.tag,
     renotify: !!opts.tag,
-    vibrate: [120, 60, 120],
+    vibrate: pattern,
     data: { url: opts.url ?? '/' },
   } as NotificationOptions;
 

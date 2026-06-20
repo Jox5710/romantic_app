@@ -4,6 +4,12 @@
 // FIREBASE_SERVICE_ACCOUNT env var (same env pattern as the VAPID keys).
 import { initializeApp, cert, getApps, type App } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
+import { ANDROID_CHANNELS } from '@/lib/notify-tunes';
+
+// tag (NotifType) → raw sound resource name, from the channel config.
+const SOUND_BY_TAG: Record<string, string> = Object.fromEntries(
+  ANDROID_CHANNELS.map((c) => [c.id, c.sound]),
+);
 
 let app: App | null = null;
 
@@ -43,16 +49,25 @@ export async function sendFcm(tokens: string[], payload: FcmPayload): Promise<{ 
   if (!a || tokens.length === 0) return { sent: 0, invalidTokens: [] };
 
   const tag = payload.tag ?? 'forever';
+  const sound = SOUND_BY_TAG[tag]; // raw resource name (no ext) or undefined
   const res = await getMessaging(a).sendEachForMulticast({
     tokens,
     notification: { title: payload.title, body: payload.body },
     data: { url: payload.url ?? '/', tag },
     android: {
       priority: 'high',
-      notification: { tag, defaultVibrateTimings: true },
+      notification: {
+        tag,
+        // Route to the per-type channel created on the device (lib/native.ts),
+        // which carries that type's custom sound + vibration. Falls back to the
+        // app's default channel if the channel doesn't exist yet.
+        channelId: tag,
+        sound: sound ? `${sound}` : undefined,
+        defaultVibrateTimings: !sound,
+      },
     },
     apns: {
-      payload: { aps: { sound: 'default', 'thread-id': tag } },
+      payload: { aps: { sound: sound ? `${sound}.caf` : 'default', 'thread-id': tag } },
     },
   });
 

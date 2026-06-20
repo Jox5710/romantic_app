@@ -49,7 +49,8 @@
     "dinner": "Swipe to Eat",
     "canvas": "Canvas",
     "queue": "The Queue",
-    "voices": "Voice Notes"
+    "voices": "Voice Notes",
+    "pose": "Pose Studio"
   },
   "theme": {
     "dusk": "Dusk",
@@ -129,7 +130,9 @@
       "passwordHint": "You'll use this with your email to sign in next time. At least 8 characters.",
       "confirmPassword": "Confirm password",
       "passwordError": "Could not save the password. Please try a stronger one.",
-      "sessionError": "Session error, please sign in again."
+      "sessionError": "Session error, please sign in again.",
+      "emailedTo": "Invitation emailed to",
+      "emailFallback": "We couldn't send the email automatically — share the link below with your partner."
     },
     "accept": {
       "title": "You've been invited",
@@ -148,14 +151,16 @@
       "passwordHint": "You'll use this with your email to sign in next time. At least 8 characters.",
       "confirmPassword": "Confirm password",
       "passwordError": "Could not save the password. Please try a stronger one.",
-      "sessionError": "Session error, please sign in again."
+      "sessionError": "Session error, please sign in again.",
+      "partnerLabel": "Your partner"
     },
     "awaiting": {
       "title": "Awaiting our blessing",
       "subtitle": "Your sanctuary is being reviewed. We'll notify you when it's approved.",
       "submitForReview": "Submit for review",
       "pending": "Under review — thank you for your patience.",
-      "rejected": "Your request was not approved."
+      "rejected": "Your request was not approved.",
+      "waitingForPartner": "Waiting for your partner to accept the invitation…"
     },
     "rejected": {
       "title": "Not approved",
@@ -550,7 +555,9 @@
     "empty": {
       "title": "A blank canvas",
       "body": "Draw something for your partner to discover."
-    }
+    },
+    "undo": "Undo",
+    "eraser": "Eraser"
   },
   "queue": {
     "title": "The Queue",
@@ -1128,6 +1135,37 @@
     "heartbeat": {
       "title": "A heartbeat from your love 💓",
       "body": "Your partner just sent you a heartbeat."
+    },
+    "iosInstall": {
+      "title": "Turn on notifications",
+      "step1": "Tap the Share button in Safari",
+      "step2": "Choose “Add to Home Screen”",
+      "step3": "Open Forever from your home screen, then tap Enable"
     }
+  },
+  "pose": {
+    "title": "Pose Studio",
+    "subtitle": "Blend your two photos into one romantic portrait",
+    "remaining": "{n} left today",
+    "uploadStep": "Add a photo of each of you",
+    "photoYou": "You",
+    "photoPartner": "Your partner",
+    "poseStep": "Choose a pose",
+    "customLabel": "Or describe your own pose",
+    "customPlaceholder": "e.g. dancing under string lights",
+    "useCustom": "Use this pose",
+    "generate": "Create our portrait",
+    "comeBackTomorrow": "You've used today's portraits — come back tomorrow 💛",
+    "needPhotos": "Add a photo of each of you first",
+    "needPose": "Pick a pose first",
+    "quotaReached": "You've reached today's limit of 2 portraits",
+    "genFailed": "Couldn't create the image — please try again",
+    "download": "Download in HD",
+    "gallery": "Your portraits",
+    "loading1": "Bringing you two together…",
+    "loading2": "Painting the light just right…",
+    "loading3": "Finding the perfect angle…",
+    "loading4": "Adding a little magic…",
+    "loadingHint": "This usually takes 10–20 seconds"
   }
 }

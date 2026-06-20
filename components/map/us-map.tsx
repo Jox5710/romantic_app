@@ -7,7 +7,8 @@
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { usePlaces, useAddPlace, useDeletePlace } from '@/lib/queries/places';
+import { usePlaces, useAddPlace, useUpdatePlace, useDeletePlace } from '@/lib/queries/places';
+import { nativeGetPosition } from '@/lib/native';
 import { useCoupleState } from '@/lib/hooks/use-couple-state';
 import { useToast } from '@/components/ui/toast';
 import { useTheme } from '@/components/theme/theme-provider';
@@ -82,6 +83,7 @@ export function UsMap() {
   const { coupleId } = useCoupleState();
   const { data: places } = usePlaces(coupleId);
   const add = useAddPlace();
+  const update = useUpdatePlace();
   const del = useDeletePlace();
 
   // Pending-pin form (existing right-click flow).
@@ -89,6 +91,8 @@ export function UsMap() {
   const [name, setName] = useState('');
   const [kind, setKind] = useState<PlaceKind>('visited');
   const [note, setNote] = useState('');
+  const [visitedAt, setVisitedAt] = useState('');
+  const [locating, setLocating] = useState(false);
 
   // Race-gate: markers effect waits until Leaflet has finished loading.
   const [mapReady, setMapReady] = useState(false);
@@ -205,7 +209,13 @@ export function UsMap() {
             iconSize: [16, 16],
             iconAnchor: [8, 8],
           });
-          const marker = L.marker([p.lat, p.lng], { icon }).addTo(map);
+          const marker = L.marker([p.lat, p.lng], { icon, draggable: true }).addTo(map);
+
+          // Drag-to-reposition: persist the new coordinates on drop.
+          marker.on('dragend', () => {
+            const ll = marker.getLatLng();
+            update.mutate({ id: p.id, lat: ll.lat, lng: ll.lng });
+          });
 
           if (isHoverDevice) {
             // Desktop: hover → open viewer card. Grace timer for cursor travel.
@@ -316,24 +326,34 @@ export function UsMap() {
     setQuery('');
   }
 
-  function locateMe() {
-    if (!navigator.geolocation) { toast(t('geolocationUnavailable'), 'error'); return; }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => fly([pos.coords.latitude, pos.coords.longitude], 15),
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) toast(t('geolocationDenied'), 'error');
-        else toast(t('geolocationUnavailable'), 'error');
-      },
-      { enableHighAccuracy: true, timeout: 12_000, maximumAge: 0 },
-    );
+  async function locateMe() {
+    if (locating) return;
+    setLocating(true);
+    try {
+      // Uses the native @capacitor/geolocation plugin inside the APK (so "My
+      // Location" actually works there), and the web Geolocation API in a browser.
+      const pos = await nativeGetPosition();
+      if (pos) fly([pos.lat, pos.lng], 15);
+      else toast(t('geolocationDenied'), 'error');
+    } catch {
+      toast(t('geolocationUnavailable'), 'error');
+    } finally {
+      setLocating(false);
+    }
   }
 
   async function savePin() {
     if (!coupleId || !pending || !name.trim()) return;
     const { lat, lng } = pending;
-    await add.mutateAsync({ couple_id: coupleId, name, lat, lng, kind, note: note || undefined });
-    setPending(null); setName(''); setNote('');
-    fly([lat, lng], 3);
+    await add.mutateAsync({
+      couple_id: coupleId, name, lat, lng, kind,
+      note: note || undefined,
+      visited_at: visitedAt || undefined,
+    });
+    setPending(null); setName(''); setNote(''); setVisitedAt('');
+    // Keep the camera ON the new pin (was zooming out to world view, zoom 3).
+    const map = mapInstanceRef.current;
+    fly([lat, lng], Math.max(map?.getZoom() ?? 10, 10));
   }
 
   async function deletePin(id: string) {
@@ -502,7 +522,7 @@ export function UsMap() {
         <RailButton icon={<Minus size={16} />}  label={t('controls.zoomOut')} onClick={() => mapInstanceRef.current?.zoomOut()} />
         <RailButton icon={<Landmark size={16} />} label={t('controls.egypt')} onClick={() => fly(EGYPT_CENTER, EGYPT_ZOOM)} />
         <RailButton icon={<Globe size={16} />}    label={t('controls.world')} onClick={() => fly(WORLD_CENTER, WORLD_ZOOM)} />
-        <RailButton icon={<LocateFixed size={16} />} label={t('controls.myLocation')} onClick={locateMe} />
+        <RailButton icon={<LocateFixed size={16} className={locating ? 'animate-pulse' : ''} />} label={t('controls.myLocation')} active={locating} onClick={locateMe} />
         <RailButton icon={<Filter size={16} />} label={t('controls.filter')} active={filterOpen} onClick={() => setFilterOpen((v) => !v)} />
       </div>
 
@@ -523,6 +543,7 @@ export function UsMap() {
                 </button>
               ))}
             </div>
+            <Field label={t('form.visitedAt')} type="date" value={visitedAt} onChange={(e) => setVisitedAt(e.target.value)} />
             <Field label={t('noteOptional')} value={note} onChange={(e) => setNote(e.target.value)} />
             <GoldButton onClick={savePin} loading={add.isPending} disabled={!name.trim()} className="w-full">{t('savePin')}</GoldButton>
           </Card>
